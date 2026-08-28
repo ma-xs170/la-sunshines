@@ -60,3 +60,4 @@ claude
 ```
 
 puis demande-lui d'intégrer Bizouk (billetterie), de brancher les vraies éditions/flyers, ou de découper en plusieurs pages (Éditions, Line-up, Contact) — tout le style/tokens sont déjà posés dans `src/style.css`, il n'a qu'à réutiliser les classes `.glass`, `.btn`, `.ed-card`, etc.
+# la-sunshines
