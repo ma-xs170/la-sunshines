@@ -85,10 +85,24 @@ export default function SiteEffects() {
       hidden().forEach(show);
     }, 1800);
 
-    // tout [data-reveal] ajouté ensuite (nouvelle page, filtres…) est pris en charge
+    // Prend en charge tout [data-reveal] AJOUTÉ (nouvelle page, filtres…) ET tout
+    // [data-reveal] dont React aurait recomposé la className en effaçant `.is-in`
+    // (ex. toggle de filtre sur /editions) -> re-révélé au lieu de rester caché.
     let moRaf = 0;
+    const kick = () => {
+      cancelAnimationFrame(moRaf);
+      moRaf = requestAnimationFrame(rescan);
+    };
     const mo = new MutationObserver((muts) => {
       for (const m of muts) {
+        if (m.type === 'attributes') {
+          const el = m.target as HTMLElement;
+          if (el.matches?.('[data-reveal]:not(.is-in)')) {
+            kick();
+            return;
+          }
+          continue;
+        }
         for (const n of m.addedNodes) {
           if (n.nodeType !== 1) continue;
           const el = n as HTMLElement;
@@ -96,14 +110,18 @@ export default function SiteEffects() {
             el.matches?.('[data-reveal]:not(.is-in)') ||
             el.querySelector?.('[data-reveal]:not(.is-in)')
           ) {
-            cancelAnimationFrame(moRaf);
-            moRaf = requestAnimationFrame(rescan);
+            kick();
             return;
           }
         }
       }
     });
-    mo.observe(document.body, { childList: true, subtree: true });
+    mo.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class'],
+    });
 
     // ---- Lenis + parallax des halos (une seule fois) ----
     let cancelled = false;

@@ -16,7 +16,11 @@ function mediaStyle(flyer: string | null): CSSProperties | undefined {
 function NextCard({ edition, hidden }: { edition: Edition; hidden: boolean }) {
   return (
     <article
-      className={cls('ed-card', 'ed-card--next', 'glass', hidden && 'is-hidden')}
+      // `hidden` via style inline (pas via className) : sinon React recompose la
+      // className à chaque changement de filtre et efface le `.is-in` ajouté
+      // impérativement par SiteEffects -> carte bloquée à opacity:0 au retour.
+      className={cls('ed-card', 'ed-card--next', 'glass')}
+      style={hidden ? { display: 'none' } : undefined}
       data-reveal
       data-status="next"
     >
@@ -99,7 +103,8 @@ function NextCard({ edition, hidden }: { edition: Edition; hidden: boolean }) {
 function PastCard({ edition, hidden }: { edition: Edition; hidden: boolean }) {
   return (
     <article
-      className={cls('ed-card', 'glass', hidden && 'is-hidden')}
+      className={cls('ed-card', 'glass')}
+      style={hidden ? { display: 'none' } : undefined}
       data-reveal
       data-status="past"
     >
