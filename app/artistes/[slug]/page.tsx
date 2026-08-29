@@ -7,6 +7,7 @@ import Footer from '@/components/Footer';
 import Icon from '@/components/Icon';
 import ArtistSubscribe from '@/components/ArtistSubscribe';
 import ArtistClaim from '@/components/ArtistClaim';
+import ArtistAccessLink from '@/components/ArtistAccessLink';
 import {
   getArtistProfiles,
   getArtistBySlug,
@@ -130,18 +131,22 @@ export default async function ArtistPage({
   const socials = artistSocials(artist);
   const hasEditions = upcoming.length > 0 || past.length > 0;
 
-  // Flyer de bannière : la prochaine édition à venir (la plus proche), sinon la
-  // passée la plus récente (`past` est déjà trié du plus récent au plus ancien).
-  const bannerEd =
-    upcoming.length > 0
-      ? [...upcoming].sort((a, b) =>
-          (a.dateISO ?? '').localeCompare(b.dateISO ?? ''),
-        )[0]
-      : (past[0] ?? null);
+  // Bannière — priorité :
+  //  1. bannière personnalisée choisie par l'artiste (artist.banner)
+  //  2. flyer de sa PROCHAINE édition à venir (la plus proche) qui en a un
+  //  3. flyer de sa DERNIÈRE édition passée qui en a un
+  //  4. rien → fond neutre (--plain)
+  const flyerEd =
+    [...upcoming]
+      .sort((a, b) => (a.dateISO ?? '').localeCompare(b.dateISO ?? ''))
+      .find((e) => e.flyer) ??
+    past.find((e) => e.flyer) ??
+    null;
+  const bannerImg = artist.banner || flyerEd?.flyer || null;
 
-  const tint = washTint(bannerEd?.dominantColor);
+  const tint = washTint(artist.banner ? null : (flyerEd?.dominantColor ?? null));
   const bannerStyle = {
-    '--ab-flyer': bannerEd?.flyer ? `url("${bannerEd.flyer}")` : 'none',
+    '--ab-flyer': bannerImg ? `url("${bannerImg}")` : 'none',
     // voile teinté qui se fond vers le fond crème en bas (pas de bord net)
     '--ab-wash': `linear-gradient(180deg, ${rgba(tint, 0.5)} 0%, ${rgba(
       tint,
@@ -156,11 +161,11 @@ export default async function ArtistPage({
       <main className="artist">
         <header
           className={
-            bannerEd?.flyer ? 'artist-banner' : 'artist-banner artist-banner--plain'
+            bannerImg ? 'artist-banner' : 'artist-banner artist-banner--plain'
           }
           style={bannerStyle}
         >
-          {bannerEd?.flyer && (
+          {bannerImg && (
             <div className="artist-banner__bg" aria-hidden="true" />
           )}
           <div className="artist-banner__wash" aria-hidden="true" />
@@ -268,6 +273,8 @@ export default async function ArtistPage({
             </ul>
           </section>
         )}
+
+        {artist.verified && <ArtistAccessLink slug={artist.slug} />}
       </main>
 
       <Footer />

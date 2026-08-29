@@ -4,6 +4,7 @@ import { readStore } from '@/lib/store';
 import { persistStore } from '@/lib/persistStore';
 import { deleteBlob } from '@/lib/blob';
 import { sendMail, mailLayout, siteUrl } from '@/lib/mail';
+import { issueArtistLoginToken, sendArtistMagicLink } from '@/lib/artistLogin';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -39,34 +40,53 @@ export async function POST(req: Request, { params }: Ctx) {
 
   // 2) statut de l'artiste + retrait de la demande du Store
   const artist = store.artists.find((a) => a.slug === reqItem.artistSlug);
-  if (artist) artist.verified = approve;
+  if (artist) {
+    artist.verified = approve;
+    // on récupère l'email déclaré dans la demande s'il n'y en a pas encore sur
+    // la fiche — c'est l'adresse qui recevra les liens de connexion.
+    if (approve && !artist.email && reqItem.email) artist.email = reqItem.email;
+  }
   store.verificationRequests = store.verificationRequests.filter((v) => v.id !== id);
+
+  // 3) à l'approbation : premier lien magique vers l'espace artiste
+  let magicToken: string | null = null;
+  if (approve && artist) magicToken = issueArtistLoginToken(store, artist.slug);
 
   const saved = await persistStore(store);
   if (!saved.ok) {
     return NextResponse.json({ error: saved.error }, { status: 502 });
   }
 
-  // 3) notification de l'artiste (best-effort)
-  void sendMail({
-    to: reqItem.email,
-    subject: approve
-      ? 'Ta page LA SUNSHINES est certifiée ✓'
-      : 'Ta demande de vérification — LA SUNSHINES',
-    html: mailLayout(
-      approve
-        ? `<p>Bonjour ${reqItem.name},</p>
-           <p>Ta demande a été <strong>approuvée</strong> : la page
-           <a href="${siteUrl()}/artistes/${reqItem.artistSlug}">${artist?.name ?? reqItem.artistSlug}</a>
-           affiche désormais le badge « Certifié ».</p>
-           <p>Ta pièce d’identité a été supprimée de nos serveurs.</p>`
-        : `<p>Bonjour ${reqItem.name},</p>
-           <p>Nous n’avons pas pu valider ta demande de vérification pour la page
-           <strong>${artist?.name ?? reqItem.artistSlug}</strong>. Si tu penses
-           qu’il s’agit d’une erreur, réponds à cet email.</p>
-           <p>Ta pièce d’identité a été supprimée de nos serveurs.</p>`,
-    ),
-  });
+  // 4) notification de l'artiste (best-effort)
+  if (approve && artist && magicToken) {
+    void sendArtistMagicLink(artist, magicToken);
+    void sendMail({
+      to: reqItem.email,
+      subject: 'Ta page LA SUNSHINES est certifiée ✓',
+      html: mailLayout(
+        `<p>Bonjour ${reqItem.name},</p>
+         <p>Ta demande a été <strong>approuvée</strong> : la page
+         <a href="${siteUrl()}/artistes/${reqItem.artistSlug}">${artist.name}</a>
+         affiche désormais le badge « Certifié ».</p>
+         <p>Un second email contient ton <strong>lien de connexion</strong> à
+         l'espace artiste, où tu peux modifier ta photo, ta bio, tes réseaux et
+         ta bannière.</p>
+         <p>Ta pièce d’identité a été supprimée de nos serveurs.</p>`,
+      ),
+    });
+  } else {
+    void sendMail({
+      to: reqItem.email,
+      subject: 'Ta demande de vérification — LA SUNSHINES',
+      html: mailLayout(
+        `<p>Bonjour ${reqItem.name},</p>
+         <p>Nous n’avons pas pu valider ta demande de vérification pour la page
+         <strong>${artist?.name ?? reqItem.artistSlug}</strong>. Si tu penses
+         qu’il s’agit d’une erreur, réponds à cet email.</p>
+         <p>Ta pièce d’identité a été supprimée de nos serveurs.</p>`,
+      ),
+    });
+  }
 
   return NextResponse.json({ ok: true, verified: approve, deployed: saved.deployed });
 }

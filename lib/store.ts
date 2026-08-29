@@ -25,6 +25,9 @@ export interface StoredArtist {
   bio: string;
   /** data URL ou chemin public ; '' si aucune image. */
   image: string;
+  /** Bannière personnalisée (data URL) choisie par l'artiste depuis son espace.
+   *  '' → repli automatique sur le flyer d'une de ses éditions (cf. page publique). */
+  banner: string;
   /** réseaux — URL complète ou pseudo ; '' = non affiché sur le profil. */
   instagram: string;
   tiktok: string;
@@ -46,6 +49,7 @@ export function normalizeArtist(raw: Partial<StoredArtist> & { name?: string }):
     role: typeof raw.role === 'string' ? raw.role : '',
     bio: typeof raw.bio === 'string' ? raw.bio : '',
     image: typeof raw.image === 'string' ? raw.image : '',
+    banner: typeof raw.banner === 'string' ? raw.banner : '',
     instagram: typeof raw.instagram === 'string' ? raw.instagram : '',
     tiktok: typeof raw.tiktok === 'string' ? raw.tiktok : '',
     soundcloud: typeof raw.soundcloud === 'string' ? raw.soundcloud : '',
@@ -149,6 +153,20 @@ export interface VerificationRequest {
   createdAt: string;
 }
 
+/**
+ * Jeton de connexion à usage unique (« magic link ») pour l'espace artiste.
+ * Émis à l'approbation d'une vérification, ou à la demande depuis la page
+ * publique si l'artiste est déjà vérifié. Court : expire vite, `used` une fois.
+ */
+export interface ArtistLoginToken {
+  token: string;
+  artistSlug: string;
+  /** timestamp (ms) d'expiration. */
+  expiresAt: number;
+  used: boolean;
+  createdAt: string;
+}
+
 /** Abonnement d'un visiteur aux annonces d'un artiste. */
 export interface Subscription {
   email: string;
@@ -169,6 +187,8 @@ export interface Store {
   subscriptions: Subscription[];
   /** clés `${eventSlug}::${email}` déjà notifiées — anti-doublon des emails. */
   notifiedSubscribers: string[];
+  /** jetons « magic link » de l'espace artiste (courte durée, usage unique). */
+  artistLoginTokens: ArtistLoginToken[];
 }
 
 const EMPTY: Store = {
@@ -180,6 +200,7 @@ const EMPTY: Store = {
   verificationRequests: [],
   subscriptions: [],
   notifiedSubscribers: [],
+  artistLoginTokens: [],
 };
 
 function shapeGalleries(v: unknown): Record<string, string[]> {
@@ -252,6 +273,17 @@ function shape(parsed: Partial<Store>): Store {
       ? (parsed.notifiedSubscribers as unknown[]).filter(
           (x): x is string => typeof x === 'string',
         )
+      : [],
+    artistLoginTokens: Array.isArray(parsed.artistLoginTokens)
+      ? (parsed.artistLoginTokens as ArtistLoginToken[])
+          .filter(
+            (t) =>
+              t &&
+              typeof t.token === 'string' &&
+              typeof t.artistSlug === 'string' &&
+              typeof t.expiresAt === 'number',
+          )
+          .map((t) => ({ ...t, used: t.used === true }))
       : [],
   };
 }

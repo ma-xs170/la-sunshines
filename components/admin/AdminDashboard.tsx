@@ -380,6 +380,19 @@ function VerificationPanel({
     flash('Certification retirée.', res.deployed);
   }
 
+  async function sendLink(a: StoredArtist) {
+    setBusy(a.id);
+    const res = (await api('/api/admin/artist-login-link', 'POST', {
+      slug: a.slug,
+    })) as { ok: boolean; error?: string; email?: string; deployed?: boolean };
+    setBusy(null);
+    if (!res.ok) return flash(res.error ?? 'Échec.');
+    flash(
+      `Lien de connexion envoyé à ${res.email ?? a.email}.`,
+      res.deployed,
+    );
+  }
+
   return (
     <section className="admin-panel admin-panel--wide glass">
       <h2>Vérifications</h2>
@@ -494,6 +507,14 @@ function VerificationPanel({
                     </a>
                   </div>
                   <div className="admin-verif__acts">
+                    <button
+                      className="btn btn--amber"
+                      type="button"
+                      disabled={busy === a.id}
+                      onClick={() => sendLink(a)}
+                    >
+                      {busy === a.id ? '…' : 'Envoyer un nouveau lien de connexion'}
+                    </button>
                     <button
                       className="btn btn--outline"
                       type="button"

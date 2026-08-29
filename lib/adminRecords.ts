@@ -18,6 +18,7 @@ export type ArtistInput = {
   role?: unknown;
   bio?: unknown;
   image?: unknown;
+  banner?: unknown;
   instagram?: unknown;
   tiktok?: unknown;
   soundcloud?: unknown;
@@ -110,6 +111,7 @@ export function buildArtist(
     role: str(input.role),
     bio: str(input.bio),
     image: str(input.image),
+    banner: str(input.banner),
     instagram: str(input.instagram),
     tiktok: str(input.tiktok),
     soundcloud: str(input.soundcloud),
@@ -133,6 +135,7 @@ export function applyArtistPatch(
     role: pick('role', current.role),
     bio: pick('bio', current.bio),
     image: pick('image', current.image),
+    banner: input.banner !== undefined ? str(input.banner) : current.banner,
     instagram: pick('instagram', current.instagram),
     tiktok: pick('tiktok', current.tiktok),
     soundcloud: pick('soundcloud', current.soundcloud),
