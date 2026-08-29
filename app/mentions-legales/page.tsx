@@ -51,16 +51,16 @@ export default function LegalNoticePage() {
           <p>Le site est hébergé par&nbsp;:</p>
           <ul>
             <li>
-              <strong>HOSTINGER, UAB</strong> — société de droit lituanien, code
-              302710386
+              <strong>Vercel Inc.</strong> — société de droit américain
             </li>
             <li>
-              Siège : Švitrigailos str. 34, LT-03230 Vilnius, Lituanie
+              Adresse : 440&nbsp;N&nbsp;Barranca&nbsp;Ave&nbsp;#4133, Covina,
+              CA&nbsp;91723, États-Unis
             </li>
             <li>
               Site :{' '}
-              <a href="https://www.hostinger.fr" target="_blank" rel="noopener noreferrer">
-                hostinger.fr
+              <a href="https://vercel.com" target="_blank" rel="noopener noreferrer">
+                vercel.com
               </a>
             </li>
           </ul>
