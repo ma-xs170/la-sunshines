@@ -339,36 +339,38 @@
   ],
   "events": [
     {
-      "id": "mtew2h8lcv5tzt",
-      "slug": "welcome-to-dominica",
-      "name": "Welcome to Dominica",
-      "date": "2026-08-14",
+      "id": "mtew1jssa8xz9g",
+      "slug": "edition-picasso",
+      "name": "Édition Picasso",
+      "date": "2026-07-10",
       "time": "16h–22h",
       "description": "",
       "venue": "W Club by Ciroc, Jarry — Baie-Mahault",
-      "dresscode": "Dresscode Vert ou Rouge",
-      "headliner": "DJ DREEZY · SYXTEE",
+      "dresscode": "Dresscode libre",
+      "headliner": "Jeune Aber · Dega Youth · Lulux · DJ DREEZY · SYXTEE",
       "lineup": [
-        "Doms",
+        "Styll'One",
+        "Buzz",
         "Wiixx",
-        "Buz"
+        "Syxtee",
+        "Dreezy"
       ],
-      "bizoukEmbed": "<iframe style=\"background-color: transparent;\" src=\"https://www.bizouk.com/stores/reservation/place?event=127255&widget=1\" name=\"payment-frame\" width=\"100%\" height=\"1065\" frameborder=\"0\" scrolling=\"yes\"></iframe>\n<script type=\"text/javascript\" src=\"https://static.bizouk.com/lib/js/widget/widget_client.js\"></script>",
-      "flyer": "/images/editions/welcome-to-dominica.jpg",
+      "bizoukEmbed": "<iframe style=\"background-color: transparent;\" src=\"https://www.bizouk.com/stores/reservation/place?event=121434&widget=1\" name=\"payment-frame\" width=\"100%\" height=\"1065\" frameborder=\"0\" scrolling=\"yes\"></iframe>\n<script type=\"text/javascript\" src=\"https://static.bizouk.com/lib/js/widget/widget_client.js\"></script>",
+      "flyer": "/images/editions/edition-picasso.jpg",
       "flyerW": 800,
       "flyerH": 1067,
-      "dominantColor": "#19280e",
+      "dominantColor": "#84007b",
       "palette": [
-        "#19280e",
-        "#f2f2f2",
-        "#374727"
+        "#84007b",
+        "#a2019a",
+        "#02caf4"
       ],
-      "gradient": "linear-gradient(140deg, #19280e 0%, #374727 55%, #212b17 100%)",
-      "emoji": "🏝️",
+      "gradient": "linear-gradient(140deg, #84007b 0%, #a2019a 45%, #02caf4 78%, #01839f 100%)",
+      "emoji": "🎨",
       "hidden": false,
       "archived": false,
       "schedule": [],
-      "createdAt": "2026-08-29T21:24:47.685Z"
+      "createdAt": "2026-08-29T21:24:04.348Z"
     },
     {
       "id": "mteu09dl95huxi",
@@ -396,7 +398,14 @@
       "createdAt": "2026-08-29T20:27:04.953Z",
       "description": "",
       "archived": false,
-      "schedule": []
+      "schedule": [
+        {
+          "id": "mtew2zyg90y5qq",
+          "time": "16",
+          "artistName": "DÉBUT DE L'ÉVÈNEMENT",
+          "label": ""
+        }
+      ]
     },
     {
       "id": "mterbfsymdzkro",
