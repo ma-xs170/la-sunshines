@@ -455,6 +455,13 @@
       "createdAt": "2026-08-29T21:28:04.884Z"
     }
   ],
-  "subscriptions": [],
+  "subscriptions": [
+    {
+      "email": "deeejay.dreezy@gmail.com",
+      "artistSlug": "dreezy",
+      "token": "mtew7qk7varsvymtew7qk8yf6u8r",
+      "createdAt": "2026-08-29T21:28:53.048Z"
+    }
+  ],
   "notifiedSubscribers": []
 }
