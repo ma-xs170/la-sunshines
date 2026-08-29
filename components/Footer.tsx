@@ -1,6 +1,5 @@
 import Image from 'next/image';
 import Icon from './Icon';
-import StatusWidget from './StatusWidget';
 
 const INSTAGRAM = 'https://www.instagram.com/sunshines.fwi/';
 const TIKTOK = 'https://tiktok.com/@sunshines.fwi';
@@ -91,15 +90,14 @@ export default function Footer() {
           </a>
         </div>
 
-        <StatusWidget />
-
         <hr className="foot-sep" />
 
         <div className="foot-bottom">
           <span>© 2026 LA SUNSHINES — THE MOUV. Tous droits réservés.</span>
           <span>
             <a href="/politique-de-confidentialite">Politique de confidentialité</a> ·{' '}
-            <a href="/mentions-legales">Mentions légales</a>
+            <a href="/mentions-legales">Mentions légales</a> ·{' '}
+            <a href="/status">Statuts</a>
           </span>
         </div>
       </div>

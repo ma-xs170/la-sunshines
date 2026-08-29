@@ -1,5 +1,6 @@
 'use client';
 
+import type { CSSProperties } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -29,6 +30,22 @@ export default function Nav() {
   const activeHref = activeHrefFor(pathname);
 
   const [open, setOpen] = useState(false);
+
+  // Le bouton « Réserver » suit la couleur dynamique de la page (--ev-fab posé
+  // sur <main.event> par pageTheme()) ; texte clair/foncé selon isDarkTheme
+  // (classe .event--themed). Hors page à thème → amber par défaut.
+  const [cta, setCta] = useState<{ tint: string; dark: boolean }>({
+    tint: '',
+    dark: false,
+  });
+  useEffect(() => {
+    const el = document.querySelector('.event');
+    setCta({
+      tint: el ? getComputedStyle(el).getPropertyValue('--ev-fab').trim() : '',
+      dark: el?.classList.contains('event--themed') ?? false,
+    });
+  }, [pathname]);
+
   const navRef = useRef<HTMLElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
   const linksRef = useRef<HTMLDivElement>(null);
@@ -139,7 +156,15 @@ export default function Nav() {
           ))}
         </div>
 
-        <a className="cta" href="/#billetterie">
+        <a
+          className={
+            'cta' +
+            (cta.tint ? ' cta--themed' : '') +
+            (cta.tint && cta.dark ? ' cta--on-dark' : '')
+          }
+          href="/#billetterie"
+          style={cta.tint ? ({ '--cta-tint': cta.tint } as CSSProperties) : undefined}
+        >
           <Icon name="ticket" />
           <span>Réserver</span>
         </a>
