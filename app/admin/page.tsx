@@ -41,7 +41,7 @@ export default async function AdminPage() {
 
   // Liste fusionnée (statiques + admin) : sert au dropdown « gérer un événement »
   // (pré-remplissage du formulaire) ET à la gestion des galeries par slug.
-  const editions = getAllEditions().map((e) => {
+  const editions = getAllEditions({ includeHidden: true }).map((e) => {
     const se = eventBySlug.get(e.slug);
     const hl = (e.headliner ?? '')
       .split(/\s*·\s*/)
@@ -54,6 +54,7 @@ export default async function AdminPage() {
       gallery: e.gallery ?? [],
       isStatic: staticSlugs.has(e.slug),
       storeId: se?.id ?? null,
+      hidden: e.hidden === true,
       // valeurs de pré-remplissage du formulaire d'édition
       date: se ? se.date : (e.dateISO ?? ''),
       time: se ? (se.time ?? '') : (e.timeLabel ?? ''),

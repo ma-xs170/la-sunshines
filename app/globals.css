@@ -795,6 +795,9 @@ section{
   color:#fff;
   text-shadow:0 6px 26px rgba(0,0,0,0.45);
 }
+/* état neutre (prochaine soirée masquée) : message + lien, sur pile */
+.cta-band--neutral{flex-direction:column;gap:var(--s-24);}
+.cta-band--neutral .cta-band__thanks{font-size:clamp(28px,5vw + 10px,56px);}
 
 .cta-band .script{display:block;margin-bottom:var(--s-12);color:var(--amber-hi);}
 .cta-band__date{margin-bottom:var(--s-8);color:#fff;}
@@ -1726,6 +1729,44 @@ footer{
   background:rgba(255,178,56,0.14);border:1px solid rgba(255,178,56,0.32);
   border-radius:999px;
 }
+
+/* --- toggle « événement privé » --- */
+.admin-toggle{
+  display:flex;align-items:flex-start;gap:12px;cursor:pointer;
+  padding:12px 14px;border-radius:var(--r-sm);
+  border:1px solid var(--panel-border-strong);
+  background:rgba(25,20,16,0.03);
+}
+.admin-toggle:hover{border-color:var(--ink);}
+.admin-toggle input{position:absolute;opacity:0;width:0;height:0;}
+.admin-toggle__box{
+  flex:none;position:relative;
+  width:40px;height:22px;border-radius:999px;margin-top:1px;
+  background:rgba(25,20,16,0.18);
+  transition:background .18s var(--ease);
+}
+.admin-toggle__box::after{
+  content:"";position:absolute;top:2px;left:2px;
+  width:18px;height:18px;border-radius:50%;background:#fff;
+  box-shadow:0 1px 3px rgba(25,20,16,0.3);
+  transition:transform .18s var(--ease);
+}
+.admin-toggle input:checked + .admin-toggle__box{background:var(--coral);}
+.admin-toggle input:checked + .admin-toggle__box::after{transform:translateX(18px);}
+.admin-toggle input:focus-visible + .admin-toggle__box{outline:2px solid var(--amber);outline-offset:2px;}
+.admin-toggle__label{
+  display:flex;flex-direction:column;gap:3px;
+  font-size:13px;font-weight:700;color:var(--ink);line-height:1.3;
+}
+.admin-toggle__label small{font-weight:500;font-size:11px;color:var(--gray-dim);}
+
+.admin-badge{
+  display:inline-block;margin-left:8px;
+  padding:2px 8px;border-radius:999px;
+  font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;
+  vertical-align:middle;
+}
+.admin-badge--hidden{background:var(--coral);color:#fff;}
 
 .admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-24);align-items:start;}
 .admin-panel{padding:var(--s-24);}

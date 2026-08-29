@@ -45,6 +45,8 @@ export type EditionLite = {
   isStatic: boolean;
   /** id du StoredEvent qui la porte (surcharge ou ajout admin), sinon null. */
   storeId: string | null;
+  /** événement privé (masqué du site public). */
+  hidden: boolean;
   // pré-remplissage du formulaire d'édition
   date: string;
   time: string;
@@ -658,6 +660,7 @@ const emptyEvent = {
   headliner: '',
   lineup: '',
   bizoukEmbed: '',
+  hidden: false,
 };
 
 function EventPanel({
@@ -707,6 +710,7 @@ function EventPanel({
       headliner: ev.headliner,
       lineup: ev.lineup.join('\n'),
       bizoukEmbed: ev.bizoukEmbed,
+      hidden: ev.hidden === true,
     });
     setImg({
       dataUrl: ev.flyer,
@@ -742,6 +746,7 @@ function EventPanel({
         headliner: ed.headliner,
         lineup: ed.lineup.join('\n'),
         bizoukEmbed: ed.bizoukEmbed,
+        hidden: ed.hidden,
       });
       setImg({
         dataUrl: ed.flyer,
@@ -947,6 +952,7 @@ function EventPanel({
             {editions.map((e) => (
               <option key={e.slug} value={e.slug}>
                 {e.emoji} {e.name}
+                {e.hidden ? '  🔒 privé' : ''}
               </option>
             ))}
           </select>
@@ -956,6 +962,9 @@ function EventPanel({
               <span className="admin-list__emoji">{selectedEd.emoji}</span>
               <span className="admin-list__name">
                 {selectedEd.name}
+                {selectedEd.hidden && (
+                  <span className="admin-badge admin-badge--hidden">Privé</span>
+                )}
                 <small>
                   {selectedEd.slug}
                   {' · '}
@@ -1029,6 +1038,24 @@ function EventPanel({
               <input value={form.dresscode} onChange={set('dresscode')} />
             </label>
           </div>
+
+          <label className="admin-toggle">
+            <input
+              type="checkbox"
+              checked={form.hidden}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, hidden: e.target.checked }))
+              }
+            />
+            <span className="admin-toggle__box" aria-hidden="true" />
+            <span className="admin-toggle__label">
+              Événement privé (masqué du site)
+              <small>
+                Retiré de l’accueil, du listing, de la page détail (404) et des
+                pages artistes. Réversible — aucune donnée perdue.
+              </small>
+            </span>
+          </label>
         </fieldset>
 
         <fieldset className="admin-section">

@@ -81,6 +81,13 @@ export interface Edition {
    * Rempli par `lib/content.ts` à la lecture ; `[]` par défaut.
    */
   gallery?: string[];
+  /**
+   * Événement PRIVÉ : masqué du site public (listing, page détail → 404, hero,
+   * pages artistes, sitemap). Réversible depuis /admin. Les éditions statiques
+   * peuvent l'être via une surcharge admin qui ne change QUE ce champ.
+   * `undefined` / `false` = visible.
+   */
+  hidden?: boolean;
 }
 
 type EditionSeed = Omit<

@@ -79,6 +79,9 @@ export interface StoredEvent {
   palette: string[];
   gradient: string;
   emoji: string;
+  /** Événement PRIVÉ : masqué de tout le site public (réversible). Défaut false.
+   *  Fonctionne aussi pour une édition statique via le mécanisme d'override. */
+  hidden: boolean;
   createdAt: string;
 }
 
@@ -145,6 +148,7 @@ function normalizeEvent(raw: Partial<StoredEvent>): StoredEvent {
     flyerH: typeof raw.flyerH === 'number' ? raw.flyerH : 0,
     lineup: Array.isArray(raw.lineup) ? raw.lineup : [],
     palette: Array.isArray(raw.palette) ? raw.palette : [],
+    hidden: raw.hidden === true, // absent dans les anciens enregistrements
   };
 }
 

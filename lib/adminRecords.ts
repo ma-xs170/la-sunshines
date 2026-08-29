@@ -39,6 +39,7 @@ export type EventInput = {
   flyerH?: unknown;
   dominant?: unknown; // #rrggbb calculé côté client
   palette?: unknown; // string[]
+  hidden?: unknown; // booléen — événement privé (masqué du site)
 };
 
 const str = (v: unknown, fallback = ''): string =>
@@ -162,6 +163,7 @@ export function buildEvent(
     palette,
     gradient: heroGradient(palette, dominantColor),
     emoji: resolveEmoji({ name, dominantColor }),
+    hidden: input.hidden === true,
     createdAt: new Date().toISOString(),
   };
 }
@@ -184,6 +186,8 @@ export function applyEventPatch(current: StoredEvent, input: EventInput): Stored
     dominantColor:
       input.dominant !== undefined ? toHex(input.dominant) : current.dominantColor,
     palette: input.palette !== undefined ? toPalette(input.palette) : current.palette,
+    hidden:
+      input.hidden !== undefined ? input.hidden === true : current.hidden === true,
   };
   // recalculs automatiques
   next.gradient = heroGradient(next.palette, next.dominantColor);

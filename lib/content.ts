@@ -66,6 +66,7 @@ function storedEventToEdition(ev: StoredEvent): Edition {
     palette,
     gradient: ev.gradient || heroGradient(palette, dominantColor),
     emoji: ev.emoji || resolveEmoji({ name: ev.name, dominantColor }),
+    hidden: ev.hidden === true,
   };
 }
 
@@ -99,11 +100,20 @@ function mergeOverride(base: Edition, se: StoredEvent, ovr: Edition): Edition {
     palette: flyerChanged ? ovr.palette : base.palette,
     gradient: flyerChanged ? ovr.gradient : base.gradient,
     emoji: flyerChanged ? ovr.emoji : base.emoji,
+    // la visibilité vient TOUJOURS de la surcharge → une édition statique peut
+    // être masquée sans être autrement modifiée.
+    hidden: se.hidden === true,
   };
 }
 
-/** Toutes les éditions visibles publiquement : statiques + surcharges/ajouts admin. */
-export function getAllEditions(): Edition[] {
+/**
+ * Toutes les éditions. Par défaut, les éditions **masquées** (`hidden`) sont
+ * exclues → c'est ce que voient toutes les surfaces publiques (accueil,
+ * /editions, /editions/[slug], pages artistes, assistant, sitemap).
+ * `includeHidden: true` : réservé à /admin pour pouvoir les rendre à nouveau
+ * visibles.
+ */
+export function getAllEditions(opts?: { includeHidden?: boolean }): Edition[] {
   const store = readStoreSync();
   const eventBySlug = new Map(store.events.map((e) => [e.slug, e]));
   const staticSlugs = new Set(staticEditions.map((e) => e.slug));
@@ -122,19 +132,36 @@ export function getAllEditions(): Edition[] {
   // Sans date → considéré comme « à venir très lointain » : remonte en tête de
   // liste (un brouillon fraîchement créé est visible tout de suite).
   return [...merged, ...extra]
+    .filter((e) => (opts?.includeHidden ? true : !e.hidden))
     .map((e) => ({ ...e, gallery: store.galleries[e.slug] ?? e.gallery ?? [] }))
     .sort((a, b) =>
       (b.dateISO ?? '9999-12-31').localeCompare(a.dateISO ?? '9999-12-31'),
     );
 }
 
-/** Photos de la galerie d'une édition (par slug). */
+/** Photos de la galerie d'une édition (par slug) — jamais pour une édition masquée. */
 export function getGallery(slug: string): string[] {
+  if (!getAllEditions().some((e) => e.slug === slug)) return [];
   return readStoreSync().galleries[slug] ?? [];
 }
 
 export function getEditionBySlug(slug: string): Edition | undefined {
   return getAllEditions().find((e) => e.slug === slug);
+}
+
+/**
+ * La prochaine soirée à venir (hors masquées) est-elle en réalité MASQUÉE ?
+ * → l'accueil affiche alors un état neutre au lieu de mettre en avant une
+ *   édition passée avec son flyer.
+ */
+export function nextEditionHidden(): boolean {
+  if (getNextEdition()) return false; // une autre édition à venir existe
+  const rawNext = getAllEditions({ includeHidden: true })
+    .filter(isEditionUpcoming)
+    .sort((a, b) =>
+      (a.dateISO ?? '9999-12-31').localeCompare(b.dateISO ?? '9999-12-31'),
+    )[0];
+  return Boolean(rawNext?.hidden);
 }
 
 /** La prochaine soirée à venir = la plus PROCHE dans le temps (pas juste

@@ -10,6 +10,7 @@ import {
   getAllEditions,
   getNextEdition,
   getFeaturedEdition,
+  nextEditionHidden,
 } from '@/lib/content';
 import { isEditionUpcoming } from '@/lib/editions';
 import { getBizoukEmbed } from '@/lib/bizouk';
@@ -17,8 +18,14 @@ import { getBizoukEmbed } from '@/lib/bizouk';
 export default function Home() {
   const editions = getAllEditions();
   const nextEdition = getNextEdition();
+
+  // La prochaine soirée existe mais elle est MASQUÉE depuis /admin (et aucune
+  // autre à venir) → on n'affiche ni sa billetterie ni un repli sur une édition
+  // passée : juste un bandeau neutre.
+  const heroNeutral = !nextEdition && nextEditionHidden();
+
   // bandeau CTA : prochaine à venir, ou la plus récente passée (-> « Merci »)
-  const featuredEdition = getFeaturedEdition();
+  const featuredEdition = heroNeutral ? undefined : getFeaturedEdition();
 
   // Billetterie de la prochaine édition — affichée en tête de page tant que
   // l'édition n'est pas passée (auto-masquée sinon).
@@ -48,7 +55,11 @@ export default function Home() {
         <Marquee />
         <EditionsPreview editions={editions} />
         <Infos nextVenue={nextEdition?.venue ?? null} preview />
-        {featuredEdition && <CtaBand edition={featuredEdition} />}
+        {heroNeutral ? (
+          <CtaBand neutral />
+        ) : (
+          featuredEdition && <CtaBand edition={featuredEdition} />
+        )}
       </main>
 
       <Footer />

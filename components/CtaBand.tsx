@@ -9,7 +9,36 @@ function nbsp(s: string) {
   return s.replace(/«\s+/g, `«${NB}`).replace(/\s+»/g, `${NB}»`);
 }
 
-export default function CtaBand({ edition }: { edition: Edition }) {
+export default function CtaBand({
+  edition,
+  neutral = false,
+}: {
+  edition?: Edition;
+  /** état neutre : aucune édition mise en avant (ex. prochaine soirée masquée
+   *  depuis /admin). Message générique + lien vers /editions, pas de flyer ni
+   *  de billetterie. */
+  neutral?: boolean;
+}) {
+  if (neutral || !edition) {
+    return (
+      <section
+        className="cta-band cta-band--thanks cta-band--neutral glass"
+        id="billetterie"
+        data-reveal
+      >
+        <p className="cta-band__thanks">
+          Merci pour votre confiance <span aria-hidden="true">✨</span>
+        </p>
+        <div className="btn-row">
+          <a className="btn btn--outline btn--lg" href="/editions">
+            <span>Voir toutes les éditions</span>
+            <Icon name="arrow-right" />
+          </a>
+        </div>
+      </section>
+    );
+  }
+
   const upcoming = isEditionUpcoming(edition);
 
   // le flyer de l'édition en fond ; l'assombrissement/flou est fait en CSS
