@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
+import PageHero from '@/components/PageHero';
 import EditionsFilterable from '@/components/EditionsFilterable';
 import { getAllEditions } from '@/lib/content';
 
@@ -17,15 +18,12 @@ export default function EditionsPage() {
     <>
       <Nav />
 
-      <main className="editions editions-page">
-        <header className="section-head">
-          <span className="script">La sauuuuceee</span>
-          <h1>Les éditions</h1>
-          <p className="editions-page__lead">
-            La prochaine soirée et toutes les éditions passées. Filtre par « à venir »
-            ou « passées ».
-          </p>
-        </header>
+      <main className="editions editions-page content-page">
+        <PageHero
+          eyebrow="La sauuuuceee"
+          title="Les éditions"
+          lead="La prochaine soirée et toutes les éditions passées. Filtre par « à venir » ou « passées »."
+        />
 
         <EditionsFilterable editions={editions} />
       </main>

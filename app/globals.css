@@ -577,6 +577,27 @@ section{
 .section-head h2{margin-bottom:0;}
 
 /* =========================================================
+   Pages de contenu — gabarit commun (nav fixe + <PageHero>)
+   Utilisé par /interdits, /infos, /contact, /status, pages légales.
+   Garantit un espacement IDENTIQUE partout.
+   ========================================================= */
+.content-page{
+  max-width:var(--w-text);margin:0 auto;
+  /* dégagement fixe sous la nav translucide fixe (~74px) + respiration */
+  padding:calc(var(--s-64) + var(--s-40)) var(--gutter) var(--s-64);
+}
+.page-hero{margin-bottom:var(--s-40);}
+.page-hero__eyebrow{display:block;margin-bottom:var(--s-8);}
+.page-hero__title{
+  font-size:clamp(21px,2.4vw + 12px,38px);line-height:1.02;letter-spacing:-0.04em;
+  margin-bottom:0;
+}
+.page-hero__lead{
+  margin-top:var(--s-16);
+  color:var(--gray);font-weight:500;font-size:15px;line-height:1.6;max-width:56ch;
+}
+
+/* =========================================================
    Éditions
    ========================================================= */
 /* bouton « Voir + » sous l'aperçu tronqué de la homepage */
@@ -585,19 +606,7 @@ section{
   margin-top:var(--s-24);
 }
 
-/* page /editions : liste exhaustive (main, pas section -> shell explicite) */
-.editions-page{
-  max-width:var(--w-text);margin:0 auto;
-  padding:calc(var(--s-64) + 16px) var(--gutter) var(--s-40);
-}
-.editions-page .section-head h1{
-  font-size:clamp(21px,2.4vw + 12px,38px);line-height:1.02;letter-spacing:-0.04em;
-  margin-bottom:0;
-}
-.editions-page__lead{
-  margin-top:var(--s-16);
-  color:var(--gray);font-weight:500;font-size:15px;line-height:1.6;max-width:52ch;
-}
+/* page /editions : gabarit .content-page + <PageHero> (cf. section dédiée) */
 
 .editions-empty{
   display:flex;flex-direction:column;align-items:flex-start;gap:var(--s-16);
@@ -715,12 +724,10 @@ section{
   display:flex;justify-content:center;
   margin-top:var(--s-24);
 }
-/* page /infos dédiée : réserve de l'espace sous la nav sticky */
-.infos-page{padding-top:calc(var(--s-64) + 16px);}
-.infos-page .section-head h1{
-  font-size:clamp(21px,2.4vw + 12px,38px);line-height:1.02;letter-spacing:-0.04em;
-  margin-bottom:0;
-}
+/* page /infos : gabarit .content-page + <PageHero> ; la <section.infos> perd
+   son band-padding (gouttière + écart portés par .content-page / <PageHero>). */
+.content-page > .infos{padding:0;}
+.content-page > .infos > .infos-grid{margin-top:0;}
 .infos-grid{
   display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-16);
   margin-top:var(--s-40);
@@ -1812,18 +1819,7 @@ footer{
 /* =========================================================
    Page Interdits & accès  (Phase 7)
    ========================================================= */
-.rules{
-  max-width:var(--w-text);margin:0 auto;
-  padding:calc(var(--s-64) + 16px) var(--gutter) var(--s-40);
-}
-.rules__head{margin-bottom:var(--s-40);}
-.rules__head h1{
-  font-size:clamp(21px,2.4vw + 12px,38px);line-height:1.02;letter-spacing:-0.04em;
-}
-.rules__lead{
-  margin-top:var(--s-16);
-  color:var(--gray);font-weight:500;font-size:15px;max-width:56ch;line-height:1.6;
-}
+/* .rules : gabarit .content-page + <PageHero> */
 .rules-grid{
   display:grid;grid-template-columns:repeat(2,1fr);gap:var(--s-16);
 }
@@ -1864,16 +1860,8 @@ footer{
 /* =========================================================
    Page Contact
    ========================================================= */
-.contact{
-  max-width:640px;margin:0 auto;
-  padding:calc(var(--s-64) + 16px) var(--gutter) var(--s-40);
-}
-.contact__head{margin-bottom:var(--s-40);}
-.contact__head h1{font-size:clamp(21px,2.4vw + 12px,38px);line-height:1.02;letter-spacing:-0.04em;}
-.contact__lead{
-  margin-top:var(--s-16);
-  color:var(--gray);font-weight:500;font-size:15px;line-height:1.6;
-}
+/* .contact : gabarit .content-page + <PageHero>, mais colonne plus étroite */
+.contact.content-page{max-width:640px;}
 .contact-form{
   display:flex;flex-direction:column;gap:var(--s-16);
   padding:var(--s-40);
@@ -1924,16 +1912,8 @@ footer{
 /* =========================================================
    Pages légales — /politique-de-confidentialite, /mentions-legales
    ========================================================= */
-.legal{
-  max-width:760px;margin:0 auto;
-  padding:calc(var(--s-64) + 16px) var(--gutter) var(--s-40);
-}
-.legal__head{margin-bottom:var(--s-40);}
-.legal__head h1{font-size:clamp(20px,2.2vw + 11px,36px);line-height:1.02;letter-spacing:-0.04em;}
-.legal__meta{
-  margin-top:var(--s-12);
-  font-size:13px;font-weight:600;color:var(--gray);
-}
+/* .legal : gabarit .content-page + <PageHero>, mais colonne plus étroite */
+.legal.content-page{max-width:760px;}
 .legal__body{padding:clamp(var(--s-24),4vw,var(--s-40));}
 .legal__body h2{
   font-size:clamp(17px,2.4vw,20px);
@@ -1968,18 +1948,8 @@ footer{
 
 /* =========================================================
    Page /status — état des services (widget <StatusWidget>)
+   Gabarit : .content-page + <PageHero>.
    ========================================================= */
-.status-page{
-  max-width:var(--w-text);margin:0 auto;
-  padding:calc(var(--s-64) + 16px) var(--gutter) var(--s-64);
-}
-.status-page__head{margin-bottom:var(--s-40);}
-.status-page__head .script{display:block;margin-bottom:var(--s-8);}
-.status-page__lead{
-  margin-top:var(--s-16);
-  color:var(--gray);font-weight:500;font-size:15px;max-width:56ch;line-height:1.6;
-}
-
 .status{
   width:100%;max-width:520px;margin:0;
   padding:var(--s-24);

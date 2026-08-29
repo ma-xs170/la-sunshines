@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
+import PageHero from '@/components/PageHero';
 import Icon, { type IconName } from '@/components/Icon';
 
 export const metadata: Metadata = {
@@ -77,16 +78,12 @@ export default function InterditsPage() {
     <>
       <Nav />
 
-      <main className="rules">
-        <header className="section-head rules__head">
-          <span className="script">Le cadre</span>
-          <h1>Interdits &amp; accès</h1>
-          <p className="rules__lead">
-            Pour que LA SUNSHINES reste une soirée sûre et encadrée pour les 12–17
-            ans, voici ce qu’il faut savoir avant de venir. En achetant un billet,
-            tu acceptes ce règlement.
-          </p>
-        </header>
+      <main className="rules content-page">
+        <PageHero
+          eyebrow="Le cadre"
+          title="Interdits & accès"
+          lead="Pour que LA SUNSHINES reste une soirée sûre et encadrée pour les 12–17 ans, voici ce qu’il faut savoir avant de venir. En achetant un billet, tu acceptes ce règlement."
+        />
 
         <div className="rules-grid">
           {SECTIONS.map((s) => (

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
+import PageHero from '@/components/PageHero';
 import ContactForm from '@/components/ContactForm';
 
 export const metadata: Metadata = {
@@ -14,15 +15,12 @@ export default function ContactPage() {
     <>
       <Nav />
 
-      <main className="contact">
-        <header className="section-head contact__head">
-          <span className="script">On t’écoute</span>
-          <h1>Nous contacter</h1>
-          <p className="contact__lead">
-            Billetterie, booking, partenariat, presse ou simple question : remplis le
-            formulaire, on te répond au plus vite.
-          </p>
-        </header>
+      <main className="contact content-page">
+        <PageHero
+          eyebrow="On t’écoute"
+          title="Nous contacter"
+          lead="Billetterie, booking, partenariat, presse ou simple question : remplis le formulaire, on te répond au plus vite."
+        />
 
         <ContactForm />
       </main>

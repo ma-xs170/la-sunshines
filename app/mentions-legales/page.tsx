@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
+import PageHero from '@/components/PageHero';
 
 export const metadata: Metadata = {
   title: 'Mentions légales · LA SUNSHINES',
@@ -16,11 +17,8 @@ export default function LegalNoticePage() {
     <>
       <Nav />
 
-      <main className="legal">
-        <header className="legal__head">
-          <span className="script">Le cadre légal</span>
-          <h1>Mentions légales</h1>
-        </header>
+      <main className="legal content-page">
+        <PageHero eyebrow="Le cadre légal" title="Mentions légales" />
 
         <div className="legal__body glass">
           <h2>Éditeur du site</h2>

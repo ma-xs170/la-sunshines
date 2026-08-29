@@ -42,14 +42,18 @@ export default function Infos({
 
   return (
     <section id="infos" className="infos">
-      <header className="section-head">
-        <span className="script">Infos</span>
-        {preview ? <h2>Avant de venir.</h2> : <h1>Avant de venir.</h1>}
-        <p className="infos__lead">
-          On garde l&apos;expérience simple : accès encadré, une soirée claire, et tout ce
-          qu&apos;il faut pour que les ados profitent en toute sécurité.
-        </p>
-      </header>
+      {/* mode complet (/infos) : l'en-tête est fourni par <PageHero> sur la page.
+          mode aperçu (homepage) : en-tête local avec <h2>. */}
+      {preview && (
+        <header className="section-head">
+          <span className="script">Infos</span>
+          <h2>Avant de venir.</h2>
+          <p className="infos__lead">
+            On garde l&apos;expérience simple : accès encadré, une soirée claire, et
+            tout ce qu&apos;il faut pour que les ados profitent en toute sécurité.
+          </p>
+        </header>
+      )}
 
       <div className="infos-grid">
         {shown.map((c) => (

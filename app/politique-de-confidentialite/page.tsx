@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
+import PageHero from '@/components/PageHero';
 
 export const metadata: Metadata = {
   title: 'Politique de confidentialité · LA SUNSHINES',
@@ -17,12 +18,12 @@ export default function PrivacyPage() {
     <>
       <Nav />
 
-      <main className="legal">
-        <header className="legal__head">
-          <span className="script">Vie privée</span>
-          <h1>Politique de confidentialité</h1>
-          <p className="legal__meta">Dernière mise à jour : {UPDATED}</p>
-        </header>
+      <main className="legal content-page">
+        <PageHero
+          eyebrow="Vie privée"
+          title="Politique de confidentialité"
+          lead={`Dernière mise à jour : ${UPDATED}`}
+        />
 
         <div className="legal__body glass">
           <p>
