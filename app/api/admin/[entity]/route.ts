@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { isAuthed } from '@/lib/adminAuth';
-import { readStore, writeStore } from '@/lib/store';
+import { readStore } from '@/lib/store';
+import { persistStore } from '@/lib/persistStore';
 import { buildArtist, buildEvent, buildAnnouncement } from '@/lib/adminRecords';
 
 const ENTITIES = ['artists', 'events', 'announcements'] as const;
@@ -33,8 +34,12 @@ export async function POST(req: Request, { params }: Ctx) {
     const built = buildArtist(body as Record<string, unknown>, store);
     if ('error' in built) return NextResponse.json(built, { status: 400 });
     store.artists.unshift(built);
-    await writeStore(store);
-    return NextResponse.json({ ok: true, item: built }, { status: 201 });
+    const saved = await persistStore(store);
+    if (!saved.ok) return NextResponse.json({ error: saved.error }, { status: 502 });
+    return NextResponse.json(
+      { ok: true, item: built, deployed: saved.deployed },
+      { status: 201 },
+    );
   }
 
   if (entity === 'announcements') {
@@ -43,13 +48,21 @@ export async function POST(req: Request, { params }: Ctx) {
     // une seule annonce active à la fois
     if (built.active) store.announcements.forEach((a) => (a.active = false));
     store.announcements.unshift(built);
-    await writeStore(store);
-    return NextResponse.json({ ok: true, item: built }, { status: 201 });
+    const saved = await persistStore(store);
+    if (!saved.ok) return NextResponse.json({ error: saved.error }, { status: 502 });
+    return NextResponse.json(
+      { ok: true, item: built, deployed: saved.deployed },
+      { status: 201 },
+    );
   }
 
   const built = buildEvent(body as Record<string, unknown>, store);
   if ('error' in built) return NextResponse.json(built, { status: 400 });
   store.events.unshift(built);
-  await writeStore(store);
-  return NextResponse.json({ ok: true, item: built }, { status: 201 });
+  const saved = await persistStore(store);
+  if (!saved.ok) return NextResponse.json({ error: saved.error }, { status: 502 });
+  return NextResponse.json(
+    { ok: true, item: built, deployed: saved.deployed },
+    { status: 201 },
+  );
 }

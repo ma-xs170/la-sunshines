@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { isAuthed } from '@/lib/adminAuth';
-import { readStore, writeStore } from '@/lib/store';
+import { readStore } from '@/lib/store';
+import { persistStore } from '@/lib/persistStore';
 import {
   applyArtistPatch,
   applyEventPatch,
@@ -40,8 +41,9 @@ export async function PATCH(req: Request, { params }: Ctx) {
     const idx = store.artists.findIndex((a) => a.id === id);
     if (idx < 0) return NextResponse.json({ error: 'Introuvable.' }, { status: 404 });
     store.artists[idx] = applyArtistPatch(store.artists[idx], body);
-    await writeStore(store);
-    return NextResponse.json({ ok: true, item: store.artists[idx] });
+    const saved = await persistStore(store);
+    if (!saved.ok) return NextResponse.json({ error: saved.error }, { status: 502 });
+    return NextResponse.json({ ok: true, item: store.artists[idx], deployed: saved.deployed });
   }
 
   if (entity === 'announcements') {
@@ -54,8 +56,9 @@ export async function PATCH(req: Request, { params }: Ctx) {
         if (i !== idx) a.active = false;
       });
     }
-    await writeStore(store);
-    return NextResponse.json({ ok: true, item: store.announcements[idx] });
+    const saved = await persistStore(store);
+    if (!saved.ok) return NextResponse.json({ error: saved.error }, { status: 502 });
+    return NextResponse.json({ ok: true, item: store.announcements[idx], deployed: saved.deployed });
   }
 
   if (entity === 'tickets') {
@@ -63,15 +66,17 @@ export async function PATCH(req: Request, { params }: Ctx) {
     if (idx < 0) return NextResponse.json({ error: 'Introuvable.' }, { status: 404 });
     const status = body.status === 'done' ? 'done' : 'open';
     store.tickets[idx] = { ...store.tickets[idx], status };
-    await writeStore(store);
-    return NextResponse.json({ ok: true, item: store.tickets[idx] });
+    const saved = await persistStore(store);
+    if (!saved.ok) return NextResponse.json({ error: saved.error }, { status: 502 });
+    return NextResponse.json({ ok: true, item: store.tickets[idx], deployed: saved.deployed });
   }
 
   const idx = store.events.findIndex((e) => e.id === id);
   if (idx < 0) return NextResponse.json({ error: 'Introuvable.' }, { status: 404 });
   store.events[idx] = applyEventPatch(store.events[idx], body);
-  await writeStore(store);
-  return NextResponse.json({ ok: true, item: store.events[idx] });
+  const saved = await persistStore(store);
+  if (!saved.ok) return NextResponse.json({ error: saved.error }, { status: 502 });
+  return NextResponse.json({ ok: true, item: store.events[idx], deployed: saved.deployed });
 }
 
 // DELETE /api/admin/events/:id  — suppression
@@ -98,6 +103,7 @@ export async function DELETE(_req: Request, { params }: Ctx) {
     store.announcements = next as typeof store.announcements;
   else if (entity === 'tickets') store.tickets = next as typeof store.tickets;
   else store.events = next as typeof store.events;
-  await writeStore(store);
-  return NextResponse.json({ ok: true });
+  const saved = await persistStore(store);
+  if (!saved.ok) return NextResponse.json({ error: saved.error }, { status: 502 });
+  return NextResponse.json({ ok: true, deployed: saved.deployed });
 }

@@ -130,9 +130,15 @@ async function createTicket(args: Record<string, unknown>): Promise<{
     createdAt: new Date().toISOString(),
   };
 
-  const store = await readStore();
-  store.tickets.unshift(ticket);
-  await writeStore(store);
+  // Persistance best-effort : si le commit GitHub échoue (token, rate limit…),
+  // on n'annule pas la demande — l'email ci-dessous reste le canal de livraison.
+  try {
+    const store = await readStore();
+    store.tickets.unshift(ticket);
+    await writeStore(store);
+  } catch (e) {
+    console.error('[assistant] ticket non persisté (envoi email uniquement) :', e);
+  }
 
   // Emails (best-effort : un échec n'annule pas le ticket)
   const apiKey = process.env.RESEND_API_KEY;

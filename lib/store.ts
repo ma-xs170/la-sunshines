@@ -11,6 +11,7 @@
 import { promises as fs, readFileSync } from 'fs';
 import path from 'path';
 import { slugify } from './slug';
+import { githubStoreEnabled, commitStoreToGithub } from './githubStore';
 
 const FILE = path.join(process.cwd(), 'data', 'content.json');
 
@@ -179,8 +180,18 @@ export async function readStore(): Promise<Store> {
 }
 
 export async function writeStore(store: Store): Promise<void> {
+  const json = `${JSON.stringify(store, null, 2)}\n`;
+
+  // PRODUCTION (GITHUB_TOKEN présent) : commit sur GitHub → auto-deploy Vercel.
+  // Le FS de l'hébergeur étant en lecture seule, aucune écriture disque ici.
+  if (githubStoreEnabled()) {
+    await commitStoreToGithub(json);
+    return;
+  }
+
+  // LOCAL : écriture disque directe (rechargement immédiat en dev).
   await fs.mkdir(path.dirname(FILE), { recursive: true });
-  await fs.writeFile(FILE, `${JSON.stringify(store, null, 2)}\n`, 'utf8');
+  await fs.writeFile(FILE, json, 'utf8');
 }
 
 /** Version synchrone pour la lecture au rendu des pages publiques. */

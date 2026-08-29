@@ -48,6 +48,10 @@ export type EditionLite = {
   palette: string[];
 };
 
+// note ajoutée aux confirmations d'enregistrement (le contenu part sur GitHub
+// et Vercel redéploie tout seul).
+const SAVED_NOTE = 'Le site se met à jour automatiquement (~1 min).';
+
 async function api(
   path: string,
   method: string,
@@ -58,6 +62,8 @@ async function api(
   error?: string;
   gallery?: string[];
   data?: unknown;
+  /** true si l'écriture a été committée sur GitHub (→ redeploy auto). */
+  deployed?: boolean;
 }> {
   const res = await fetch(path, {
     method,
@@ -79,10 +85,10 @@ export default function AdminDashboard({
   const [msg, setMsg] = useState<string>('');
   const msgTimer = useRef<number | undefined>(undefined);
 
-  function flash(text: string) {
-    setMsg(text);
+  function flash(text: string, saved?: boolean) {
+    setMsg(saved ? `${text} ${SAVED_NOTE}` : text);
     if (msgTimer.current) window.clearTimeout(msgTimer.current);
-    msgTimer.current = window.setTimeout(() => setMsg(''), 3500);
+    msgTimer.current = window.setTimeout(() => setMsg(''), saved ? 5000 : 3500);
   }
 
   async function logout() {
@@ -107,8 +113,9 @@ export default function AdminDashboard({
       {msg && <p className="admin-flash">{msg}</p>}
 
       <p className="admin-note">
-        Le contenu ajouté ici est enregistré dans <code>data/content.json</code> et
-        apparaît sur le site au prochain <code>build</code> (rebuild / redeploy).
+        Chaque enregistrement est committé sur GitHub (<code>data/content.json</code>)
+        et déclenche un redéploiement automatique&nbsp;: les changements sont en
+        ligne en ~1&nbsp;min. En local, l’écriture se fait directement sur le disque.
       </p>
 
       <div className="admin-grid">
@@ -137,7 +144,7 @@ function TicketPanel({
 }: {
   store: Store;
   setStore: (s: Store) => void;
-  flash: (t: string) => void;
+  flash: (t: string, saved?: boolean) => void;
 }) {
   const [filter, setFilter] = useState<'open' | 'all'>('open');
   const list = store.tickets.filter((t) =>
@@ -152,7 +159,7 @@ function TicketPanel({
       ...store,
       tickets: store.tickets.map((t) => (t.id === id ? { ...t, status } : t)),
     });
-    flash(status === 'done' ? 'Ticket marqué traité.' : 'Ticket rouvert.');
+    flash(status === 'done' ? 'Ticket marqué traité.' : 'Ticket rouvert.', res.deployed);
   }
 
   async function remove(id: string) {
@@ -160,7 +167,7 @@ function TicketPanel({
     const res = await api(`/api/admin/tickets/${id}`, 'DELETE');
     if (!res.ok) return flash(res.error ?? 'Échec.');
     setStore({ ...store, tickets: store.tickets.filter((t) => t.id !== id) });
-    flash('Ticket supprimé.');
+    flash('Ticket supprimé.', res.deployed);
   }
 
   return (
@@ -249,7 +256,7 @@ function AnnouncementPanel({
 }: {
   store: Store;
   setStore: (s: Store) => void;
-  flash: (t: string) => void;
+  flash: (t: string, saved?: boolean) => void;
 }) {
   const [text, setText] = useState('');
   const [href, setHref] = useState('');
@@ -272,7 +279,7 @@ function AnnouncementPanel({
     });
     setText('');
     setHref('');
-    flash('Annonce publiée.');
+    flash('Annonce publiée.', res.deployed);
   }
 
   async function toggle(a: StoredAnnouncement) {
@@ -291,7 +298,7 @@ function AnnouncementPanel({
             : x,
       ),
     });
-    flash(item.active ? 'Annonce activée.' : 'Annonce désactivée.');
+    flash(item.active ? 'Annonce activée.' : 'Annonce désactivée.', res.deployed);
   }
 
   async function remove(a: StoredAnnouncement) {
@@ -302,7 +309,7 @@ function AnnouncementPanel({
       ...store,
       announcements: store.announcements.filter((x) => x.id !== a.id),
     });
-    flash('Annonce supprimée.');
+    flash('Annonce supprimée.', res.deployed);
   }
 
   const activeId = store.announcements.find((a) => a.active)?.id ?? null;
@@ -379,7 +386,7 @@ function GalleryPanel({
   flash,
 }: {
   editions: EditionLite[];
-  flash: (t: string) => void;
+  flash: (t: string, saved?: boolean) => void;
 }) {
   const [galleries, setGalleries] = useState<Record<string, string[]>>(() =>
     Object.fromEntries(editions.map((e) => [e.slug, e.gallery])),
@@ -407,7 +414,7 @@ function GalleryPanel({
       const res = await api(`/api/admin/gallery/${slug}`, 'PATCH', { images });
       if (!res.ok || !res.gallery) return flash(res.error ?? 'Échec.');
       setGalleries((g) => ({ ...g, [slug]: res.gallery as string[] }));
-      flash(`${images.length} photo(s) ajoutée(s).`);
+      flash(`${images.length} photo(s) ajoutée(s).`, res.deployed);
     } finally {
       setBusy(false);
     }
@@ -418,7 +425,7 @@ function GalleryPanel({
     const res = await api(`/api/admin/gallery/${slug}`, 'DELETE', { index });
     if (!res.ok) return flash(res.error ?? 'Échec.');
     setGalleries((g) => ({ ...g, [slug]: (res.gallery as string[]) ?? [] }));
-    flash('Photo retirée.');
+    flash('Photo retirée.', res.deployed);
   }
 
   return (
@@ -426,7 +433,7 @@ function GalleryPanel({
       <h2>Galeries photos par édition</h2>
       <p className="admin-note admin-note--tight">
         Alimente la section GALERIE de chaque page événement. Les photos sont
-        redimensionnées automatiquement. Visible sur le site au prochain build.
+        redimensionnées automatiquement. En ligne après le redéploiement auto (~1 min).
       </p>
 
       <ul className="admin-gal-list">
@@ -514,7 +521,7 @@ function EventPanel({
 }: {
   store: Store;
   setStore: (s: Store) => void;
-  flash: (t: string) => void;
+  flash: (t: string, saved?: boolean) => void;
   editions: EditionLite[];
 }) {
   const [form, setForm] = useState({ ...emptyEvent });
@@ -705,7 +712,7 @@ function EventPanel({
     });
 
     if (mode === 'create') {
-      flash('Événement ajouté.');
+      flash('Événement ajouté.', res.deployed);
       reset();
     } else {
       // on reste en mode modification sur l'événement enregistré
@@ -713,6 +720,7 @@ function EventPanel({
         mode === 'override'
           ? 'Version personnalisée enregistrée.'
           : 'Événement modifié.',
+        res.deployed,
       );
       loadStoreEvent(item);
     }
@@ -735,7 +743,10 @@ function EventPanel({
       events: store.events.filter((x) => x.id !== target.id),
     });
     reset();
-    flash(isOverride ? 'Revenu à la version du site.' : 'Événement supprimé.');
+    flash(
+      isOverride ? 'Revenu à la version du site.' : 'Événement supprimé.',
+      res.deployed,
+    );
   }
 
   const selectedEd = manageSlug
@@ -984,7 +995,7 @@ function ArtistPanel({
 }: {
   store: Store;
   setStore: (s: Store) => void;
-  flash: (t: string) => void;
+  flash: (t: string, saved?: boolean) => void;
 }) {
   const [form, setForm] = useState({ ...emptyArtist });
   const [image, setImage] = useState('');
@@ -1037,7 +1048,7 @@ function ArtistPanel({
         : [item, ...store.artists],
     });
     setSelectedId(item.id); // le nouvel / modifié artiste devient l'artiste géré
-    flash(editingId ? 'Artiste modifié.' : 'Artiste ajouté.');
+    flash(editingId ? 'Artiste modifié.' : 'Artiste ajouté.', res.deployed);
     reset();
   }
 
@@ -1071,7 +1082,7 @@ function ArtistPanel({
     setStore({ ...store, artists: store.artists.filter((x) => x.id !== a.id) });
     if (editingId === a.id) reset();
     if (selectedId === a.id) setSelectedId('');
-    flash('Artiste supprimé.');
+    flash('Artiste supprimé.', res.deployed);
   }
 
   const list = query.trim()

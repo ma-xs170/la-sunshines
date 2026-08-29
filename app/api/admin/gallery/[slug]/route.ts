@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { isAuthed } from '@/lib/adminAuth';
-import { readStore, writeStore } from '@/lib/store';
+import { readStore } from '@/lib/store';
+import { persistStore } from '@/lib/persistStore';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -48,8 +49,9 @@ export async function PATCH(req: Request, ctx: Ctx) {
   const current = store.galleries[slug] ?? [];
   const next = [...current, ...incoming].slice(0, MAX_PER_EDITION);
   store.galleries[slug] = next;
-  await writeStore(store);
-  return NextResponse.json({ ok: true, gallery: next });
+  const saved = await persistStore(store);
+  if (!saved.ok) return NextResponse.json({ error: saved.error }, { status: 502 });
+  return NextResponse.json({ ok: true, gallery: next, deployed: saved.deployed });
 }
 
 // DELETE /api/admin/gallery/:slug  — body { index: number } — retire une photo
@@ -73,6 +75,7 @@ export async function DELETE(req: Request, ctx: Ctx) {
   const next = current.filter((_, i) => i !== index);
   if (next.length) store.galleries[slug] = next;
   else delete store.galleries[slug];
-  await writeStore(store);
-  return NextResponse.json({ ok: true, gallery: next });
+  const saved = await persistStore(store);
+  if (!saved.ok) return NextResponse.json({ error: saved.error }, { status: 502 });
+  return NextResponse.json({ ok: true, gallery: next, deployed: saved.deployed });
 }
