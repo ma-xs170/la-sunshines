@@ -1,6 +1,8 @@
 'use client';
 
+import type { CSSProperties } from 'react';
 import { useEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import Icon from './Icon';
 
 type Msg = { role: 'user' | 'assistant'; content: string };
@@ -20,6 +22,19 @@ export default function Assistant() {
   const [err, setErr] = useState<{ text: string; fallback?: string } | null>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const pathname = usePathname();
+
+  // Teinte « liquid glass » du bouton flottant : reprend la couleur dynamique
+  // de la page courante (--ev-fab posé sur <main.event> par pageTheme()). Hors
+  // page à thème, on laisse le CSS retomber sur l'amber du site.
+  const [fabTint, setFabTint] = useState('');
+  useEffect(() => {
+    const themed = document.querySelector('.event');
+    const tint = themed
+      ? getComputedStyle(themed).getPropertyValue('--ev-fab').trim()
+      : '';
+    setFabTint(tint);
+  }, [pathname]);
 
   const turns = msgs.filter((m) => m.role === 'user').length;
   const reachedLimit = msgs.length >= MAX_TURNS;
@@ -86,6 +101,7 @@ export default function Assistant() {
         aria-label={open ? 'Fermer l’assistant' : 'Ouvrir l’assistant'}
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
+        style={fabTint ? ({ '--fab-tint': fabTint } as CSSProperties) : undefined}
       >
         <Icon name={open ? 'close' : 'sparkles'} />
       </button>

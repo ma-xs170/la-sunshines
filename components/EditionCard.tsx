@@ -50,7 +50,7 @@ function NextCard({ edition, hidden }: { edition: Edition; hidden: boolean }) {
         )}
       </div>
       <div className="ed-card__body">
-        <p className="kicker">{edition.kicker}</p>
+        {/* pas de kicker « Prochaine édition » : redondant avec le badge du flyer */}
         <h3>
           <span className="ed-card__emoji" aria-hidden="true">
             {edition.emoji}
@@ -122,7 +122,7 @@ function PastCard({ edition, hidden }: { edition: Edition; hidden: boolean }) {
         <span className="badge">Passée</span>
       </div>
       <div className="ed-card__body">
-        <p className="kicker">{edition.kicker}</p>
+        {/* pas de kicker « Édition passée » : redondant avec le badge du flyer */}
         <h3>
           <span className="ed-card__emoji" aria-hidden="true">
             {edition.emoji}

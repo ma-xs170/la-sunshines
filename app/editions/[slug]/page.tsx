@@ -6,7 +6,7 @@ import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import Icon from '@/components/Icon';
 import { getAllEditions, getEditionBySlug } from '@/lib/content';
-import { isDarkTheme, pageTint } from '@/lib/gradient';
+import { isDarkTheme, pageTheme } from '@/lib/gradient';
 import { isEditionUpcoming } from '@/lib/editions';
 import { getTimetable } from '@/lib/timetables';
 import { getBizoukEmbed } from '@/lib/bizouk';
@@ -88,13 +88,13 @@ export default async function EditionPage({
   const hasRawLineup = ed.lineup.length > 0;
   const showLineupSection = !hasRawLineup || secondaryLineup.length > 0;
 
-  // Theming automatique : la zone haute de la page (derrière la nav → 1re
-  // section) prend la teinte du flyer et se fond vers le crème. Si cette teinte
-  // est sombre, le texte de la zone bascule en clair (cf. `.event--themed`).
+  // Theming automatique : TOUTE la page événement (fond, encre, accent, filets,
+  // panneaux, voile du hero) est teintée par la couleur du flyer. `pageTheme`
+  // renvoie le jeu complet de variables ; `event--themed` marque le mode sombre
+  // (fond sombre + encre claire) pour les quelques réglages non pilotables par
+  // variable seule.
   const darkTheme = isDarkTheme(ed.dominantColor, ed.palette);
-  const eventStyle = {
-    '--ev-tint': pageTint(ed.palette, ed.dominantColor),
-  } as CSSProperties;
+  const eventStyle = pageTheme(ed.palette, ed.dominantColor) as unknown as CSSProperties;
 
   return (
     <>
@@ -118,7 +118,6 @@ export default async function EditionPage({
                 Toutes les éditions
               </Link>
 
-              <p className="event-hero__kicker">{ed.kicker}</p>
               <h1 className="event-hero__title">
                 <span className="event-hero__emoji" aria-hidden="true">
                   {ed.emoji}

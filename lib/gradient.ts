@@ -152,24 +152,75 @@ export function isDarkTheme(
 }
 
 /**
- * Teinte de fond posée en HAUT de la page événement (derrière la nav
- * translucide) et fondue vers le crème sur ~1 section — cf. `.event::before`.
- *  • flyer sombre : la couleur du flyer, un peu assombrie, pour porter du
- *    texte clair sans écraser la couleur.
- *  • flyer clair : simple voile pâle tiré vers le crème (pas de bascule de
- *    texte, juste de quoi supprimer la bande neutre en haut).
+ * Jeu COMPLET de variables de theming d'une page événement, dérivé du flyer.
+ * Toutes les couleurs du sous-arbre `.event` en découlent (fond de page, encre
+ * principale / secondaire, accent calligraphique, filets et panneaux
+ * décoratifs, voile du hero) — plus rien ne reste sur une couleur « par
+ * défaut ». Le contraste texte/fond est garanti par `isDarkTheme()` :
+ *  • flyer sombre → fond très sombre teinté + encre claire + accent clair vif ;
+ *  • flyer clair → voile pâle teinté + encre foncée + accent foncé vif.
+ * À poser en `style` inline sur `<main class="event">`.
  */
-export function pageTint(
+export function pageTheme(
   palette: string[] | undefined,
   dominant: string | null | undefined,
-): string {
-  let colors = usablePalette(palette ?? []);
-  if (colors.length === 0 && dominant) colors = usablePalette([dominant]);
-  if (colors.length === 0) colors = ['#3a2a4a'];
-  const base = colors[0];
-  return luminance(parseHex(base)) < 0.5
-    ? mix(base, '#0c0a12', 0.34)
-    : mix(base, '#fff8ee', 0.72);
+): Record<string, string> {
+  const dark = isDarkTheme(dominant, palette);
+
+  // teinte de référence = couleur la plus « colorée » du flyer (hue + sat)
+  const pool = [
+    ...(palette ?? []),
+    ...(dominant ? [dominant] : []),
+  ].filter((h) => /^#[0-9a-f]{6}$/i.test(h));
+  let hue = 30 / 360;
+  let sat = 0.4;
+  let bestScore = -1;
+  for (const hex of pool) {
+    const [h, s, l] = rgbToHsl(parseHex(hex));
+    const score = s * (1 - Math.abs(l - 0.5) * 0.5);
+    if (score > bestScore) {
+      bestScore = score;
+      hue = h;
+      sat = s;
+    }
+  }
+
+  // teinte « liquid glass » : mi-ton vif du flyer, identique en clair/sombre,
+  // consommée p.ex. par le bouton flottant de l'Assistant (--fab-tint).
+  const fab = hslToHex([hue, Math.max(sat, 0.6), 0.52]);
+
+  if (dark) {
+    const s = Math.min(Math.max(sat, 0.34), 0.6);
+    return {
+      '--ev-tint': hslToHex([hue, s, 0.12]),
+      '--ev-tint-top': hslToHex([hue, Math.min(s + 0.06, 0.7), 0.075]),
+      '--ev-ink': '#f7f2ec',
+      '--ev-ink-soft': 'rgba(247, 242, 236, 0.72)',
+      '--ev-ink-dim': 'rgba(247, 242, 236, 0.5)',
+      '--ev-accent': hslToHex([hue, Math.max(sat, 0.7), 0.74]),
+      '--ev-line': 'rgba(255, 255, 255, 0.15)',
+      '--ev-line-strong': 'rgba(255, 255, 255, 0.3)',
+      '--ev-panel': 'rgba(255, 255, 255, 0.07)',
+      '--ev-hero-veil-1': 'rgba(8, 6, 10, 0.22)',
+      '--ev-hero-veil-2': 'rgba(8, 6, 10, 0.5)',
+      '--ev-fab': fab,
+    };
+  }
+  const s = Math.min(Math.max(sat, 0.14), 0.4);
+  return {
+    '--ev-tint': hslToHex([hue, s, 0.955]),
+    '--ev-tint-top': hslToHex([hue, Math.min(s + 0.12, 0.55), 0.9]),
+    '--ev-ink': '#191410',
+    '--ev-ink-soft': 'rgba(25, 20, 16, 0.64)',
+    '--ev-ink-dim': 'rgba(25, 20, 16, 0.46)',
+    '--ev-accent': hslToHex([hue, Math.max(sat * 0.85, 0.5), 0.33]),
+    '--ev-line': 'rgba(25, 20, 16, 0.12)',
+    '--ev-line-strong': 'rgba(25, 20, 16, 0.2)',
+    '--ev-panel': 'rgba(255, 255, 255, 0.66)',
+    '--ev-hero-veil-1': 'rgba(20, 16, 12, 0.4)',
+    '--ev-hero-veil-2': 'rgba(20, 16, 12, 0.72)',
+    '--ev-fab': fab,
+  };
 }
 
 /** Palette nettoyée : on écarte les quasi-blancs / quasi-noirs et les doublons. */

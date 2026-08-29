@@ -48,6 +48,12 @@
 
   /* gros titres display : Unbounded (Google Fonts), plus ronde/large qu'Impact */
   --font-display:'Unbounded','Trebuchet MS','Segoe UI',system-ui,sans-serif;
+
+  /* tailles de texte FLUIDES (min mobile · préféré vw+px · max desktop)
+     pour que rien ne surdimensionne sur petit écran (testé 375 / 390px) */
+  --fs-lead:clamp(15px, 0.8vw + 12px, 18px);      /* chapôs / intros */
+  --fs-script:clamp(19px, 1.2vw + 14.5px, 24px);  /* petites accroches calligraphiées */
+  --fs-tagline:clamp(17px, 1.6vw + 11px, 22px);   /* taglines calligraphiées (hero / cartes) */
 }
 
 @media (max-width:900px){ :root{ --band:var(--s-64); } }
@@ -82,7 +88,7 @@ h1,h2,h3,h4,.display{
   letter-spacing:-0.04em;
 }
 .wordmark{
-  font-size:clamp(30px, 6.2vw, 58px);
+  font-size:clamp(28px, 5.4vw + 6px, 58px);
   line-height:1.02;
   letter-spacing:-0.05em;
 }
@@ -91,18 +97,18 @@ h1,h2,h3,h4,.display{
   font-family:var(--font-display);
   text-transform:uppercase;
   font-weight:800;
-  font-size:clamp(36px, 6.4vw, 76px);
+  font-size:clamp(30px, 5vw + 12px, 76px);
   line-height:0.98;
   letter-spacing:-0.05em;
 }
 h2{
-  font-size:clamp(23px, 3.5vw, 38px);
-  line-height:1.0;
+  font-size:clamp(21px, 2.4vw + 12px, 38px);
+  line-height:1.02;
   letter-spacing:-0.04em;
 }
 h3{
-  font-size:clamp(19px, 2.6vw, 26px);
-  line-height:1.06;
+  font-size:clamp(18px, 1.6vw + 12px, 26px);
+  line-height:1.08;
   letter-spacing:-0.035em;
 }
 h4{
@@ -110,11 +116,18 @@ h4{
   line-height:1.15;
   letter-spacing:-0.005em;
 }
+/* Unbounded se resserre trop en petit : on détend le tracking des titres
+   sous 560px pour garder les mots lisibles (pas de lettres qui se touchent). */
+@media (max-width:560px){
+  h1,h2,h3,.display,
+  .event-hero__title,.artist-name,.cta-band__date{letter-spacing:-0.022em;}
+  .wordmark{letter-spacing:-0.03em;}
+}
 .script{
   font-family:'Caveat',cursive;
   font-weight:700;
   color:var(--amber-ink);
-  font-size:24px;
+  font-size:var(--fs-script);
   line-height:1;
 }
 /* petits intitulés (Inter, pas Archivo) */
@@ -444,7 +457,7 @@ nav a.cta:focus-visible,
 }
 .hero__sub{
   margin-top:var(--s-16);
-  font-size:17px;color:rgba(255,255,255,0.82);max-width:42ch;font-weight:500;line-height:1.55;
+  font-size:var(--fs-lead);color:rgba(255,255,255,0.82);max-width:42ch;font-weight:500;line-height:1.55;
 }
 .hero .btn-row{margin-top:var(--s-24);}
 
@@ -562,7 +575,7 @@ section{
   padding:calc(var(--s-64) + 16px) var(--gutter) var(--s-40);
 }
 .editions-page .section-head h1{
-  font-size:clamp(23px,3.5vw,38px);line-height:1.0;letter-spacing:-0.04em;
+  font-size:clamp(21px,2.4vw + 12px,38px);line-height:1.02;letter-spacing:-0.04em;
   margin-bottom:0;
 }
 .editions-page__lead{
@@ -633,7 +646,7 @@ section{
 .ed-card__media--pending .pending .icon{width:22px;height:22px;}
 .ed-card__tagline{
   font-family:'Caveat',cursive;font-weight:700;
-  font-size:19px;line-height:1.25;color:var(--ink);
+  font-size:var(--fs-tagline);line-height:1.25;color:var(--ink);
   margin-bottom:var(--s-16);
 }
 .ed-card__media::after{
@@ -650,7 +663,6 @@ section{
 }
 .badge--next{background:rgba(255,178,56,0.92);border-color:transparent;color:var(--ink);}
 
-.ed-card__body .kicker{color:var(--gray-dim);margin-bottom:var(--s-8);}
 .ed-card__body h3{margin-bottom:var(--s-12);}
 .ed-card__emoji{
   display:inline-block;margin-right:0.4em;
@@ -690,7 +702,7 @@ section{
 /* page /infos dédiée : réserve de l'espace sous la nav sticky */
 .infos-page{padding-top:calc(var(--s-64) + 16px);}
 .infos-page .section-head h1{
-  font-size:clamp(23px,3.5vw,38px);line-height:1.0;letter-spacing:-0.04em;
+  font-size:clamp(21px,2.4vw + 12px,38px);line-height:1.02;letter-spacing:-0.04em;
   margin-bottom:0;
 }
 .infos-grid{
@@ -748,7 +760,7 @@ section{
 }
 .cta-band__thanks{
   font-family:'Caveat',cursive;font-weight:700;
-  font-size:clamp(46px,10vw,88px);line-height:1;
+  font-size:clamp(32px,7vw + 8px,88px);line-height:1;
   color:#fff;
   text-shadow:0 6px 26px rgba(0,0,0,0.45);
 }
@@ -760,7 +772,7 @@ section{
   letter-spacing:0.07em;font-size:12px;color:var(--amber-hi);margin-bottom:var(--s-16);
 }
 .cta-band__text{
-  color:rgba(255,255,255,0.94);font-weight:500;font-size:18px;
+  color:rgba(255,255,255,0.94);font-weight:500;font-size:var(--fs-lead);
   max-width:34ch;margin:0 auto var(--s-8);line-height:1.5;
 }
 .cta-band__note{color:rgba(255,255,255,0.68);font-weight:500;font-size:14px;margin:0 auto var(--s-24);}
@@ -891,32 +903,29 @@ footer{
 /* =========================================================
    Pages événement — /editions/[slug]  (Phase 3)
    ========================================================= */
-.event{padding-bottom:var(--s-40);position:relative;overflow:hidden;}
+/* Page événement ENTIÈREMENT teintée par le flyer : le fond, l'encre et tous
+   les éléments décoratifs viennent des variables --ev-* posées en inline sur
+   .event par pageTheme() (lib/gradient.ts). Fallbacks = thème crème du site. */
+.event{
+  padding-bottom:var(--s-64);position:relative;overflow:hidden;
+  background:var(--ev-tint, var(--bg));
+  color:var(--ev-ink, var(--ink));
+}
+/* pas de bande crème entre la page teintée et le footer sombre */
+.event + footer{margin-top:0;}
 /* le contenu passe au-dessus du champ d'emojis (.event-emoji-field, z-index:0) */
 .event > .event-hero,
 .event > .event-section,
 .event > .event-buy{position:relative;z-index:1;}
 
-/* Voile thémé du HAUT de page : démarre au tout premier pixel (donc DERRIÈRE
-   la nav translucide, qui reste posée par-dessus) et se fond vers le crème sur
-   ~1 section. Supprime la bande neutre qui apparaissait au-dessus du hero et
-   étend l'ambiance du flyer au-delà de l'en-tête. Teinte = --ev-tint (posée en
-   inline sur .event) : sombre pour un flyer sombre, voile pâle sinon. */
+/* accent de profondeur en haut de page (derrière la nav translucide) : la
+   teinte un peu plus dense qui se fond dans le fond uni en descendant. */
 .event::before{
   content:"";
   position:absolute;left:0;right:0;top:0;
-  height:clamp(920px, 74vh + 500px, 1480px);
-  background:linear-gradient(180deg,
-    var(--ev-tint, transparent) 0%,
-    var(--ev-tint, transparent) 52%,
-    color-mix(in srgb, var(--ev-tint, transparent) 45%, transparent) 74%,
-    transparent 100%);
+  height:clamp(560px, 80vh, 1080px);
+  background:linear-gradient(180deg, var(--ev-tint-top, transparent) 0%, transparent 100%);
   z-index:0;pointer-events:none;
-}
-/* mobile : le hero (1 colonne) est très haut et porte déjà tout le theming ;
-   pas de traîne de voile derrière la 1re section (sinon texte foncé sur teinte). */
-@media (max-width:760px){
-  .event::before{display:none;}
 }
 
 .event-hero{
@@ -925,14 +934,12 @@ footer{
   color:#fff;
   overflow:hidden;
 }
+/* voile de contraste du hero, piloté par les tokens (cohérent clair/sombre) */
 .event-hero::before{
   content:"";position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(180deg,rgba(20,16,12,0.30),rgba(20,16,12,0.62));
-}
-/* flyer clair : le dégradé du hero est pâle → on épaissit le voile pour garder
-   le texte blanc lisible (les pages à flyer sombre gardent le voile léger). */
-.event:not(.event--themed) .event-hero::before{
-  background:linear-gradient(180deg,rgba(20,16,12,0.40),rgba(20,16,12,0.72));
+  background:linear-gradient(180deg,
+    var(--ev-hero-veil-1, rgba(20,16,12,0.30)),
+    var(--ev-hero-veil-2, rgba(20,16,12,0.62)));
 }
 .event-hero__inner{
   position:relative;
@@ -978,19 +985,14 @@ footer{
   color:rgba(255,255,255,0.78);
 }
 .event-hero__venue .icon{width:14px;height:14px;color:rgba(255,255,255,0.78);}
-.event-hero__kicker{
-  font-family:'Inter',sans-serif;font-weight:700;text-transform:uppercase;
-  letter-spacing:0.09em;font-size:11px;color:rgba(255,255,255,0.75);
-  margin-bottom:var(--s-8);
-}
 .event-hero__title{
-  font-size:clamp(24px,4.2vw,40px);line-height:1.0;letter-spacing:-0.04em;
+  font-size:clamp(21px,3vw + 9px,40px);line-height:1.02;letter-spacing:-0.04em;
   margin-bottom:var(--s-16);
 }
 .event-hero__emoji{display:inline-block;margin-right:0.35em;font-size:0.9em;}
 .event-hero__tagline{
   font-family:'Caveat',cursive;font-weight:700;
-  font-size:22px;line-height:1.3;color:#fff;
+  font-size:var(--fs-tagline);line-height:1.3;color:#fff;
   max-width:38ch;margin-bottom:var(--s-24);
 }
 /* barre pill-info : capsule « liquid glass » complète = rond icône + texte */
@@ -1122,46 +1124,67 @@ footer{
 .lineup__pill .artist-name-link:hover{background:rgba(25,20,16,0.04);text-decoration:none;}
 .lineup__pill .artist-name-link:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
 
-/* ---------- Flyer sombre : texte clair dans la zone thémée du haut ----------
-   `.event--themed` = teinte de haut de page sombre (cf. isDarkTheme). Le hero
-   est déjà en texte blanc ; on bascule en plus la 1re section, qui tombe dans
-   le voile --ev-tint avant le fondu vers le crème. Les sections suivantes
-   restent sur crème / encre foncée.
-   Gardé au layout hero 2 colonnes (desktop) : là le hero a une hauteur bornée,
-   donc le voile couvre de façon fiable le haut de la 1re section. En mobile le
-   hero (1 colonne) est très haut, la 1re section arrive après le voile → on
-   garde l'encre foncée sur crème. */
-@media (min-width:761px){
-  .event--themed .event-section:first-of-type{color:rgba(255,255,255,0.88);}
-  .event--themed .event-section:first-of-type h2{color:#fff;}
-  .event--themed .event-section:first-of-type .script{color:var(--amber-hi);}
-  .event--themed .event-section:first-of-type .event-empty{color:rgba(255,255,255,0.7);}
-  .event--themed .event-section:first-of-type .lineup__pill{
-    background:rgba(255,255,255,0.12);
-    border-color:rgba(255,255,255,0.22);
-    color:#fff;
-    box-shadow:none;
-  }
-  .event--themed .event-section:first-of-type .lineup__pill .artist-name-link:hover{
-    background:rgba(255,255,255,0.14);
-  }
-  .event--themed .event-section:first-of-type .glass{
-    background:rgba(255,255,255,0.08);
-    border-color:rgba(255,255,255,0.16);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,0.14),0 16px 36px rgba(0,0,0,0.22);
-  }
-  .event--themed .event-section:first-of-type .coming-soon p{color:rgba(255,255,255,0.82);}
-  .event--themed .event-section:first-of-type .coming-soon .icon{color:var(--amber-hi);}
-  .event--themed .event-section:first-of-type .bizouk-closed__pill{
-    background:rgba(255,255,255,0.14);border-color:rgba(255,255,255,0.24);color:#fff;
-  }
-  .event--themed .event-section:first-of-type .bizouk-closed__link{
-    color:rgba(255,255,255,0.82);border-color:rgba(255,255,255,0.4);
-  }
-  .event--themed .event-section:first-of-type .bizouk-closed__link:hover{
-    color:#fff;border-color:#fff;
-  }
+/* ================================================================
+   Theming intégral de la page événement — TOUTES les sections, tous
+   les éléments. Chaque couleur vient d'une variable --ev-* (pageTheme,
+   lib/gradient.ts) : rien ne reste sur une teinte « par défaut » qui
+   jurerait avec le flyer. Marche en clair comme en sombre (les tokens
+   portent déjà le bon contraste), à toutes les largeurs.
+   ================================================================ */
+
+/* --- textes --- */
+.event .event-section h2{color:var(--ev-ink);}
+.event .script,
+.event .tt-group__cat{color:var(--ev-accent);}
+.event .event-empty,
+.event .coming-soon p,
+.event .tt-label,
+.event .event-map--pending,
+.event .gallery--empty,
+.event .cookie-note{color:var(--ev-ink-soft);}
+.event .tt-row--sub .tt-label,
+.event .tt-dot{color:var(--ev-ink-dim);}
+
+/* --- icônes / symboles SVG : currentColor hérité du contexte thémé --- */
+.event .coming-soon .icon,
+.event .gallery--empty .icon,
+.event .event-map--pending .icon{color:var(--ev-accent);}
+
+/* --- panneaux & filets décoratifs --- */
+.event .lineup__pill,
+.event .tt-time{
+  background:var(--ev-panel);
+  border-color:var(--ev-line);
+  color:var(--ev-ink);
+  box-shadow:none;
 }
+.event .lineup__pill .artist-name-link:hover{background:var(--ev-line);}
+.event .glass{
+  background:var(--ev-panel);
+  border-color:var(--ev-line);
+  box-shadow:inset 0 1px 0 var(--ev-line), 0 16px 34px rgba(0,0,0,0.12);
+}
+.event .tt-list > li:not(:last-child),
+.event .tt-list--sub,
+.event .tt-list--sub > li:not(:last-child){border-color:var(--ev-line);}
+.event .tt-row--strong .tt-time{
+  background:color-mix(in srgb, var(--ev-accent) 16%, transparent);
+  border-color:color-mix(in srgb, var(--ev-accent) 42%, transparent);
+  color:var(--ev-accent);
+}
+.event .gallery--empty{background:var(--ev-panel);border-color:var(--ev-line-strong);}
+.event .gallery-grid__thumb{border-color:var(--ev-line);}
+.event .event-map:not(.event-map--pending),
+.event .bizouk{border-color:var(--ev-line);}
+.event .event-buy a{color:var(--ev-ink-soft);border-color:var(--ev-line-strong);}
+.event .event-buy a:hover{color:var(--ev-ink);border-color:var(--ev-ink);}
+
+/* --- billetterie « vente terminée » (édition passée) --- */
+.event .bizouk-closed__pill{
+  background:var(--ev-panel);border-color:var(--ev-line);color:var(--ev-ink);
+}
+.event .bizouk-closed__link{color:var(--ev-ink-soft);border-color:var(--ev-line-strong);}
+.event .bizouk-closed__link:hover{color:var(--ev-ink);border-color:var(--ev-ink);}
 
 /* =========================================================
    Profil artiste  —  /artistes/[slug]
@@ -1242,7 +1265,7 @@ footer{
   color:#fff;
 }
 .artist-name{
-  font-size:clamp(26px,4.6vw,44px);line-height:1.0;letter-spacing:-0.04em;
+  font-size:clamp(23px,3.4vw + 10px,44px);line-height:1.02;letter-spacing:-0.04em;
   color:#fff;text-shadow:0 2px 20px rgba(0,0,0,0.45);
   overflow-wrap:anywhere;
 }
@@ -1766,7 +1789,7 @@ footer{
 }
 .rules__head{margin-bottom:var(--s-40);}
 .rules__head h1{
-  font-size:clamp(23px,3.5vw,38px);line-height:1.0;letter-spacing:-0.04em;
+  font-size:clamp(21px,2.4vw + 12px,38px);line-height:1.02;letter-spacing:-0.04em;
 }
 .rules__lead{
   margin-top:var(--s-16);
@@ -1783,7 +1806,7 @@ footer{
   background:rgba(255,178,56,0.18);border:1px solid rgba(255,178,56,0.3);
   color:var(--amber-ink);margin-bottom:var(--s-16);
 }
-.rule-card h2{font-size:19px;margin-bottom:var(--s-8);}
+.rule-card h2{font-size:clamp(17px,1.4vw + 13px,21px);margin-bottom:var(--s-8);}
 .rule-card__intro{color:var(--gray);font-weight:500;font-size:13px;line-height:1.5;margin-bottom:var(--s-12);}
 .rule-card__list{
   list-style:none;display:flex;flex-direction:column;gap:var(--s-8);
@@ -1817,7 +1840,7 @@ footer{
   padding:calc(var(--s-64) + 16px) var(--gutter) var(--s-40);
 }
 .contact__head{margin-bottom:var(--s-40);}
-.contact__head h1{font-size:clamp(23px,3.5vw,38px);line-height:1.0;letter-spacing:-0.04em;}
+.contact__head h1{font-size:clamp(21px,2.4vw + 12px,38px);line-height:1.02;letter-spacing:-0.04em;}
 .contact__lead{
   margin-top:var(--s-16);
   color:var(--gray);font-weight:500;font-size:15px;line-height:1.6;
@@ -1860,7 +1883,7 @@ footer{
   background:rgba(255,178,56,0.18);border:1px solid rgba(255,178,56,0.3);
   color:var(--amber-ink);
 }
-.contact-form--done h2{font-size:22px;}
+.contact-form--done h2{font-size:clamp(19px,1.6vw + 14px,24px);}
 .contact-form--done p{color:var(--gray);font-weight:500;}
 .contact-form--done .btn{margin-top:var(--s-8);}
 
@@ -1877,7 +1900,7 @@ footer{
   padding:calc(var(--s-64) + 16px) var(--gutter) var(--s-40);
 }
 .legal__head{margin-bottom:var(--s-40);}
-.legal__head h1{font-size:clamp(22px,3.4vw,36px);line-height:1.0;letter-spacing:-0.04em;}
+.legal__head h1{font-size:clamp(20px,2.2vw + 11px,36px);line-height:1.02;letter-spacing:-0.04em;}
 .legal__meta{
   margin-top:var(--s-12);
   font-size:13px;font-weight:600;color:var(--gray);
@@ -2011,13 +2034,35 @@ footer{
   position:fixed;right:clamp(14px,4vw,26px);bottom:clamp(14px,4vw,26px);z-index:70;
   width:54px;height:54px;border-radius:999px;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(135deg,var(--amber),var(--coral));
-  color:#2a1c07;box-shadow:0 12px 30px rgba(25,20,16,0.28);
-  transition:transform .15s var(--ease),box-shadow .15s var(--ease);
+  /* « liquid glass » : verre translucide teinté par la couleur dynamique de la
+     page (--fab-tint, posé en inline par <Assistant> ; repli sur l'amber). */
+  --fab-tint:var(--amber);
+  color:#fff;
+  background:
+    radial-gradient(circle at 50% 56%, rgba(0,0,0,0.20), transparent 60%),
+    linear-gradient(150deg,
+      color-mix(in srgb, var(--fab-tint) 52%, transparent),
+      color-mix(in srgb, var(--fab-tint) 24%, transparent));
+  border:1px solid color-mix(in srgb, var(--fab-tint) 50%, rgba(255,255,255,0.55));
+  backdrop-filter:blur(12px) saturate(170%);
+  -webkit-backdrop-filter:blur(12px) saturate(170%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.5),
+    inset 0 -7px 16px color-mix(in srgb, var(--fab-tint) 24%, transparent),
+    0 10px 28px rgba(25,20,16,0.24);
+  transition:transform .15s var(--ease),box-shadow .2s var(--ease),
+             background .3s var(--ease),border-color .3s var(--ease);
 }
-.asst-fab:hover{transform:translateY(-2px);box-shadow:0 16px 38px rgba(25,20,16,0.34);}
+.asst-fab:hover{transform:translateY(-2px);box-shadow:
+  inset 0 1px 0 rgba(255,255,255,0.55),
+  inset 0 -7px 16px color-mix(in srgb, var(--fab-tint) 26%, transparent),
+  0 16px 38px rgba(25,20,16,0.3);}
 .asst-fab:focus-visible{outline:2px solid var(--ink);outline-offset:3px;}
-.asst-fab .icon{width:24px;height:24px;color:currentColor;}
+/* sparkle toujours lisible quelle que soit la teinte du verre : blanc + liseré sombre */
+.asst-fab .icon{
+  width:24px;height:24px;color:#fff;
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,0.7)) drop-shadow(0 0 3px rgba(0,0,0,0.45));
+}
 
 .asst-panel{
   position:fixed;right:clamp(14px,4vw,26px);bottom:calc(clamp(14px,4vw,26px) + 66px);
