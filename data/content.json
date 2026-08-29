@@ -11,7 +11,7 @@
       "tiktok": "",
       "soundcloud": "",
       "email": "",
-      "verified": false,
+      "verified": true,
       "createdAt": "2026-08-28T21:32:03.359Z"
     },
     {
@@ -443,30 +443,13 @@
   "galleries": {},
   "announcements": [],
   "tickets": [],
-  "verificationRequests": [
-    {
-      "id": "mtew6pecdcowv3",
-      "artistSlug": "dreezy",
-      "name": "ANDY ARETHUS",
-      "email": "deeejay.dreezy@gmail.com",
-      "blobUrl": "https://0bxy4uzfczywxagy.private.blob.vercel-storage.com/verification/dreezy-vIgQik30MtKXR2SCEKMzO3fiT6nN8S.jpg",
-      "blobPathname": "verification/dreezy-vIgQik30MtKXR2SCEKMzO3fiT6nN8S.jpg",
-      "fileType": "image/jpeg",
-      "createdAt": "2026-08-29T21:28:04.884Z"
-    }
-  ],
+  "verificationRequests": [],
   "subscriptions": [
     {
       "email": "deeejay.dreezy@gmail.com",
       "artistSlug": "dreezy",
       "token": "mtew7qk7varsvymtew7qk8yf6u8r",
       "createdAt": "2026-08-29T21:28:53.048Z"
-    },
-    {
-      "email": "mathxs.170@gmail.com",
-      "artistSlug": "dj-syxtee",
-      "token": "mtew8y4dw00v3imtew8y4dx5tio4",
-      "createdAt": "2026-08-29T21:29:49.501Z"
     }
   ],
   "notifiedSubscribers": []
