@@ -11,6 +11,7 @@
       "tiktok": "",
       "soundcloud": "",
       "email": "",
+      "verified": false,
       "createdAt": "2026-08-28T21:32:03.359Z"
     },
     {
@@ -24,6 +25,7 @@
       "tiktok": "",
       "soundcloud": "https://soundcloud.com/deejay-syxtee",
       "email": "lawcy.booking@gmail.com",
+      "verified": false,
       "createdAt": "2026-08-28T21:32:03.360Z"
     },
     {
@@ -37,6 +39,7 @@
       "tiktok": "",
       "soundcloud": "",
       "email": "",
+      "verified": false,
       "createdAt": "2026-08-28T21:32:03.360Z"
     },
     {
@@ -50,6 +53,7 @@
       "tiktok": "",
       "soundcloud": "",
       "email": "",
+      "verified": false,
       "createdAt": "2026-08-28T21:32:03.360Z"
     },
     {
@@ -63,6 +67,7 @@
       "tiktok": "",
       "soundcloud": "",
       "email": "",
+      "verified": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -76,6 +81,7 @@
       "tiktok": "",
       "soundcloud": "",
       "email": "",
+      "verified": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -89,6 +95,7 @@
       "tiktok": "",
       "soundcloud": "",
       "email": "",
+      "verified": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -102,6 +109,7 @@
       "tiktok": "",
       "soundcloud": "",
       "email": "",
+      "verified": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -115,6 +123,7 @@
       "tiktok": "",
       "soundcloud": "",
       "email": "",
+      "verified": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -128,6 +137,7 @@
       "tiktok": "",
       "soundcloud": "",
       "email": "",
+      "verified": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -141,6 +151,7 @@
       "tiktok": "",
       "soundcloud": "",
       "email": "",
+      "verified": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -154,6 +165,7 @@
       "tiktok": "",
       "soundcloud": "",
       "email": "",
+      "verified": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -167,6 +179,7 @@
       "tiktok": "",
       "soundcloud": "",
       "email": "",
+      "verified": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -180,6 +193,7 @@
       "tiktok": "",
       "soundcloud": "",
       "email": "",
+      "verified": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -193,6 +207,7 @@
       "tiktok": "",
       "soundcloud": "",
       "email": "",
+      "verified": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -206,6 +221,7 @@
       "tiktok": "",
       "soundcloud": "",
       "email": "",
+      "verified": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -219,6 +235,7 @@
       "tiktok": "",
       "soundcloud": "",
       "email": "",
+      "verified": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -232,6 +249,7 @@
       "tiktok": "",
       "soundcloud": "",
       "email": "",
+      "verified": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -245,6 +263,7 @@
       "tiktok": "",
       "soundcloud": "",
       "email": "",
+      "verified": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -258,6 +277,7 @@
       "tiktok": "",
       "soundcloud": "",
       "email": "",
+      "verified": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -271,6 +291,7 @@
       "tiktok": "",
       "soundcloud": "",
       "email": "",
+      "verified": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -284,6 +305,7 @@
       "tiktok": "",
       "soundcloud": "",
       "email": "",
+      "verified": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -297,6 +319,7 @@
       "tiktok": "",
       "soundcloud": "",
       "email": "",
+      "verified": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -310,10 +333,45 @@
       "tiktok": "",
       "soundcloud": "",
       "email": "",
+      "verified": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     }
   ],
   "events": [
+    {
+      "id": "mtew1jssa8xz9g",
+      "slug": "edition-picasso",
+      "name": "Édition Picasso",
+      "date": "2026-07-10",
+      "time": "16h–22h",
+      "description": "",
+      "venue": "W Club by Ciroc, Jarry — Baie-Mahault",
+      "dresscode": "Dresscode libre",
+      "headliner": "Jeune Aber · Dega Youth · Lulux · DJ DREEZY · SYXTEE",
+      "lineup": [
+        "Styll'One",
+        "Buzz",
+        "Wiixx",
+        "Syxtee",
+        "Dreezy"
+      ],
+      "bizoukEmbed": "<iframe style=\"background-color: transparent;\" src=\"https://www.bizouk.com/stores/reservation/place?event=121434&widget=1\" name=\"payment-frame\" width=\"100%\" height=\"1065\" frameborder=\"0\" scrolling=\"yes\"></iframe>\n<script type=\"text/javascript\" src=\"https://static.bizouk.com/lib/js/widget/widget_client.js\"></script>",
+      "flyer": "/images/editions/edition-picasso.jpg",
+      "flyerW": 800,
+      "flyerH": 1067,
+      "dominantColor": "#84007b",
+      "palette": [
+        "#84007b",
+        "#a2019a",
+        "#02caf4"
+      ],
+      "gradient": "linear-gradient(140deg, #84007b 0%, #a2019a 45%, #02caf4 78%, #01839f 100%)",
+      "emoji": "🎨",
+      "hidden": false,
+      "archived": false,
+      "schedule": [],
+      "createdAt": "2026-08-29T21:24:04.348Z"
+    },
     {
       "id": "mteu09dl95huxi",
       "slug": "la-nuit-des-ombres",
@@ -338,7 +396,9 @@
       "emoji": "🌙",
       "hidden": false,
       "createdAt": "2026-08-29T20:27:04.953Z",
-      "description": ""
+      "description": "",
+      "archived": false,
+      "schedule": []
     },
     {
       "id": "mterbfsymdzkro",
@@ -368,10 +428,15 @@
       "emoji": "🌴",
       "createdAt": "2026-08-29T19:11:47.650Z",
       "hidden": false,
-      "description": ""
+      "description": "",
+      "archived": false,
+      "schedule": []
     }
   ],
   "galleries": {},
   "announcements": [],
-  "tickets": []
+  "tickets": [],
+  "verificationRequests": [],
+  "subscriptions": [],
+  "notifiedSubscribers": []
 }
