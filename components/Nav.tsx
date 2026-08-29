@@ -46,6 +46,23 @@ export default function Nav() {
     });
   }, [pathname]);
 
+  // Nav adaptative : sur les pages avec un hero en fond (accueil = vidéo,
+  // événement / artiste = visuel sombre), la nav est CRÈME PLEINE tant qu'on
+  // est en haut (lisible sur n'importe quel visuel), puis bascule en liquid
+  // glass dès qu'on scrolle au-delà du hero. Ailleurs : glass en permanence.
+  const [solid, setSolid] = useState(false);
+  useEffect(() => {
+    const hasHero = document.querySelector('.hero, .event-hero, .artist-banner');
+    if (!hasHero) {
+      setSolid(false);
+      return;
+    }
+    const onScroll = () => setSolid(window.scrollY < 90);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [pathname]);
+
   const navRef = useRef<HTMLElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
   const linksRef = useRef<HTMLDivElement>(null);
@@ -102,7 +119,7 @@ export default function Nav() {
   }, [open]);
 
   return (
-    <div className="nav-wrap">
+    <div className={solid ? 'nav-wrap nav-wrap--solid' : 'nav-wrap'}>
       <nav
         ref={navRef}
         aria-label="Navigation principale"

@@ -290,6 +290,14 @@ nav{
   box-shadow:0 10px 34px rgba(0,0,0,0.32);
   max-width:1020px;width:100%;
   position:relative;
+  transition:background .3s var(--ease),box-shadow .3s var(--ease);
+}
+/* en haut d'une page à hero (accueil/vidéo, événement, artiste) : crème pleine,
+   lisible sur n'importe quel visuel ; repasse en liquid glass après ~90px de
+   scroll (transition douce sur le background). */
+.nav-wrap--solid nav{
+  background:var(--bg);
+  box-shadow:0 8px 24px rgba(25,20,16,0.16);
 }
 nav .logo{
   display:inline-flex;align-items:center;
