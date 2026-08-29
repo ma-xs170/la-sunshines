@@ -7,6 +7,7 @@ import { getBizoukEmbed } from '@/lib/bizouk';
 import { normalizeArtistName } from '@/lib/artists';
 import AdminLogin from '@/components/admin/AdminLogin';
 import AdminDashboard from '@/components/admin/AdminDashboard';
+import { pageviewSummary } from '@/lib/pageviews';
 
 export const dynamic = 'force-dynamic';
 
@@ -71,5 +72,13 @@ export default async function AdminPage() {
       palette: e.palette ?? [],
     };
   });
-  return <AdminDashboard initialStore={store} editions={editions} />;
+  const analytics = await pageviewSummary(7, 10);
+
+  return (
+    <AdminDashboard
+      initialStore={store}
+      editions={editions}
+      analytics={analytics}
+    />
+  );
 }

@@ -7,12 +7,24 @@ import type {
   StoredEvent,
   StoredAnnouncement,
 } from '@/lib/store';
+import type { PageviewSummary } from '@/lib/pageviews';
 import { analyzeImageFile } from '@/lib/clientColor';
 import { resolveEmoji } from '@/lib/editionEmoji';
 import { heroGradient } from '@/lib/gradient';
 import { normalizeArtistName } from '@/lib/artists';
 import Icon from '@/components/Icon';
 import ArtistCombobox from './ArtistCombobox';
+
+const VERCEL_ANALYTICS_URL = 'https://vercel.com/dashboard/analytics';
+
+type TabId = 'dashboard' | 'events' | 'artists' | 'announcements' | 'tickets';
+const TABS: { id: TabId; label: string }[] = [
+  { id: 'dashboard', label: 'Tableau de bord' },
+  { id: 'events', label: 'Événements' },
+  { id: 'artists', label: 'Artistes' },
+  { id: 'announcements', label: 'Annonces' },
+  { id: 'tickets', label: 'Tickets' },
+];
 
 type ImgState = {
   dataUrl: string;
@@ -77,11 +89,14 @@ async function api(
 export default function AdminDashboard({
   initialStore,
   editions,
+  analytics,
 }: {
   initialStore: Store;
   editions: EditionLite[];
+  analytics: PageviewSummary | null;
 }) {
   const [store, setStore] = useState<Store>(initialStore);
+  const [tab, setTab] = useState<TabId>('dashboard');
   const [msg, setMsg] = useState<string>('');
   const msgTimer = useRef<number | undefined>(undefined);
 
@@ -95,6 +110,8 @@ export default function AdminDashboard({
     await api('/api/admin/logout', 'POST');
     window.location.reload();
   }
+
+  const openTickets = store.tickets.filter((t) => t.status !== 'done').length;
 
   return (
     <main className="admin-shell admin-shell--wide">
@@ -110,6 +127,31 @@ export default function AdminDashboard({
         </div>
       </header>
 
+      <nav className="admin-tabs" aria-label="Sections de l’administration">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            className={tab === t.id ? 'admin-tab is-active' : 'admin-tab'}
+            aria-current={tab === t.id ? 'page' : undefined}
+            onClick={() => setTab(t.id)}
+          >
+            {t.label}
+            {t.id === 'tickets' && openTickets > 0 && (
+              <span className="admin-tab__badge">{openTickets}</span>
+            )}
+          </button>
+        ))}
+        <a
+          className="admin-tab admin-tab--ext"
+          href="/status"
+          target="_blank"
+          rel="noopener"
+        >
+          Statuts <Icon name="arrow-up-right" className="icon" />
+        </a>
+      </nav>
+
       {msg && <p className="admin-flash">{msg}</p>}
 
       <p className="admin-note">
@@ -118,20 +160,125 @@ export default function AdminDashboard({
         ligne en ~1&nbsp;min. En local, l’écriture se fait directement sur le disque.
       </p>
 
-      <div className="admin-grid">
-        <EventPanel
+      {tab === 'dashboard' && (
+        <DashboardPanel
           store={store}
-          setStore={setStore}
-          flash={flash}
-          editions={editions}
+          openTickets={openTickets}
+          analytics={analytics}
         />
-        <ArtistPanel store={store} setStore={setStore} flash={flash} />
+      )}
+
+      {tab === 'events' && (
+        <div className="admin-tabpanel">
+          <EventPanel
+            store={store}
+            setStore={setStore}
+            flash={flash}
+            editions={editions}
+          />
+          <GalleryPanel editions={editions} flash={flash} />
+        </div>
+      )}
+
+      {tab === 'artists' && (
+        <div className="admin-tabpanel">
+          <ArtistPanel store={store} setStore={setStore} flash={flash} />
+        </div>
+      )}
+
+      {tab === 'announcements' && (
+        <div className="admin-tabpanel">
+          <AnnouncementPanel store={store} setStore={setStore} flash={flash} />
+        </div>
+      )}
+
+      {tab === 'tickets' && (
+        <div className="admin-tabpanel">
+          <TicketPanel store={store} setStore={setStore} flash={flash} />
+        </div>
+      )}
+    </main>
+  );
+}
+
+/* ======================= TABLEAU DE BORD ======================= */
+
+function DashboardPanel({
+  store,
+  openTickets,
+  analytics,
+}: {
+  store: Store;
+  openTickets: number;
+  analytics: PageviewSummary | null;
+}) {
+  const stats = [
+    { n: store.events.length, l: 'Événements (admin)' },
+    { n: store.artists.length, l: 'Artistes' },
+    { n: openTickets, l: 'Tickets ouverts' },
+  ];
+
+  return (
+    <div className="admin-tabpanel admin-dash">
+      <div className="admin-stats">
+        {stats.map((s) => (
+          <div className="admin-stat glass" key={s.l}>
+            <span className="admin-stat__n">{s.n}</span>
+            <span className="admin-stat__l">{s.l}</span>
+          </div>
+        ))}
       </div>
 
-      <GalleryPanel editions={editions} flash={flash} />
-      <AnnouncementPanel store={store} setStore={setStore} flash={flash} />
-      <TicketPanel store={store} setStore={setStore} flash={flash} />
-    </main>
+      <section className="admin-panel glass">
+        <h2>Trafic</h2>
+        <p className="admin-note admin-note--tight">
+          Stats détaillées (visiteurs, sources, temps réel)&nbsp;:{' '}
+          <a href={VERCEL_ANALYTICS_URL} target="_blank" rel="noopener">
+            dashboard Vercel Analytics
+          </a>{' '}
+          — l’API de stats n’est accessible que sur un plan Vercel payant, d’où le
+          compteur maison ci-dessous.
+        </p>
+
+        {analytics ? (
+          <>
+            <p className="admin-dash__total">
+              <strong>{analytics.total.toLocaleString('fr-FR')}</strong> pages vues
+              · {analytics.days} derniers jours
+            </p>
+            {analytics.pages.length > 0 ? (
+              <ol className="admin-dash__top">
+                {analytics.pages.map((p) => {
+                  const max = analytics.pages[0].views || 1;
+                  return (
+                    <li key={p.path}>
+                      <span className="admin-dash__path">{p.path}</span>
+                      <span
+                        className="admin-dash__bar"
+                        style={{ width: `${Math.max(6, (p.views / max) * 100)}%` }}
+                      />
+                      <span className="admin-dash__views">
+                        {p.views.toLocaleString('fr-FR')}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ol>
+            ) : (
+              <p className="admin-hint">
+                Aucune vue enregistrée pour l’instant — reviens dans quelques heures.
+              </p>
+            )}
+          </>
+        ) : (
+          <p className="admin-hint">
+            Compteur de pages vues inactif. Lie un store <strong>Vercel KV</strong>{' '}
+            au projet (Vercel → Storage → Create → KV), redéploie&nbsp;: le comptage
+            démarre automatiquement.
+          </p>
+        )}
+      </section>
+    </div>
   );
 }
 
@@ -532,6 +679,8 @@ function EventPanel({
   const [manageSlug, setManageSlug] = useState('');
   const [busy, setBusy] = useState(false);
   const [aiBusy, setAiBusy] = useState(false);
+  // sous-onglets : « Créer » (formulaire vierge) vs « Modifier » (choix + form)
+  const [sub, setSub] = useState<'create' | 'manage'>('create');
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
@@ -756,136 +905,178 @@ function EventPanel({
     ? store.events.find((e) => e.slug === selectedEd.slug)
     : undefined;
 
+  function switchSub(next: 'create' | 'manage') {
+    reset();
+    setSub(next);
+  }
+
+  const formOpen = sub === 'create' || mode !== 'create';
+
   return (
     <section className="admin-panel glass">
-      <h2>{mode === 'create' ? 'Ajouter un événement' : 'Modifier l’événement'}</h2>
-
-      <div className="admin-manage admin-manage--top">
-        <p className="admin-manage__title">Gérer un événement existant</p>
-        <select
-          className="admin-manage__select"
-          value={manageSlug}
-          onChange={(e) => selectEdition(e.target.value)}
+      <div className="admin-subtabs" role="tablist" aria-label="Événements">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={sub === 'create'}
+          className={sub === 'create' ? 'admin-subtab is-active' : 'admin-subtab'}
+          onClick={() => switchSub('create')}
         >
-          <option value="">— Sélectionner un événement à gérer</option>
-          {editions.map((e) => (
-            <option key={e.slug} value={e.slug}>
-              {e.emoji} {e.name}
-            </option>
-          ))}
-        </select>
-
-        {selectedEd && (
-          <div className="admin-list__item admin-manage__card">
-            <span className="admin-list__emoji">{selectedEd.emoji}</span>
-            <span className="admin-list__name">
-              {selectedEd.name}
-              <small>
-                {selectedEd.slug}
-                {' · '}
-                {selectedStoreEvent
-                  ? 'version personnalisée'
-                  : selectedEd.isStatic
-                    ? 'version du site — modifie puis enregistre'
-                    : 'événement admin'}
-              </small>
-            </span>
-            <a
-              className="admin-mini"
-              href={`/editions/${selectedEd.slug}`}
-              target="_blank"
-              rel="noopener"
-            >
-              Voir
-            </a>
-            {selectedStoreEvent ? (
-              <button
-                className="admin-mini admin-mini--danger"
-                type="button"
-                onClick={removeSelected}
-              >
-                {selectedEd.isStatic
-                  ? 'Réinitialiser'
-                  : 'Supprimer cet événement'}
-              </button>
-            ) : (
-              <span className="admin-manage__hint">
-                édition du site (non supprimable)
-              </span>
-            )}
-          </div>
-        )}
+          Créer un événement
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={sub === 'manage'}
+          className={sub === 'manage' ? 'admin-subtab is-active' : 'admin-subtab'}
+          onClick={() => switchSub('manage')}
+        >
+          Modifier un événement
+        </button>
       </div>
 
-      <form onSubmit={submit} className="admin-form">
-        <label className="admin-field">
-          <span>Nom *</span>
-          <input value={form.name} onChange={set('name')} required />
-        </label>
+      {sub === 'manage' && (
+        <div className="admin-manage admin-manage--top">
+          <p className="admin-manage__title">Choisis l’événement à modifier</p>
+          <select
+            className="admin-manage__select"
+            value={manageSlug}
+            onChange={(e) => selectEdition(e.target.value)}
+          >
+            <option value="">— Sélectionner un événement</option>
+            {editions.map((e) => (
+              <option key={e.slug} value={e.slug}>
+                {e.emoji} {e.name}
+              </option>
+            ))}
+          </select>
 
-        <label className="admin-field">
-          <span>Flyer</span>
-          <input type="file" accept="image/*" onChange={onFlyer} />
-        </label>
-
-        {(img.dataUrl || form.name) && (
-          <div className="admin-preview">
-            {img.dataUrl && (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img src={img.dataUrl} alt="" className="admin-preview__flyer" />
-            )}
-            <div className="admin-preview__meta">
-              <span className="admin-preview__emoji">{previewEmoji}</span>
-              <span
-                className="admin-preview__grad"
-                style={{ background: previewGradient }}
-                title={previewGradient}
-              />
-              <span className="admin-preview__hex">{img.dominant ?? '— pas de flyer'}</span>
+          {selectedEd && (
+            <div className="admin-list__item admin-manage__card">
+              <span className="admin-list__emoji">{selectedEd.emoji}</span>
+              <span className="admin-list__name">
+                {selectedEd.name}
+                <small>
+                  {selectedEd.slug}
+                  {' · '}
+                  {selectedStoreEvent
+                    ? 'version personnalisée'
+                    : selectedEd.isStatic
+                      ? 'version du site — modifie puis enregistre'
+                      : 'événement admin'}
+                </small>
+              </span>
+              <a
+                className="admin-mini"
+                href={`/editions/${selectedEd.slug}`}
+                target="_blank"
+                rel="noopener"
+              >
+                Voir
+              </a>
+              {selectedStoreEvent ? (
+                <button
+                  className="admin-mini admin-mini--danger"
+                  type="button"
+                  onClick={removeSelected}
+                >
+                  {selectedEd.isStatic
+                    ? 'Réinitialiser'
+                    : 'Supprimer cet événement'}
+                </button>
+              ) : (
+                <span className="admin-manage__hint">
+                  édition du site (non supprimable)
+                </span>
+              )}
             </div>
-          </div>
-        )}
-
-        {img.dataUrl && (
-          <div className="admin-ai">
-            <button
-              type="button"
-              className="btn btn--outline admin-ai__btn"
-              onClick={analyzeFlyerAI}
-              disabled={aiBusy}
-            >
-              <Icon name="sparkles" />
-              <span>{aiBusy ? 'Analyse…' : 'Analyser le flyer (IA)'}</span>
-            </button>
-            <span className="admin-ai__hint">
-              Suggestion automatique (Mistral) — pré-remplit les champs, jamais
-              publiée telle quelle. Relis avant d’enregistrer.
-            </span>
-          </div>
-        )}
-
-        <div className="admin-row">
-          <label className="admin-field">
-            <span>Date (AAAA-MM-JJ)</span>
-            <input value={form.date} onChange={set('date')} placeholder="2026-10-17" />
-          </label>
-          <label className="admin-field">
-            <span>Heure</span>
-            <input value={form.time} onChange={set('time')} placeholder="16h–22h" />
-          </label>
+          )}
         </div>
+      )}
 
-        <div className="admin-row">
-          <label className="admin-field">
-            <span>Lieu (vide par défaut)</span>
-            <input value={form.venue} onChange={set('venue')} placeholder="laisser vide si non communiqué" />
-          </label>
-          <label className="admin-field">
-            <span>Dresscode</span>
-            <input value={form.dresscode} onChange={set('dresscode')} />
-          </label>
-        </div>
+      {sub === 'manage' && !formOpen && (
+        <p className="admin-hint admin-manage__empty">
+          Sélectionne un événement ci-dessus pour ouvrir le formulaire de
+          modification.
+        </p>
+      )}
 
+      {formOpen && (
+      <form onSubmit={submit} className="admin-form admin-form--sections">
+        <fieldset className="admin-section">
+          <legend>Infos générales</legend>
+          <label className="admin-field">
+            <span>Nom *</span>
+            <input value={form.name} onChange={set('name')} required />
+          </label>
+          <div className="admin-row">
+            <label className="admin-field">
+              <span>Date (AAAA-MM-JJ)</span>
+              <input value={form.date} onChange={set('date')} placeholder="2026-10-17" />
+            </label>
+            <label className="admin-field">
+              <span>Heure</span>
+              <input value={form.time} onChange={set('time')} placeholder="16h–22h" />
+            </label>
+          </div>
+          <div className="admin-row">
+            <label className="admin-field">
+              <span>Lieu (vide par défaut)</span>
+              <input value={form.venue} onChange={set('venue')} placeholder="laisser vide si non communiqué" />
+            </label>
+            <label className="admin-field">
+              <span>Dresscode</span>
+              <input value={form.dresscode} onChange={set('dresscode')} />
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset className="admin-section">
+          <legend>Flyer &amp; IA</legend>
+          <label className="admin-field">
+            <span>Flyer</span>
+            <input type="file" accept="image/*" onChange={onFlyer} />
+          </label>
+
+          {(img.dataUrl || form.name) && (
+            <div className="admin-preview">
+              {img.dataUrl && (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img src={img.dataUrl} alt="" className="admin-preview__flyer" />
+              )}
+              <div className="admin-preview__meta">
+                <span className="admin-preview__emoji">{previewEmoji}</span>
+                <span
+                  className="admin-preview__grad"
+                  style={{ background: previewGradient }}
+                  title={previewGradient}
+                />
+                <span className="admin-preview__hex">{img.dominant ?? '— pas de flyer'}</span>
+              </div>
+            </div>
+          )}
+
+          {img.dataUrl && (
+            <div className="admin-ai">
+              <button
+                type="button"
+                className="btn btn--outline admin-ai__btn"
+                onClick={analyzeFlyerAI}
+                disabled={aiBusy}
+              >
+                <Icon name="sparkles" />
+                <span>{aiBusy ? 'Analyse…' : 'Analyser le flyer (IA)'}</span>
+              </button>
+              <span className="admin-ai__hint">
+                Suggestion automatique (Mistral) — pré-remplit les champs, jamais
+                publiée telle quelle. Relis avant d’enregistrer.
+              </span>
+            </div>
+          )}
+        </fieldset>
+
+        <fieldset className="admin-section">
+          <legend>Line-up</legend>
         <div className="admin-field">
           <span>Headliner</span>
           {headlinerList.length > 0 && (
@@ -944,23 +1135,27 @@ function EventPanel({
             Les têtes d’affiche ne sont pas reproposées ici.
           </span>
         </div>
+        </fieldset>
 
-        <label className="admin-field">
-          <span>Code d’intégration Bizouk (brut)</span>
-          <textarea
-            value={form.bizoukEmbed}
-            onChange={set('bizoukEmbed')}
-            rows={3}
-            placeholder="<iframe src=&quot;https://www.bizouk.com/…&quot;></iframe>"
-          />
-        </label>
+        <fieldset className="admin-section">
+          <legend>Billetterie</legend>
+          <label className="admin-field">
+            <span>Code d’intégration Bizouk (brut)</span>
+            <textarea
+              value={form.bizoukEmbed}
+              onChange={set('bizoukEmbed')}
+              rows={3}
+              placeholder="<iframe src=&quot;https://www.bizouk.com/…&quot;></iframe>"
+            />
+          </label>
+        </fieldset>
 
         <div className="admin-form__actions">
           <button className="btn btn--amber" type="submit" disabled={busy}>
             {busy
               ? '…'
               : mode === 'create'
-                ? 'Ajouter'
+                ? 'Créer l’événement'
                 : 'Enregistrer les modifications'}
           </button>
           {mode !== 'create' && (
@@ -970,6 +1165,7 @@ function EventPanel({
           )}
         </div>
       </form>
+      )}
     </section>
   );
 }

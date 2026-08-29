@@ -1617,6 +1617,116 @@ footer{
 }
 .admin-error{color:var(--coral);font-size:13px;font-weight:600;}
 
+/* --- onglets principaux --- */
+.admin-tabs{
+  display:flex;flex-wrap:wrap;gap:6px;
+  margin-bottom:var(--s-24);
+  border-bottom:1px solid var(--panel-border);
+  padding-bottom:var(--s-12);
+}
+.admin-tab{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:9px 16px;border-radius:var(--r-pill);cursor:pointer;
+  font-size:13px;font-weight:700;color:var(--gray);
+  border:1px solid transparent;background:transparent;
+  transition:background .15s var(--ease),color .15s var(--ease),border-color .15s var(--ease);
+}
+.admin-tab:hover{background:rgba(25,20,16,0.05);color:var(--ink);}
+.admin-tab.is-active{
+  background:var(--amber);color:var(--ink);
+  box-shadow:0 6px 16px rgba(255,178,56,0.28);
+}
+.admin-tab--ext{color:var(--gray);text-decoration:none;}
+.admin-tab--ext .icon{width:12px;height:12px;}
+.admin-tab__badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:18px;height:18px;padding:0 5px;border-radius:999px;
+  background:var(--coral);color:#fff;font-size:11px;font-weight:800;
+}
+.admin-tab.is-active .admin-tab__badge{background:rgba(25,20,16,0.28);}
+
+.admin-tabpanel{display:flex;flex-direction:column;gap:var(--s-24);}
+@media (min-width:900px){
+  /* l'onglet Événements garde EventPanel + GalleryPanel empilés (pleine largeur) */
+  .admin-tabpanel{max-width:820px;}
+}
+
+/* --- tableau de bord --- */
+.admin-dash{gap:var(--s-24);}
+.admin-stats{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-16);
+}
+.admin-stat{
+  padding:var(--s-24);display:flex;flex-direction:column;gap:4px;
+}
+.admin-stat__n{
+  font-family:var(--font-display);font-weight:800;
+  font-size:clamp(28px,4vw,40px);line-height:1;letter-spacing:-0.04em;color:var(--ink);
+}
+.admin-stat__l{
+  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;
+  color:var(--gray-dim);
+}
+.admin-dash__total{font-size:14px;color:var(--gray);margin:var(--s-8) 0 var(--s-16);}
+.admin-dash__top{
+  list-style:none;display:flex;flex-direction:column;gap:8px;
+  counter-reset:pv;
+}
+.admin-dash__top li{
+  display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px;
+  position:relative;font-size:13px;
+}
+.admin-dash__path{
+  font-weight:600;color:var(--ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  z-index:1;padding:4px 8px;
+}
+.admin-dash__bar{
+  position:absolute;left:0;top:0;bottom:0;
+  background:rgba(255,178,56,0.22);border-radius:6px;
+  pointer-events:none;
+}
+.admin-dash__views{font-weight:800;color:var(--amber-ink);z-index:1;font-variant-numeric:tabular-nums;}
+
+@media (max-width:560px){
+  .admin-stats{grid-template-columns:1fr;}
+}
+
+/* --- sous-onglets (Créer / Modifier un événement) --- */
+.admin-subtabs{
+  display:flex;gap:6px;margin-bottom:var(--s-16);
+}
+.admin-subtab{
+  flex:1;padding:10px 14px;border-radius:var(--r-sm);cursor:pointer;
+  font-size:13px;font-weight:700;color:var(--gray);
+  background:rgba(25,20,16,0.04);border:1px solid transparent;
+  transition:background .15s var(--ease),color .15s var(--ease),border-color .15s var(--ease);
+}
+.admin-subtab:hover{color:var(--ink);}
+.admin-subtab.is-active{
+  background:var(--bg-2);color:var(--ink);border-color:var(--panel-border-strong);
+  box-shadow:0 4px 12px rgba(25,20,16,0.06);
+}
+.admin-manage__empty{margin-top:var(--s-8);}
+
+/* --- formulaire en sections aérées --- */
+.admin-form--sections{gap:var(--s-16);}
+.admin-section{
+  border:1px solid var(--panel-border);
+  border-radius:var(--r-md);
+  padding:var(--s-16) var(--s-16) var(--s-24);
+  margin:0;
+  display:flex;flex-direction:column;gap:var(--s-12);
+  background:rgba(255,255,255,0.4);
+}
+.admin-section > legend{
+  padding:2px 10px;margin-left:-2px;
+  font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.07em;
+  color:var(--amber-ink);
+  background:rgba(255,178,56,0.14);border:1px solid rgba(255,178,56,0.32);
+  border-radius:999px;
+}
+
 .admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-24);align-items:start;}
 .admin-panel{padding:var(--s-24);}
 .admin-panel h2{font-size:20px;margin-bottom:var(--s-16);}
