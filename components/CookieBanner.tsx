@@ -30,6 +30,8 @@ export default function CookieBanner() {
     } catch {
       /* pas bloquant */
     }
+    // permet à <GoogleAnalytics> de (dé)charger GA immédiatement, sans reload
+    window.dispatchEvent(new CustomEvent('sun-consent', { detail: choice }));
     setVisible(false);
   }
 

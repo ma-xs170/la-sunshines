@@ -1,9 +1,12 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
+import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import './globals.css';
 import Sprite from '@/components/Sprite';
 import SiteEffects from '@/components/SiteEffects';
 import CookieBanner from '@/components/CookieBanner';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
 import AnnouncementBar from '@/components/AnnouncementBar';
 import Assistant from '@/components/Assistant';
 import { getActiveAnnouncement } from '@/lib/content';
@@ -65,6 +68,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <CookieBanner />
         <Assistant />
         <SiteEffects />
+
+        {/* Mesure d'audience : Vercel (sans cookie) toujours actif ;
+            GA4 uniquement après acceptation via le CookieBanner. */}
+        <Analytics />
+        <SpeedInsights />
+        <GoogleAnalytics />
       </body>
     </html>
   );

@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Icon from './Icon';
+import StatusWidget from './StatusWidget';
 
 const INSTAGRAM = 'https://www.instagram.com/sunshines.fwi/';
 const TIKTOK = 'https://tiktok.com/@sunshines.fwi';
@@ -89,6 +90,8 @@ export default function Footer() {
             <Icon name="whatsapp" />
           </a>
         </div>
+
+        <StatusWidget />
 
         <hr className="foot-sep" />
 
