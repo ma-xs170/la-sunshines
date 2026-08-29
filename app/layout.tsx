@@ -10,7 +10,7 @@ import { getActiveAnnouncement } from '@/lib/content';
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? 'https://la-sunshines.vercel.app',
+    process.env.NEXT_PUBLIC_SITE_URL || 'https://la-sunshines.vercel.app',
   ),
   title: 'LA SUNSHINES · Soirées 12–17 ans en Guadeloupe',
   description:
@@ -37,7 +37,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700&family=Unbounded:wght@600;700;800;900&display=swap"
           rel="stylesheet"
         />
       </head>

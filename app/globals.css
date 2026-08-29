@@ -45,6 +45,9 @@
   --w-text:1080px;
 
   --ease:cubic-bezier(.22,.61,.36,1);
+
+  /* gros titres display : Unbounded (Google Fonts), plus ronde/large qu'Impact */
+  --font-display:'Unbounded','Trebuchet MS','Segoe UI',system-ui,sans-serif;
 }
 
 @media (max-width:900px){ :root{ --band:var(--s-64); } }
@@ -69,42 +72,43 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;}
 .sprite{position:absolute;width:0;height:0;overflow:hidden;}
 
 /* ---------- typographie ----------
-   Gros titres en Impact (système Mac/Windows), avec Anton (Google Fonts,
-   très proche) en secours pour Android/Linux, puis Archivo Black.
-   Police dense : line-height serré + tracking négatif qui se resserre
-   à mesure que la taille monte. */
+   Gros titres en Unbounded (Google Fonts) : plus ronde et large qu'Impact, donc
+   tailles revues à la baisse + tracking nettement négatif pour compenser le
+   chasse et éviter les débordements / titres sur trop de lignes. */
 h1,h2,h3,h4,.display{
-  font-family:Impact,'Anton','Archivo Black','Arial Narrow Bold',sans-serif;
+  font-family:var(--font-display);
   text-transform:uppercase;
-  font-weight:400;
+  font-weight:800;
+  letter-spacing:-0.04em;
 }
 .wordmark{
-  font-size:clamp(44px, 8.2vw, 88px);
-  line-height:0.90;
-  letter-spacing:-0.022em;
+  font-size:clamp(30px, 6.2vw, 58px);
+  line-height:1.02;
+  letter-spacing:-0.05em;
 }
 .display,
 .cta-band__date{
-  font-family:Impact,'Anton','Archivo Black',sans-serif;
+  font-family:var(--font-display);
   text-transform:uppercase;
-  font-size:clamp(52px, 9vw, 104px);
-  line-height:0.90;
-  letter-spacing:-0.022em;
+  font-weight:800;
+  font-size:clamp(36px, 6.4vw, 76px);
+  line-height:0.98;
+  letter-spacing:-0.05em;
 }
 h2{
-  font-size:clamp(30px, 4.6vw, 50px);
-  line-height:0.96;
-  letter-spacing:-0.018em;
+  font-size:clamp(23px, 3.5vw, 38px);
+  line-height:1.0;
+  letter-spacing:-0.04em;
 }
 h3{
-  font-size:clamp(24px, 3.2vw, 33px);
-  line-height:1.0;
-  letter-spacing:-0.012em;
+  font-size:clamp(19px, 2.6vw, 26px);
+  line-height:1.06;
+  letter-spacing:-0.035em;
 }
 h4{
-  font-size:15px;
+  font-size:14px;
   line-height:1.15;
-  letter-spacing:0.005em;
+  letter-spacing:-0.005em;
 }
 .script{
   font-family:'Caveat',cursive;
@@ -262,9 +266,11 @@ body:has(.event-atmos) .glow{display:none;}
   .ann-bar__link{margin-left:6px;}
 }
 
-.nav-wrap{position:sticky;top:16px;z-index:60;display:flex;justify-content:center;padding:0 var(--gutter);}
+.nav-wrap{position:fixed;top:0;left:0;width:100%;z-index:60;display:flex;justify-content:center;padding:16px var(--gutter);}
 nav{
-  background:rgba(255,255,255,0.94);
+  background: rgba(255,255,255,0.20);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border-radius:var(--r-pill);
   display:flex;align-items:center;gap:var(--s-4);
   padding:8px 8px 8px 20px;
@@ -464,7 +470,7 @@ nav a.cta:focus-visible,
   box-shadow:0 16px 34px rgba(0,0,0,0.4);
 }
 .countdown .icon{width:20px;height:20px;color:var(--amber);}
-.countdown__num{font-family:Impact,'Anton','Archivo Black',sans-serif;font-size:17px;line-height:1;color:var(--amber);}
+.countdown__num{font-family:var(--font-display);font-weight:800;font-size:16px;line-height:1;letter-spacing:-0.03em;color:var(--amber);}
 .countdown__lbl{font-size:11px;color:rgba(255,255,255,0.62);margin-top:3px;}
 
 /* =========================================================
@@ -479,8 +485,8 @@ nav a.cta:focus-visible,
 .marquee__tag{color:var(--amber-ink);margin-bottom:var(--s-16);}
 .marquee__names{
   display:flex;gap:var(--s-24);justify-content:center;flex-wrap:wrap;
-  font-family:Impact,'Anton','Archivo Black',sans-serif;text-transform:uppercase;
-  font-size:clamp(16px, 2.4vw, 22px);letter-spacing:-0.01em;line-height:1.1;
+  font-family:var(--font-display);font-weight:800;text-transform:uppercase;
+  font-size:clamp(14px, 2vw, 19px);letter-spacing:-0.03em;line-height:1.15;
 }
 .marquee__names .hl{color:var(--amber-ink);}
 
@@ -556,7 +562,7 @@ section{
   padding:calc(var(--s-64) + 16px) var(--gutter) var(--s-40);
 }
 .editions-page .section-head h1{
-  font-size:clamp(30px,4.6vw,50px);line-height:0.96;letter-spacing:-0.018em;
+  font-size:clamp(23px,3.5vw,38px);line-height:1.0;letter-spacing:-0.04em;
   margin-bottom:0;
 }
 .editions-page__lead{
@@ -684,7 +690,7 @@ section{
 /* page /infos dédiée : réserve de l'espace sous la nav sticky */
 .infos-page{padding-top:calc(var(--s-64) + 16px);}
 .infos-page .section-head h1{
-  font-size:clamp(30px,4.6vw,50px);line-height:0.96;letter-spacing:-0.018em;
+  font-size:clamp(23px,3.5vw,38px);line-height:1.0;letter-spacing:-0.04em;
   margin-bottom:0;
 }
 .infos-grid{
@@ -891,9 +897,30 @@ footer{
 .event > .event-section,
 .event > .event-buy{position:relative;z-index:1;}
 
+/* Voile thémé du HAUT de page : démarre au tout premier pixel (donc DERRIÈRE
+   la nav translucide, qui reste posée par-dessus) et se fond vers le crème sur
+   ~1 section. Supprime la bande neutre qui apparaissait au-dessus du hero et
+   étend l'ambiance du flyer au-delà de l'en-tête. Teinte = --ev-tint (posée en
+   inline sur .event) : sombre pour un flyer sombre, voile pâle sinon. */
+.event::before{
+  content:"";
+  position:absolute;left:0;right:0;top:0;
+  height:clamp(920px, 74vh + 500px, 1480px);
+  background:linear-gradient(180deg,
+    var(--ev-tint, transparent) 0%,
+    var(--ev-tint, transparent) 52%,
+    color-mix(in srgb, var(--ev-tint, transparent) 45%, transparent) 74%,
+    transparent 100%);
+  z-index:0;pointer-events:none;
+}
+/* mobile : le hero (1 colonne) est très haut et porte déjà tout le theming ;
+   pas de traîne de voile derrière la 1re section (sinon texte foncé sur teinte). */
+@media (max-width:760px){
+  .event::before{display:none;}
+}
+
 .event-hero{
   position:relative;
-  margin-top:var(--s-16);
   background:var(--ev-gradient, linear-gradient(140deg,#3a2a4a,#1c1430));
   color:#fff;
   overflow:hidden;
@@ -902,10 +929,16 @@ footer{
   content:"";position:absolute;inset:0;pointer-events:none;
   background:linear-gradient(180deg,rgba(20,16,12,0.30),rgba(20,16,12,0.62));
 }
+/* flyer clair : le dégradé du hero est pâle → on épaissit le voile pour garder
+   le texte blanc lisible (les pages à flyer sombre gardent le voile léger). */
+.event:not(.event--themed) .event-hero::before{
+  background:linear-gradient(180deg,rgba(20,16,12,0.40),rgba(20,16,12,0.72));
+}
 .event-hero__inner{
   position:relative;
   max-width:var(--w-text);margin:0 auto;
-  padding:clamp(40px,6vw,72px) var(--gutter);
+  /* +64px de dégagement sous la nav fixe translucide (respiration avant le titre) */
+  padding:calc(clamp(40px,6vw,72px) + 64px) var(--gutter) clamp(40px,6vw,72px);
   display:grid;grid-template-columns:1fr minmax(220px,300px);
   gap:var(--s-40);align-items:center;
 }
@@ -951,7 +984,7 @@ footer{
   margin-bottom:var(--s-8);
 }
 .event-hero__title{
-  font-size:clamp(30px,5.4vw,52px);line-height:0.98;letter-spacing:-0.018em;
+  font-size:clamp(24px,4.2vw,40px);line-height:1.0;letter-spacing:-0.04em;
   margin-bottom:var(--s-16);
 }
 .event-hero__emoji{display:inline-block;margin-right:0.35em;font-size:0.9em;}
@@ -1089,6 +1122,47 @@ footer{
 .lineup__pill .artist-name-link:hover{background:rgba(25,20,16,0.04);text-decoration:none;}
 .lineup__pill .artist-name-link:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
 
+/* ---------- Flyer sombre : texte clair dans la zone thémée du haut ----------
+   `.event--themed` = teinte de haut de page sombre (cf. isDarkTheme). Le hero
+   est déjà en texte blanc ; on bascule en plus la 1re section, qui tombe dans
+   le voile --ev-tint avant le fondu vers le crème. Les sections suivantes
+   restent sur crème / encre foncée.
+   Gardé au layout hero 2 colonnes (desktop) : là le hero a une hauteur bornée,
+   donc le voile couvre de façon fiable le haut de la 1re section. En mobile le
+   hero (1 colonne) est très haut, la 1re section arrive après le voile → on
+   garde l'encre foncée sur crème. */
+@media (min-width:761px){
+  .event--themed .event-section:first-of-type{color:rgba(255,255,255,0.88);}
+  .event--themed .event-section:first-of-type h2{color:#fff;}
+  .event--themed .event-section:first-of-type .script{color:var(--amber-hi);}
+  .event--themed .event-section:first-of-type .event-empty{color:rgba(255,255,255,0.7);}
+  .event--themed .event-section:first-of-type .lineup__pill{
+    background:rgba(255,255,255,0.12);
+    border-color:rgba(255,255,255,0.22);
+    color:#fff;
+    box-shadow:none;
+  }
+  .event--themed .event-section:first-of-type .lineup__pill .artist-name-link:hover{
+    background:rgba(255,255,255,0.14);
+  }
+  .event--themed .event-section:first-of-type .glass{
+    background:rgba(255,255,255,0.08);
+    border-color:rgba(255,255,255,0.16);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.14),0 16px 36px rgba(0,0,0,0.22);
+  }
+  .event--themed .event-section:first-of-type .coming-soon p{color:rgba(255,255,255,0.82);}
+  .event--themed .event-section:first-of-type .coming-soon .icon{color:var(--amber-hi);}
+  .event--themed .event-section:first-of-type .bizouk-closed__pill{
+    background:rgba(255,255,255,0.14);border-color:rgba(255,255,255,0.24);color:#fff;
+  }
+  .event--themed .event-section:first-of-type .bizouk-closed__link{
+    color:rgba(255,255,255,0.82);border-color:rgba(255,255,255,0.4);
+  }
+  .event--themed .event-section:first-of-type .bizouk-closed__link:hover{
+    color:#fff;border-color:#fff;
+  }
+}
+
 /* =========================================================
    Profil artiste  —  /artistes/[slug]
    ========================================================= */
@@ -1168,7 +1242,7 @@ footer{
   color:#fff;
 }
 .artist-name{
-  font-size:clamp(32px,6vw,60px);line-height:0.96;letter-spacing:-0.02em;
+  font-size:clamp(26px,4.6vw,44px);line-height:1.0;letter-spacing:-0.04em;
   color:#fff;text-shadow:0 2px 20px rgba(0,0,0,0.45);
   overflow-wrap:anywhere;
 }
@@ -1692,7 +1766,7 @@ footer{
 }
 .rules__head{margin-bottom:var(--s-40);}
 .rules__head h1{
-  font-size:clamp(30px,4.6vw,50px);line-height:0.96;letter-spacing:-0.018em;
+  font-size:clamp(23px,3.5vw,38px);line-height:1.0;letter-spacing:-0.04em;
 }
 .rules__lead{
   margin-top:var(--s-16);
@@ -1743,7 +1817,7 @@ footer{
   padding:calc(var(--s-64) + 16px) var(--gutter) var(--s-40);
 }
 .contact__head{margin-bottom:var(--s-40);}
-.contact__head h1{font-size:clamp(30px,4.6vw,50px);line-height:0.96;letter-spacing:-0.018em;}
+.contact__head h1{font-size:clamp(23px,3.5vw,38px);line-height:1.0;letter-spacing:-0.04em;}
 .contact__lead{
   margin-top:var(--s-16);
   color:var(--gray);font-weight:500;font-size:15px;line-height:1.6;
@@ -1803,7 +1877,7 @@ footer{
   padding:calc(var(--s-64) + 16px) var(--gutter) var(--s-40);
 }
 .legal__head{margin-bottom:var(--s-40);}
-.legal__head h1{font-size:clamp(28px,4.4vw,46px);line-height:0.98;letter-spacing:-0.018em;}
+.legal__head h1{font-size:clamp(22px,3.4vw,36px);line-height:1.0;letter-spacing:-0.04em;}
 .legal__meta{
   margin-top:var(--s-12);
   font-size:13px;font-weight:600;color:var(--gray);

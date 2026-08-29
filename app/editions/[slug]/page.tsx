@@ -6,6 +6,7 @@ import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import Icon from '@/components/Icon';
 import { getAllEditions, getEditionBySlug } from '@/lib/content';
+import { isDarkTheme, pageTint } from '@/lib/gradient';
 import { isEditionUpcoming } from '@/lib/editions';
 import { getTimetable } from '@/lib/timetables';
 import { getBizoukEmbed } from '@/lib/bizouk';
@@ -87,12 +88,23 @@ export default async function EditionPage({
   const hasRawLineup = ed.lineup.length > 0;
   const showLineupSection = !hasRawLineup || secondaryLineup.length > 0;
 
+  // Theming automatique : la zone haute de la page (derrière la nav → 1re
+  // section) prend la teinte du flyer et se fond vers le crème. Si cette teinte
+  // est sombre, le texte de la zone bascule en clair (cf. `.event--themed`).
+  const darkTheme = isDarkTheme(ed.dominantColor, ed.palette);
+  const eventStyle = {
+    '--ev-tint': pageTint(ed.palette, ed.dominantColor),
+  } as CSSProperties;
+
   return (
     <>
       <Nav />
       <EventAtmosphere edition={ed} />
 
-      <main className="event">
+      <main
+        className={darkTheme ? 'event event--themed' : 'event'}
+        style={eventStyle}
+      >
         {ed.emoji && <EventEmojiField key={ed.slug} emoji={ed.emoji} />}
 
         <header

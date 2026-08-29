@@ -134,6 +134,44 @@ export function vividAccent(
   return hslToHex([h, s, l]);
 }
 
+/**
+ * Le haut de la page événement est-il globalement SOMBRE ?
+ * Décidé sur la même couleur déjà extraite du flyer (dominante, repli sur la
+ * 1re teinte exploitable de la palette). Sert à basculer le texte de la zone
+ * thémée en clair (texte clair sur fond sombre) plutôt qu'en encre foncée.
+ */
+export function isDarkTheme(
+  dominant: string | null | undefined,
+  palette?: string[],
+): boolean {
+  const hex =
+    (dominant && /^#[0-9a-f]{6}$/i.test(dominant) && dominant) ||
+    (palette ?? []).find((h) => /^#[0-9a-f]{6}$/i.test(h)) ||
+    '#3a2a4a';
+  return luminance(parseHex(hex)) < 0.5;
+}
+
+/**
+ * Teinte de fond posée en HAUT de la page événement (derrière la nav
+ * translucide) et fondue vers le crème sur ~1 section — cf. `.event::before`.
+ *  • flyer sombre : la couleur du flyer, un peu assombrie, pour porter du
+ *    texte clair sans écraser la couleur.
+ *  • flyer clair : simple voile pâle tiré vers le crème (pas de bascule de
+ *    texte, juste de quoi supprimer la bande neutre en haut).
+ */
+export function pageTint(
+  palette: string[] | undefined,
+  dominant: string | null | undefined,
+): string {
+  let colors = usablePalette(palette ?? []);
+  if (colors.length === 0 && dominant) colors = usablePalette([dominant]);
+  if (colors.length === 0) colors = ['#3a2a4a'];
+  const base = colors[0];
+  return luminance(parseHex(base)) < 0.5
+    ? mix(base, '#0c0a12', 0.34)
+    : mix(base, '#fff8ee', 0.72);
+}
+
 /** Palette nettoyée : on écarte les quasi-blancs / quasi-noirs et les doublons. */
 export function usablePalette(palette: string[]): string[] {
   const out: string[] = [];
