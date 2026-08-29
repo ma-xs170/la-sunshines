@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Icon, { type IconName } from './Icon';
+import VenueLink from './VenueLink';
 
 // Placeholder quand la prochaine édition n'a pas encore de lieu communiqué
 // (même règle que lib/editions.ts / le bandeau CTA).
@@ -57,7 +58,7 @@ export default function Infos({
               <Icon name={c.icon} />
             </span>
             <h4>{c.title}</h4>
-            <p>{c.text}</p>
+            <p>{c.title === 'Lieu' ? <VenueLink venue={lieu} /> : c.text}</p>
           </div>
         ))}
       </div>

@@ -21,6 +21,7 @@ import ComingSoon from '@/components/ComingSoon';
 import FlyerLightbox from '@/components/FlyerLightbox';
 import GalleryLightbox from '@/components/GalleryLightbox';
 import ArtistName from '@/components/ArtistName';
+import VenueLink from '@/components/VenueLink';
 
 type Params = { slug: string };
 
@@ -146,7 +147,7 @@ export default async function EditionPage({
               {ed.venue && (
                 <p className="event-hero__venue">
                   <Icon name="map-pin" className="icon" />
-                  {ed.venue}
+                  <VenueLink venue={ed.venue} />
                 </p>
               )}
             </div>

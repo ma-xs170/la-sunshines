@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react';
 import Link from 'next/link';
 import Icon from './Icon';
 import EventMeta from './EventMeta';
+import VenueLink from './VenueLink';
 import type { Edition } from '@/lib/editions';
 
 function cls(...parts: (string | false | undefined)[]) {
@@ -61,7 +62,7 @@ function NextCard({ edition, hidden }: { edition: Edition; hidden: boolean }) {
         {edition.venue && (
           <p className="ed-card__loc">
             <Icon name="map-pin" />
-            {edition.venue}
+            <VenueLink venue={edition.venue} />
           </p>
         )}
         <EventMeta
@@ -132,7 +133,7 @@ function PastCard({ edition, hidden }: { edition: Edition; hidden: boolean }) {
         {edition.venue && (
           <p className="ed-card__loc">
             <Icon name="map-pin" />
-            {edition.venue}
+            <VenueLink venue={edition.venue} />
           </p>
         )}
         {edition.headliner && (
