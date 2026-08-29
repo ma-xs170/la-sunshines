@@ -418,7 +418,7 @@
       ],
       "gradient": "linear-gradient(140deg, #012946 0%, #014777 55%, #012b47 100%)",
       "emoji": "🌙",
-      "hidden": false,
+      "hidden": true,
       "createdAt": "2026-08-29T20:27:04.953Z",
       "description": "",
       "archived": false,
@@ -427,7 +427,8 @@
           "id": "mtew2zyg90y5qq",
           "time": "16",
           "artistName": "DÉBUT DE L'ÉVÈNEMENT",
-          "label": ""
+          "label": "",
+          "headliner": false
         }
       ]
     },
