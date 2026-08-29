@@ -29,6 +29,7 @@ export type EventInput = {
   slug?: unknown;
   date?: unknown;
   time?: unknown;
+  description?: unknown;
   venue?: unknown;
   dresscode?: unknown;
   headliner?: unknown;
@@ -151,6 +152,7 @@ export function buildEvent(
     name,
     date: str(input.date),
     time: str(input.time),
+    description: str(input.description),
     venue: str(input.venue), // VIDE par défaut — on n'invente pas de lieu
     dresscode: str(input.dresscode),
     headliner: str(input.headliner),
@@ -174,6 +176,8 @@ export function applyEventPatch(current: StoredEvent, input: EventInput): Stored
     name: input.name !== undefined ? str(input.name, current.name) : current.name,
     date: input.date !== undefined ? str(input.date) : current.date,
     time: input.time !== undefined ? str(input.time) : current.time,
+    description:
+      input.description !== undefined ? str(input.description) : current.description,
     venue: input.venue !== undefined ? str(input.venue) : current.venue,
     dresscode: input.dresscode !== undefined ? str(input.dresscode) : current.dresscode,
     headliner: input.headliner !== undefined ? str(input.headliner) : current.headliner,

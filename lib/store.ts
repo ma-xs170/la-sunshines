@@ -62,6 +62,8 @@ export interface StoredEvent {
   date: string;
   /** Plage horaire affichée, ex. « 16h–22h ». Peut être vide. */
   time: string;
+  /** Accroche / description courte (affichée comme tagline sur le site). Peut être vide. */
+  description: string;
   /** Lieu — VIDE par défaut (règle métier : on n'invente pas de lieu). */
   venue: string;
   dresscode: string;
@@ -144,6 +146,7 @@ function normalizeEvent(raw: Partial<StoredEvent>): StoredEvent {
   return {
     ...(raw as StoredEvent),
     time: typeof raw.time === 'string' ? raw.time : '',
+    description: typeof raw.description === 'string' ? raw.description : '',
     flyerW: typeof raw.flyerW === 'number' ? raw.flyerW : 0,
     flyerH: typeof raw.flyerH === 'number' ? raw.flyerH : 0,
     lineup: Array.isArray(raw.lineup) ? raw.lineup : [],

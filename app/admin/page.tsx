@@ -55,6 +55,7 @@ export default async function AdminPage() {
       isStatic: staticSlugs.has(e.slug),
       storeId: se?.id ?? null,
       hidden: e.hidden === true,
+      description: se?.description ?? e.tagline ?? '',
       // valeurs de pré-remplissage du formulaire d'édition
       date: se ? se.date : (e.dateISO ?? ''),
       time: se ? (se.time ?? '') : (e.timeLabel ?? ''),

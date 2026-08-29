@@ -27,17 +27,45 @@ async function load(
   return { slug, err: null };
 }
 
-// PATCH /api/admin/gallery/:slug  — body { images: string[] } — ajoute des photos
+// PATCH /api/admin/gallery/:slug
+//   { images: string[] } → ajoute des photos (à la fin)
+//   { order:  string[] } → réordonne (doit être une permutation de l'existant)
 export async function PATCH(req: Request, ctx: Ctx) {
   const { slug, err } = await load(ctx);
   if (err) return err;
 
-  let body: { images?: unknown };
+  let body: { images?: unknown; order?: unknown };
   try {
-    body = (await req.json()) as { images?: unknown };
+    body = (await req.json()) as { images?: unknown; order?: unknown };
   } catch {
     return NextResponse.json({ error: 'JSON invalide.' }, { status: 400 });
   }
+
+  const store = await readStore();
+  const current = store.galleries[slug] ?? [];
+
+  // --- réorganisation ---
+  if (Array.isArray(body.order)) {
+    const order = body.order.filter(
+      (x): x is string => typeof x === 'string' && x.length > 0,
+    );
+    const sameSet =
+      order.length === current.length &&
+      new Set(order).size === new Set(current).size &&
+      order.every((x) => current.includes(x));
+    if (!sameSet) {
+      return NextResponse.json(
+        { error: 'Ordre invalide (ne correspond pas aux photos actuelles).' },
+        { status: 400 },
+      );
+    }
+    store.galleries[slug] = order;
+    const saved = await persistStore(store);
+    if (!saved.ok) return NextResponse.json({ error: saved.error }, { status: 502 });
+    return NextResponse.json({ ok: true, gallery: order, deployed: saved.deployed });
+  }
+
+  // --- ajout ---
   const incoming = Array.isArray(body.images)
     ? body.images.filter((x): x is string => typeof x === 'string' && x.length > 0)
     : [];
@@ -45,8 +73,6 @@ export async function PATCH(req: Request, ctx: Ctx) {
     return NextResponse.json({ error: 'Aucune image reçue.' }, { status: 400 });
   }
 
-  const store = await readStore();
-  const current = store.galleries[slug] ?? [];
   const next = [...current, ...incoming].slice(0, MAX_PER_EDITION);
   store.galleries[slug] = next;
   const saved = await persistStore(store);
