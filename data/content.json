@@ -443,7 +443,18 @@
   "galleries": {},
   "announcements": [],
   "tickets": [],
-  "verificationRequests": [],
+  "verificationRequests": [
+    {
+      "id": "mtew6pecdcowv3",
+      "artistSlug": "dreezy",
+      "name": "ANDY ARETHUS",
+      "email": "deeejay.dreezy@gmail.com",
+      "blobUrl": "https://0bxy4uzfczywxagy.private.blob.vercel-storage.com/verification/dreezy-vIgQik30MtKXR2SCEKMzO3fiT6nN8S.jpg",
+      "blobPathname": "verification/dreezy-vIgQik30MtKXR2SCEKMzO3fiT6nN8S.jpg",
+      "fileType": "image/jpeg",
+      "createdAt": "2026-08-29T21:28:04.884Z"
+    }
+  ],
   "subscriptions": [],
   "notifiedSubscribers": []
 }
