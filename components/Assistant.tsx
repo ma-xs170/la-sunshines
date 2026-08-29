@@ -14,6 +14,14 @@ const GREETING: Msg = {
     'Salut 👋 Je suis l’assistant LA SUNSHINES. Je peux te renseigner sur les éditions, la billetterie, les infos pratiques et le règlement. Comment je peux t’aider ?',
 };
 
+// suggestions affichées tant que la conversation n'a pas démarré
+const SUGGESTIONS = [
+  'Billetterie',
+  'Remboursement',
+  'Dresscode',
+  'Accès & horaires',
+];
+
 export default function Assistant() {
   const [open, setOpen] = useState(false);
   const [msgs, setMsgs] = useState<Msg[]>([GREETING]);
@@ -24,20 +32,28 @@ export default function Assistant() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const pathname = usePathname();
 
-  // Teinte « liquid glass » du bouton flottant : reprend la couleur dynamique
-  // de la page courante (--ev-fab posé sur <main.event> par pageTheme()). Hors
-  // page à thème, on laisse le CSS retomber sur l'amber du site.
-  const [fabTint, setFabTint] = useState('');
+  // Thème « liquid glass » de l'assistant (bulle flottante ET fenêtre de chat) :
+  // reprend la couleur dynamique de la page (--ev-fab posé sur <main.event> par
+  // pageTheme()) + le mode clair/sombre (classe .event--themed). Hors page à
+  // thème → accent amber par défaut, mode clair.
+  const [theme, setTheme] = useState<{ accent: string; dark: boolean }>({
+    accent: '',
+    dark: false,
+  });
   useEffect(() => {
-    const themed = document.querySelector('.event');
-    const tint = themed
-      ? getComputedStyle(themed).getPropertyValue('--ev-fab').trim()
-      : '';
-    setFabTint(tint);
+    const el = document.querySelector('.event');
+    setTheme({
+      accent: el
+        ? getComputedStyle(el).getPropertyValue('--ev-fab').trim()
+        : '',
+      dark: el?.classList.contains('event--themed') ?? false,
+    });
   }, [pathname]);
 
   const turns = msgs.filter((m) => m.role === 'user').length;
   const reachedLimit = msgs.length >= MAX_TURNS;
+  const showSuggestions =
+    msgs.length === 1 && !busy && !err && !reachedLimit;
 
   useEffect(() => {
     if (open) inputRef.current?.focus();
@@ -64,8 +80,8 @@ export default function Assistant() {
     return () => document.removeEventListener('keydown', onKey);
   }, [open]);
 
-  async function send() {
-    const text = input.trim();
+  async function send(preset?: string) {
+    const text = (preset ?? input).trim();
     if (!text || busy || reachedLimit) return;
     const next = [...msgs, { role: 'user' as const, content: text }];
     setMsgs(next);
@@ -93,6 +109,10 @@ export default function Assistant() {
     }
   }
 
+  const tintStyle = theme.accent
+    ? ({ '--asst-accent': theme.accent } as CSSProperties)
+    : undefined;
+
   return (
     <>
       <button
@@ -101,13 +121,22 @@ export default function Assistant() {
         aria-label={open ? 'Fermer l’assistant' : 'Ouvrir l’assistant'}
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        style={fabTint ? ({ '--fab-tint': fabTint } as CSSProperties) : undefined}
+        style={
+          theme.accent
+            ? ({ '--fab-tint': theme.accent } as CSSProperties)
+            : undefined
+        }
       >
         <Icon name={open ? 'close' : 'sparkles'} />
       </button>
 
       {open && (
-        <div className="asst-panel glass" role="dialog" aria-label="Assistant LA SUNSHINES">
+        <div
+          className={`asst-panel glass ${theme.dark ? 'asst-panel--dark' : 'asst-panel--light'}`}
+          role="dialog"
+          aria-label="Assistant LA SUNSHINES"
+          style={tintStyle}
+        >
           <header className="asst-head">
             <span className="asst-head__title">
               <Icon name="sparkles" className="icon" />
@@ -132,6 +161,22 @@ export default function Assistant() {
                 {m.content}
               </p>
             ))}
+
+            {showSuggestions && (
+              <div className="asst-suggest" role="group" aria-label="Suggestions">
+                {SUGGESTIONS.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    className="asst-chip"
+                    onClick={() => send(s)}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            )}
+
             {busy && <p className="asst-msg asst-msg--typing">…</p>}
             {err && (
               <p className="asst-msg asst-msg--err">
