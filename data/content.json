@@ -320,7 +320,7 @@
       "name": "La Nuit Des Ombres",
       "date": "2026-10-17",
       "time": "16h–22h",
-      "venue": "SUN'LAND",
+      "venue": "INFINI NIGHT CLUB",
       "dresscode": "Dresscode Bleu ou Noir",
       "headliner": "",
       "lineup": [],
@@ -337,7 +337,8 @@
       "gradient": "linear-gradient(140deg, #012946 0%, #014777 55%, #012b47 100%)",
       "emoji": "🌙",
       "hidden": false,
-      "createdAt": "2026-08-29T20:27:04.953Z"
+      "createdAt": "2026-08-29T20:27:04.953Z",
+      "description": ""
     },
     {
       "id": "mterbfsymdzkro",
@@ -366,7 +367,8 @@
       "gradient": "linear-gradient(140deg, #b77aa9 0%, #d8c6d9 45%, #d695c9 78%, #8b6183 100%)",
       "emoji": "🌴",
       "createdAt": "2026-08-29T19:11:47.650Z",
-      "hidden": false
+      "hidden": false,
+      "description": ""
     }
   ],
   "galleries": {},
