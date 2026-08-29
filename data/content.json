@@ -315,6 +315,31 @@
   ],
   "events": [
     {
+      "id": "mtetzde4invxex",
+      "slug": "la-nuit-des-ombres",
+      "name": "La Nuit Des Ombres",
+      "date": "2026-10-17",
+      "time": "16h–22h",
+      "venue": "SUN'LAND",
+      "dresscode": "Dresscode Bleu ou Noir",
+      "headliner": "",
+      "lineup": [],
+      "bizoukEmbed": "<iframe style=\"background-color: transparent;\" src=\"https://www.bizouk.com/stores/reservation/place?event=128267&widget=1\" name=\"payment-frame\" width=\"100%\" height=\"1065\" frameborder=\"0\" scrolling=\"yes\"></iframe>\n<script type=\"text/javascript\" src=\"https://static.bizouk.com/lib/js/widget/widget_client.js\"></script>",
+      "flyer": "/images/editions/la-nuit-des-ombres.png",
+      "flyerW": 2000,
+      "flyerH": 2000,
+      "dominantColor": "#00040b",
+      "palette": [
+        "#00040b",
+        "#012946",
+        "#014777"
+      ],
+      "gradient": "linear-gradient(140deg, #012946 0%, #014777 55%, #012b47 100%)",
+      "emoji": "🌙",
+      "hidden": true,
+      "createdAt": "2026-08-29T20:26:23.500Z"
+    },
+    {
       "id": "mterbfsymdzkro",
       "slug": "la-xploz-tropical-island",
       "name": "La Xploz · Tropical Island",
@@ -340,7 +365,8 @@
       ],
       "gradient": "linear-gradient(140deg, #b77aa9 0%, #d8c6d9 45%, #d695c9 78%, #8b6183 100%)",
       "emoji": "🌴",
-      "createdAt": "2026-08-29T19:11:47.650Z"
+      "createdAt": "2026-08-29T19:11:47.650Z",
+      "hidden": false
     }
   ],
   "galleries": {},
