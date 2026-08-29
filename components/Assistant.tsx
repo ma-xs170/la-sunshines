@@ -4,6 +4,7 @@ import type { CSSProperties } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Icon from './Icon';
+import Markdown from './Markdown';
 
 type Msg = { role: 'user' | 'assistant'; content: string };
 
@@ -153,14 +154,17 @@ export default function Assistant() {
           </header>
 
           <div className="asst-body" ref={bodyRef}>
-            {msgs.map((m, i) => (
-              <p
-                key={i}
-                className={m.role === 'user' ? 'asst-msg asst-msg--me' : 'asst-msg'}
-              >
-                {m.content}
-              </p>
-            ))}
+            {msgs.map((m, i) =>
+              m.role === 'user' ? (
+                <p key={i} className="asst-msg asst-msg--me">
+                  {m.content}
+                </p>
+              ) : (
+                <div key={i} className="asst-msg asst-msg--md">
+                  <Markdown text={m.content} />
+                </div>
+              ),
+            )}
 
             {showSuggestions && (
               <div className="asst-suggest" role="group" aria-label="Suggestions">
