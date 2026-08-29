@@ -18,7 +18,16 @@ export const metadata: Metadata = {
   title: 'LA SUNSHINES · Soirées 12–17 ans en Guadeloupe',
   description:
     'LA SUNSHINES, la soirée référence des 12–17 ans en Guadeloupe : billetterie sécurisée, entrée contrôlée, staff et sécurité dédiés. Prochaine édition « La Nuit Des Ombres » le 17 octobre en Guadeloupe.',
-  icons: { icon: '/favicon.svg' },
+  // Favicon = monogramme du logo « La Sunshines » (fichiers dans /public).
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: '48x48' },
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/icon-192.png', type: 'image/png', sizes: '192x192' },
+      { url: '/icon-512.png', type: 'image/png', sizes: '512x512' },
+    ],
+    apple: { url: '/apple-icon.png', sizes: '180x180' },
+  },
   openGraph: {
     type: 'website',
     locale: 'fr_FR',
