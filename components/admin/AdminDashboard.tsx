@@ -6,21 +6,49 @@ import type {
   StoredArtist,
   StoredEvent,
   StoredAnnouncement,
+  ScheduleEntry,
+  VerificationRequest,
 } from '@/lib/store';
 import type { PageviewSummary } from '@/lib/pageviews';
 import { analyzeImageFile } from '@/lib/clientColor';
-import Icon from '@/components/Icon';
+import Icon, { type IconName } from '@/components/Icon';
 import EventsSection from './EventsSection';
 
 const VERCEL_ANALYTICS_URL = 'https://vercel.com/dashboard/analytics';
 
-type TabId = 'dashboard' | 'events' | 'artists' | 'announcements' | 'tickets';
-const TABS: { id: TabId; label: string }[] = [
-  { id: 'dashboard', label: 'Tableau de bord' },
-  { id: 'events', label: 'Événements' },
-  { id: 'artists', label: 'Artistes' },
-  { id: 'announcements', label: 'Annonces' },
-  { id: 'tickets', label: 'Tickets' },
+type TabId =
+  | 'dashboard'
+  | 'events'
+  | 'events-create'
+  | 'artists'
+  | 'verifications'
+  | 'announcements'
+  | 'tickets';
+
+type NavItem = { id: TabId; label: string; icon: IconName };
+type NavGroup = { title: string; items: NavItem[] };
+
+const NAV: NavGroup[] = [
+  { title: '', items: [{ id: 'dashboard', label: 'Tableau de bord', icon: 'sparkles' }] },
+  {
+    title: 'Événements',
+    items: [
+      { id: 'events', label: 'Mes événements', icon: 'calendar' },
+      { id: 'events-create', label: 'Créer', icon: 'sun' },
+    ],
+  },
+  {
+    title: 'Contenu',
+    items: [
+      { id: 'artists', label: 'Artistes', icon: 'share' },
+      { id: 'verifications', label: 'Vérifications', icon: 'shield' },
+      { id: 'announcements', label: 'Annonces', icon: 'bell' },
+    ],
+  },
+  {
+    title: 'Support',
+    items: [{ id: 'tickets', label: 'Tickets', icon: 'inbox' }],
+  },
 ];
 
 export type EditionLite = {
@@ -34,6 +62,10 @@ export type EditionLite = {
   storeId: string | null;
   /** événement privé (masqué du site public). */
   hidden: boolean;
+  /** événement rangé dans les archives (invisible publiquement, comme `hidden`). */
+  archived: boolean;
+  /** programme horaire (running order) de l'événement. */
+  schedule: ScheduleEntry[];
   // pré-remplissage du formulaire d'édition
   description: string;
   date: string;
@@ -87,6 +119,7 @@ export default function AdminDashboard({
 }) {
   const [store, setStore] = useState<Store>(initialStore);
   const [tab, setTab] = useState<TabId>('dashboard');
+  const [navOpen, setNavOpen] = useState(false);
   const [msg, setMsg] = useState<string>('');
   const msgTimer = useRef<number | undefined>(undefined);
 
@@ -102,89 +135,267 @@ export default function AdminDashboard({
   }
 
   const openTickets = store.tickets.filter((t) => t.status !== 'done').length;
+  const pendingVerif = store.verificationRequests.length;
+
+  function go(id: TabId) {
+    setTab(id);
+    setNavOpen(false);
+  }
+
+  function badge(id: TabId): number {
+    if (id === 'tickets') return openTickets;
+    if (id === 'verifications') return pendingVerif;
+    return 0;
+  }
+
+  const currentLabel =
+    NAV.flatMap((g) => g.items).find((i) => i.id === tab)?.label ?? 'Administration';
 
   return (
-    <main className="admin-shell admin-shell--wide">
-      <header className="admin-top">
-        <h1>Administration</h1>
-        <div className="admin-top__actions">
-          <a className="admin-link" href="/" target="_blank" rel="noopener">
-            Voir le site
-          </a>
-          <button className="btn btn--outline" type="button" onClick={logout}>
-            Se déconnecter
-          </button>
+    <div className={navOpen ? 'admin-layout is-nav-open' : 'admin-layout'}>
+      <aside className="admin-sidebar" aria-label="Navigation de l’administration">
+        <div className="admin-sidebar__brand">
+          <Icon name="sun" className="icon" />
+          <span>LA SUNSHINES</span>
         </div>
-      </header>
+        <nav className="admin-sidebar__nav">
+          {NAV.map((group, gi) => (
+            <div className="admin-navgroup" key={group.title || `g${gi}`}>
+              {group.title && (
+                <p className="admin-navgroup__title">{group.title}</p>
+              )}
+              {group.items.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={tab === item.id ? 'admin-navlink is-active' : 'admin-navlink'}
+                  aria-current={tab === item.id ? 'page' : undefined}
+                  onClick={() => go(item.id)}
+                >
+                  <Icon name={item.icon} className="icon" />
+                  <span>{item.label}</span>
+                  {badge(item.id) > 0 && (
+                    <span className="admin-navlink__badge">{badge(item.id)}</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          ))}
+          <div className="admin-navgroup">
+            <p className="admin-navgroup__title">Compte</p>
+            <a
+              className="admin-navlink admin-navlink--ext"
+              href="/status"
+              target="_blank"
+              rel="noopener"
+            >
+              <Icon name="clock" className="icon" />
+              <span>Statuts</span>
+              <Icon name="arrow-up-right" className="icon admin-navlink__ext" />
+            </a>
+            <a
+              className="admin-navlink admin-navlink--ext"
+              href="/"
+              target="_blank"
+              rel="noopener"
+            >
+              <Icon name="share" className="icon" />
+              <span>Voir le site</span>
+              <Icon name="arrow-up-right" className="icon admin-navlink__ext" />
+            </a>
+            <button className="admin-navlink" type="button" onClick={logout}>
+              <Icon name="close" className="icon" />
+              <span>Se déconnecter</span>
+            </button>
+          </div>
+        </nav>
+      </aside>
 
-      <nav className="admin-tabs" aria-label="Sections de l’administration">
-        {TABS.map((t) => (
+      <button
+        type="button"
+        className="admin-sidebar__scrim"
+        aria-label="Fermer le menu"
+        onClick={() => setNavOpen(false)}
+      />
+
+      <main className="admin-shell admin-shell--wide">
+        <header className="admin-top">
           <button
-            key={t.id}
             type="button"
-            className={tab === t.id ? 'admin-tab is-active' : 'admin-tab'}
-            aria-current={tab === t.id ? 'page' : undefined}
-            onClick={() => setTab(t.id)}
+            className="admin-burger"
+            aria-label="Ouvrir le menu"
+            aria-expanded={navOpen}
+            onClick={() => setNavOpen((v) => !v)}
           >
-            {t.label}
-            {t.id === 'tickets' && openTickets > 0 && (
-              <span className="admin-tab__badge">{openTickets}</span>
-            )}
+            <Icon name="menu" className="icon" />
           </button>
-        ))}
-        <a
-          className="admin-tab admin-tab--ext"
-          href="/status"
-          target="_blank"
-          rel="noopener"
-        >
-          Statuts <Icon name="arrow-up-right" className="icon" />
-        </a>
-      </nav>
+          <h1>{currentLabel}</h1>
+        </header>
 
-      {msg && <p className="admin-flash">{msg}</p>}
+        {msg && <p className="admin-flash">{msg}</p>}
 
-      <p className="admin-note">
-        Chaque enregistrement est committé sur GitHub (<code>data/content.json</code>)
-        et déclenche un redéploiement automatique&nbsp;: les changements sont en
-        ligne en ~1&nbsp;min. En local, l’écriture se fait directement sur le disque.
+        <p className="admin-note">
+          Chaque enregistrement est committé sur GitHub (<code>data/content.json</code>)
+          et déclenche un redéploiement automatique&nbsp;: les changements sont en
+          ligne en ~1&nbsp;min. En local, l’écriture se fait directement sur le disque.
+        </p>
+
+        {tab === 'dashboard' && (
+          <DashboardPanel
+            store={store}
+            openTickets={openTickets}
+            analytics={analytics}
+          />
+        )}
+
+        {tab === 'events' && (
+          <EventsSection
+            store={store}
+            setStore={setStore}
+            flash={flash}
+            editions={editions}
+          />
+        )}
+
+        {tab === 'events-create' && (
+          <EventsSection
+            store={store}
+            setStore={setStore}
+            flash={flash}
+            editions={editions}
+            startInCreate
+          />
+        )}
+
+        {tab === 'artists' && (
+          <div className="admin-tabpanel">
+            <ArtistPanel store={store} setStore={setStore} flash={flash} />
+          </div>
+        )}
+
+        {tab === 'verifications' && (
+          <div className="admin-tabpanel">
+            <VerificationPanel store={store} setStore={setStore} flash={flash} />
+          </div>
+        )}
+
+        {tab === 'announcements' && (
+          <div className="admin-tabpanel">
+            <AnnouncementPanel store={store} setStore={setStore} flash={flash} />
+          </div>
+        )}
+
+        {tab === 'tickets' && (
+          <div className="admin-tabpanel">
+            <TicketPanel store={store} setStore={setStore} flash={flash} />
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
+
+/* ======================= VÉRIFICATIONS D'IDENTITÉ ======================= */
+
+function VerificationPanel({
+  store,
+  setStore,
+  flash,
+}: {
+  store: Store;
+  setStore: (s: Store) => void;
+  flash: (t: string, saved?: boolean) => void;
+}) {
+  const [busy, setBusy] = useState<string | null>(null);
+  const reqs = store.verificationRequests;
+
+  async function decide(r: VerificationRequest, decision: 'approve' | 'refuse') {
+    const label =
+      decision === 'approve'
+        ? `Certifier « ${r.name} » comme titulaire de la page artiste ? Le document d’identité sera définitivement supprimé.`
+        : `Refuser la demande de « ${r.name} » ? Le document d’identité sera définitivement supprimé.`;
+    if (!window.confirm(label)) return;
+    setBusy(r.id);
+    const res = await api(`/api/admin/verification/${r.id}`, 'POST', { decision });
+    setBusy(null);
+    if (!res.ok) return flash(res.error ?? 'Échec.');
+    setStore({
+      ...store,
+      verificationRequests: store.verificationRequests.filter((x) => x.id !== r.id),
+      artists: store.artists.map((a) =>
+        a.slug === r.artistSlug
+          ? { ...a, verified: decision === 'approve' }
+          : a,
+      ),
+    });
+    flash(
+      decision === 'approve'
+        ? 'Artiste certifié. Document supprimé.'
+        : 'Demande refusée. Document supprimé.',
+      res.deployed,
+    );
+  }
+
+  return (
+    <section className="admin-panel admin-panel--wide glass">
+      <h2>Demandes de vérification</h2>
+      <p className="admin-note admin-note--tight">
+        Un artiste a téléversé une pièce d’identité pour revendiquer sa page. Le
+        document est stocké de façon privée (Vercel Blob) et&nbsp;
+        <strong>supprimé automatiquement dès que tu statues</strong>. Seul le
+        statut «&nbsp;certifié&nbsp;» est conservé.
       </p>
 
-      {tab === 'dashboard' && (
-        <DashboardPanel
-          store={store}
-          openTickets={openTickets}
-          analytics={analytics}
-        />
+      {reqs.length === 0 ? (
+        <p className="admin-list__empty">Aucune demande en attente.</p>
+      ) : (
+        <ul className="admin-list">
+          {reqs.map((r) => {
+            const artist = store.artists.find((a) => a.slug === r.artistSlug);
+            return (
+              <li key={r.id} className="admin-verif">
+                <div className="admin-verif__main">
+                  <span className="admin-list__name">
+                    {artist?.name ?? r.artistSlug}
+                    <small>
+                      Demandé par {r.name} ·{' '}
+                      <a href={`mailto:${r.email}`}>{r.email}</a> ·{' '}
+                      {new Date(r.createdAt).toLocaleString('fr-FR')}
+                    </small>
+                  </span>
+                  <a
+                    className="admin-mini"
+                    href={`/api/admin/verification/${r.id}/document`}
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <Icon name="shield" className="icon" /> Voir le document
+                  </a>
+                </div>
+                <div className="admin-verif__acts">
+                  <button
+                    className="btn btn--amber"
+                    type="button"
+                    disabled={busy === r.id}
+                    onClick={() => decide(r, 'approve')}
+                  >
+                    {busy === r.id ? '…' : 'Approuver'}
+                  </button>
+                  <button
+                    className="btn btn--outline"
+                    type="button"
+                    disabled={busy === r.id}
+                    onClick={() => decide(r, 'refuse')}
+                  >
+                    Refuser
+                  </button>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
       )}
-
-      {tab === 'events' && (
-        <EventsSection
-          store={store}
-          setStore={setStore}
-          flash={flash}
-          editions={editions}
-        />
-      )}
-
-      {tab === 'artists' && (
-        <div className="admin-tabpanel">
-          <ArtistPanel store={store} setStore={setStore} flash={flash} />
-        </div>
-      )}
-
-      {tab === 'announcements' && (
-        <div className="admin-tabpanel">
-          <AnnouncementPanel store={store} setStore={setStore} flash={flash} />
-        </div>
-      )}
-
-      {tab === 'tickets' && (
-        <div className="admin-tabpanel">
-          <TicketPanel store={store} setStore={setStore} flash={flash} />
-        </div>
-      )}
-    </main>
+    </section>
   );
 }
 

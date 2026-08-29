@@ -5,6 +5,7 @@ import {
   type StoredArtist,
   type StoredEvent,
   type StoredAnnouncement,
+  type ScheduleEntry,
   newId,
 } from './store';
 import { slugify, uniqueSlug } from './slug';
@@ -41,6 +42,8 @@ export type EventInput = {
   dominant?: unknown; // #rrggbb calculé côté client
   palette?: unknown; // string[]
   hidden?: unknown; // booléen — événement privé (masqué du site)
+  archived?: unknown; // booléen — rangé dans les archives admin
+  schedule?: unknown; // ScheduleEntry[] — programme horaire
 };
 
 const str = (v: unknown, fallback = ''): string =>
@@ -60,6 +63,19 @@ function toLineup(v: unknown): string[] {
       .filter(Boolean);
   }
   return [];
+}
+
+function toSchedule(v: unknown): ScheduleEntry[] {
+  if (!Array.isArray(v)) return [];
+  return v
+    .filter((s): s is Record<string, unknown> => Boolean(s) && typeof s === 'object')
+    .map((s) => ({
+      id: typeof s.id === 'string' && s.id ? s.id : newId(),
+      time: typeof s.time === 'string' ? s.time.trim() : '',
+      artistName: typeof s.artistName === 'string' ? s.artistName.trim() : '',
+      label: typeof s.label === 'string' ? s.label.trim() : '',
+    }))
+    .filter((s) => s.time || s.artistName || s.label);
 }
 
 function toPalette(v: unknown): string[] {
@@ -97,6 +113,7 @@ export function buildArtist(
     tiktok: str(input.tiktok),
     soundcloud: str(input.soundcloud),
     email: str(input.email),
+    verified: false,
     createdAt: new Date().toISOString(),
   };
 }
@@ -166,6 +183,8 @@ export function buildEvent(
     gradient: heroGradient(palette, dominantColor),
     emoji: resolveEmoji({ name, dominantColor }),
     hidden: input.hidden === true,
+    archived: input.archived === true,
+    schedule: toSchedule(input.schedule),
     createdAt: new Date().toISOString(),
   };
 }
@@ -192,6 +211,14 @@ export function applyEventPatch(current: StoredEvent, input: EventInput): Stored
     palette: input.palette !== undefined ? toPalette(input.palette) : current.palette,
     hidden:
       input.hidden !== undefined ? input.hidden === true : current.hidden === true,
+    archived:
+      input.archived !== undefined
+        ? input.archived === true
+        : current.archived === true,
+    schedule:
+      input.schedule !== undefined
+        ? toSchedule(input.schedule)
+        : (current.schedule ?? []),
   };
   // recalculs automatiques
   next.gradient = heroGradient(next.palette, next.dominantColor);

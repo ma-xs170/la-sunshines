@@ -88,6 +88,10 @@ export interface Edition {
    * `undefined` / `false` = visible.
    */
   hidden?: boolean;
+  /** Archivé côté admin — invisible publiquement, comme `hidden`. */
+  archived?: boolean;
+  /** Programme horaire (running order), géré depuis /admin. `[]` si vide. */
+  schedule?: import('./store').ScheduleEntry[];
 }
 
 type EditionSeed = Omit<

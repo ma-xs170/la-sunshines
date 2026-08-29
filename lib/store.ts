@@ -30,6 +30,9 @@ export interface StoredArtist {
   tiktok: string;
   soundcloud: string;
   email: string;
+  /** Page réclamée + vérifiée par l'artiste (badge « Certifié »). Défaut false.
+   *  Seul CE booléen persiste ; la pièce d'identité n'est jamais dans le Store. */
+  verified: boolean;
   createdAt: string;
 }
 
@@ -47,6 +50,7 @@ export function normalizeArtist(raw: Partial<StoredArtist> & { name?: string }):
     tiktok: typeof raw.tiktok === 'string' ? raw.tiktok : '',
     soundcloud: typeof raw.soundcloud === 'string' ? raw.soundcloud : '',
     email: typeof raw.email === 'string' ? raw.email : '',
+    verified: raw.verified === true,
     createdAt:
       typeof raw.createdAt === 'string' && raw.createdAt
         ? raw.createdAt
@@ -84,7 +88,22 @@ export interface StoredEvent {
   /** Événement PRIVÉ : masqué de tout le site public (réversible). Défaut false.
    *  Fonctionne aussi pour une édition statique via le mécanisme d'override. */
   hidden: boolean;
+  /** ARCHIVÉ : rangé côté admin (onglet Archives), invisible publiquement comme
+   *  `hidden`. Réversible. Défaut false. */
+  archived: boolean;
+  /** Programme horaire (running order). Optionnel, [] par défaut. */
+  schedule: ScheduleEntry[];
   createdAt: string;
+}
+
+export interface ScheduleEntry {
+  id: string;
+  /** heure libre, ex. « 18h00 ». */
+  time: string;
+  /** nom d'artiste (du line-up ou saisie libre). '' possible si label seul. */
+  artistName: string;
+  /** intitulé optionnel, ex. « Ouverture des portes », « Live », « Set DJ ». */
+  label: string;
 }
 
 export interface StoredAnnouncement {
@@ -112,6 +131,33 @@ export interface StoredTicket {
   createdAt: string;
 }
 
+/**
+ * Demande de vérification d'une page artiste (réclamation avec pièce d'identité).
+ * La pièce elle-même est sur Vercel Blob (accès PRIVÉ) — jamais ici. Seuls
+ * `blobUrl`/`blobPathname` (pointeurs vers un blob non public) transitent, et la
+ * demande est SUPPRIMÉE du Store dès que l'admin a statué.
+ */
+export interface VerificationRequest {
+  id: string;
+  artistSlug: string;
+  /** nom déclaré par le demandeur. */
+  name: string;
+  email: string;
+  blobUrl: string;
+  blobPathname: string;
+  fileType: string;
+  createdAt: string;
+}
+
+/** Abonnement d'un visiteur aux annonces d'un artiste. */
+export interface Subscription {
+  email: string;
+  artistSlug: string;
+  /** jeton opaque pour le désabonnement en 1 clic. */
+  token: string;
+  createdAt: string;
+}
+
 export interface Store {
   artists: StoredArtist[];
   events: StoredEvent[];
@@ -119,6 +165,10 @@ export interface Store {
   galleries: Record<string, string[]>;
   announcements: StoredAnnouncement[];
   tickets: StoredTicket[];
+  verificationRequests: VerificationRequest[];
+  subscriptions: Subscription[];
+  /** clés `${eventSlug}::${email}` déjà notifiées — anti-doublon des emails. */
+  notifiedSubscribers: string[];
 }
 
 const EMPTY: Store = {
@@ -127,6 +177,9 @@ const EMPTY: Store = {
   galleries: {},
   announcements: [],
   tickets: [],
+  verificationRequests: [],
+  subscriptions: [],
+  notifiedSubscribers: [],
 };
 
 function shapeGalleries(v: unknown): Record<string, string[]> {
@@ -152,6 +205,17 @@ function normalizeEvent(raw: Partial<StoredEvent>): StoredEvent {
     lineup: Array.isArray(raw.lineup) ? raw.lineup : [],
     palette: Array.isArray(raw.palette) ? raw.palette : [],
     hidden: raw.hidden === true, // absent dans les anciens enregistrements
+    archived: raw.archived === true,
+    schedule: Array.isArray(raw.schedule)
+      ? (raw.schedule as Partial<ScheduleEntry>[])
+          .filter((s) => s && typeof s === 'object')
+          .map((s) => ({
+            id: typeof s.id === 'string' && s.id ? s.id : newId(),
+            time: typeof s.time === 'string' ? s.time : '',
+            artistName: typeof s.artistName === 'string' ? s.artistName : '',
+            label: typeof s.label === 'string' ? s.label : '',
+          }))
+      : [],
   };
 }
 
@@ -173,6 +237,21 @@ function shape(parsed: Partial<Store>): Store {
       ? (parsed.tickets as StoredTicket[])
           .filter((t) => t && typeof t.email === 'string')
           .map((t) => ({ ...t, status: t.status === 'done' ? 'done' : 'open' }))
+      : [],
+    verificationRequests: Array.isArray(parsed.verificationRequests)
+      ? (parsed.verificationRequests as VerificationRequest[]).filter(
+          (v) => v && typeof v.artistSlug === 'string' && typeof v.blobPathname === 'string',
+        )
+      : [],
+    subscriptions: Array.isArray(parsed.subscriptions)
+      ? (parsed.subscriptions as Subscription[]).filter(
+          (s) => s && typeof s.email === 'string' && typeof s.artistSlug === 'string' && typeof s.token === 'string',
+        )
+      : [],
+    notifiedSubscribers: Array.isArray(parsed.notifiedSubscribers)
+      ? (parsed.notifiedSubscribers as unknown[]).filter(
+          (x): x is string => typeof x === 'string',
+        )
       : [],
   };
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import type { Store, StoredArtist, StoredEvent } from '@/lib/store';
+import type { Store, StoredArtist, StoredEvent, ScheduleEntry } from '@/lib/store';
 import { analyzeImageFile } from '@/lib/clientColor';
 import { resolveEmoji } from '@/lib/editionEmoji';
 import { heroGradient } from '@/lib/gradient';
@@ -27,6 +27,7 @@ type ImgState = {
 const EMPTY_IMG: ImgState = { dataUrl: '', dominant: null, palette: [], w: 0, h: 0 };
 
 const ISO_RE = /^\d{4}-\d{2}-\d{2}$/;
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 
 type EventFormState = {
   name: string;
@@ -39,6 +40,7 @@ type EventFormState = {
   lineup: string;
   bizoukEmbed: string;
   hidden: boolean;
+  schedule: ScheduleEntry[];
 };
 
 const EMPTY_FORM: EventFormState = {
@@ -52,6 +54,7 @@ const EMPTY_FORM: EventFormState = {
   lineup: '',
   bizoukEmbed: '',
   hidden: false,
+  schedule: [],
 };
 
 async function api(path: string, method: string, body?: unknown) {
@@ -94,6 +97,8 @@ function liteFromStored(ev: StoredEvent, prev?: EditionLite): EditionLite {
     isStatic: prev?.isStatic ?? false,
     storeId: ev.id,
     hidden: ev.hidden === true,
+    archived: ev.archived === true,
+    schedule: Array.isArray(ev.schedule) ? ev.schedule : [],
     date: ev.date,
     time: ev.time ?? '',
     venue: ev.venue,
@@ -138,6 +143,24 @@ function useEventForm(initialForm?: Partial<EventFormState>, initialImg?: Partia
     setForm((f) => ({ ...f, headliner: arr.join(' · ') }));
   const setLineup = (arr: string[]) =>
     setForm((f) => ({ ...f, lineup: arr.join('\n') }));
+
+  const schedule = form.schedule;
+  const setSchedule = (rows: ScheduleEntry[]) =>
+    setForm((f) => ({ ...f, schedule: rows }));
+  const addSchedule = () =>
+    setSchedule([...schedule, { id: uid(), time: '', artistName: '', label: '' }]);
+  const patchSchedule = (id: string, patch: Partial<ScheduleEntry>) =>
+    setSchedule(schedule.map((s) => (s.id === id ? { ...s, ...patch } : s)));
+  const removeSchedule = (id: string) =>
+    setSchedule(schedule.filter((s) => s.id !== id));
+  const moveSchedule = (id: string, dir: -1 | 1) => {
+    const i = schedule.findIndex((s) => s.id === id);
+    const j = i + dir;
+    if (i < 0 || j < 0 || j >= schedule.length) return;
+    const next = [...schedule];
+    [next[i], next[j]] = [next[j], next[i]];
+    setSchedule(next);
+  };
 
   async function onFlyer(
     e: React.ChangeEvent<HTMLInputElement>,
@@ -208,6 +231,11 @@ function useEventForm(initialForm?: Partial<EventFormState>, initialImg?: Partia
     onFlyer,
     analyzeFlyerAI,
     aiBusy,
+    schedule,
+    addSchedule,
+    patchSchedule,
+    removeSchedule,
+    moveSchedule,
     payload,
   };
 }
@@ -329,9 +357,11 @@ function ArtistTagField({
 function OptionalFields({
   hook,
   artistNames,
+  onNewArtist,
 }: {
   hook: Hook;
   artistNames: string[];
+  onNewArtist?: () => void;
 }) {
   const inList = (l: string[], n: string) =>
     l.some((x) => normalizeArtistName(x) === normalizeArtistName(n));
@@ -358,6 +388,16 @@ function OptionalFields({
         onRemove={(n) => hook.setLineup(hook.lineupList.filter((x) => x !== n))}
         hint="Les têtes d’affiche ne sont pas reproposées ici."
       />
+      {onNewArtist && (
+        <button
+          type="button"
+          className="btn btn--outline admin-inline-add"
+          onClick={onNewArtist}
+        >
+          <Icon name="sparkles" />
+          <span>+ Nouvel artiste (ajouté au line-up)</span>
+        </button>
+      )}
       <label className="admin-field">
         <span>Code d’intégration Bizouk (brut)</span>
         <textarea
@@ -368,6 +408,86 @@ function OptionalFields({
         />
       </label>
     </>
+  );
+}
+
+function ScheduleEditor({ hook }: { hook: Hook }) {
+  const names = Array.from(
+    new Set([...hook.headlinerList, ...hook.lineupList].filter(Boolean)),
+  );
+  return (
+    <div className="sched">
+      <datalist id="sched-artists">
+        {names.map((n) => (
+          <option key={n} value={n} />
+        ))}
+      </datalist>
+      {hook.schedule.length === 0 && (
+        <p className="admin-field__hint">
+          Aucune ligne. Le programme n’apparaît sur le site que s’il contient au
+          moins une entrée.
+        </p>
+      )}
+      <ul className="sched__list">
+        {hook.schedule.map((row, i) => (
+          <li className="sched__row" key={row.id}>
+            <input
+              className="sched__time"
+              value={row.time}
+              placeholder="18h00"
+              onChange={(e) => hook.patchSchedule(row.id, { time: e.target.value })}
+            />
+            <input
+              className="sched__artist"
+              list="sched-artists"
+              value={row.artistName}
+              placeholder="Artiste (line-up ou libre)"
+              onChange={(e) => hook.patchSchedule(row.id, { artistName: e.target.value })}
+            />
+            <input
+              className="sched__label"
+              value={row.label}
+              placeholder="Label (Live, Set DJ…)"
+              onChange={(e) => hook.patchSchedule(row.id, { label: e.target.value })}
+            />
+            <div className="sched__acts">
+              <button
+                type="button"
+                aria-label="Monter"
+                disabled={i === 0}
+                onClick={() => hook.moveSchedule(row.id, -1)}
+              >
+                <Icon name="chevron-left" />
+              </button>
+              <button
+                type="button"
+                aria-label="Descendre"
+                disabled={i === hook.schedule.length - 1}
+                onClick={() => hook.moveSchedule(row.id, 1)}
+              >
+                <Icon name="chevron-right" />
+              </button>
+              <button
+                type="button"
+                className="sched__del"
+                aria-label="Supprimer la ligne"
+                onClick={() => hook.removeSchedule(row.id)}
+              >
+                <Icon name="close" />
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <button
+        type="button"
+        className="btn btn--outline"
+        onClick={hook.addSchedule}
+      >
+        <Icon name="clock" />
+        <span>Ajouter une ligne</span>
+      </button>
+    </div>
   );
 }
 
@@ -516,6 +636,141 @@ function EventWizard({
 }
 
 /* ================================================================== */
+/* MODALE « + Nouvel artiste » (depuis la page de gestion d'un event) */
+/* ================================================================== */
+
+function ArtistQuickForm({
+  store,
+  setStore,
+  flash,
+  onClose,
+  onCreated,
+}: {
+  store: Store;
+  setStore: (s: Store) => void;
+  flash: (t: string, saved?: boolean) => void;
+  onClose: () => void;
+  onCreated: (name: string) => void;
+}) {
+  const [form, setForm] = useState({
+    name: '',
+    role: '',
+    bio: '',
+    instagram: '',
+    tiktok: '',
+    soundcloud: '',
+    email: '',
+  });
+  const [image, setImage] = useState('');
+  const [busy, setBusy] = useState(false);
+  const set =
+    (k: keyof typeof form) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+      setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  async function onImage(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const a = await analyzeImageFile(file);
+      setImage(a.dataUrl);
+    } catch {
+      flash('Image illisible.');
+    }
+  }
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.name.trim()) return flash('Nom obligatoire.');
+    setBusy(true);
+    const res = await api('/api/admin/artists', 'POST', {
+      ...form,
+      image: image || undefined,
+    });
+    setBusy(false);
+    if (!res.ok || !res.item) return flash(res.error ?? 'Échec.');
+    const item = res.item as unknown as StoredArtist;
+    setStore({ ...store, artists: [item, ...store.artists] });
+    flash('Artiste ajouté et placé dans le line-up.', res.deployed);
+    onCreated(item.name);
+    onClose();
+  }
+
+  return (
+    <div className="admin-modal" role="dialog" aria-modal="true" aria-label="Nouvel artiste">
+      <div className="admin-modal__backdrop" onClick={onClose} />
+      <div className="admin-modal__panel glass">
+        <div className="admin-modal__head">
+          <h3>Nouvel artiste</h3>
+          <button type="button" className="admin-modal__x" aria-label="Fermer" onClick={onClose}>
+            <Icon name="close" />
+          </button>
+        </div>
+        <form onSubmit={submit} className="admin-form">
+          <label className="admin-field">
+            <span>Nom *</span>
+            <input value={form.name} onChange={set('name')} required autoFocus />
+          </label>
+          <div className="admin-row">
+            <label className="admin-field">
+              <span>Rôle</span>
+              <select value={form.role} onChange={set('role')}>
+                <option value="">— Non précisé</option>
+                {['DJ', 'Artiste', 'Musicien', 'Groupe'].map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="admin-field">
+              <span>Photo</span>
+              <input type="file" accept="image/*" onChange={onImage} />
+            </label>
+          </div>
+          {image && (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={image} alt="" className="admin-preview__artist" />
+          )}
+          <label className="admin-field">
+            <span>Bio</span>
+            <textarea value={form.bio} onChange={set('bio')} rows={3} />
+          </label>
+          <div className="admin-row">
+            <label className="admin-field">
+              <span>Instagram</span>
+              <input value={form.instagram} onChange={set('instagram')} placeholder="@pseudo" />
+            </label>
+            <label className="admin-field">
+              <span>TikTok</span>
+              <input value={form.tiktok} onChange={set('tiktok')} placeholder="@pseudo" />
+            </label>
+          </div>
+          <div className="admin-row">
+            <label className="admin-field">
+              <span>SoundCloud</span>
+              <input value={form.soundcloud} onChange={set('soundcloud')} />
+            </label>
+            <label className="admin-field">
+              <span>Email</span>
+              <input value={form.email} onChange={set('email')} />
+            </label>
+          </div>
+          <div className="admin-form__actions">
+            <button className="btn btn--amber" type="submit" disabled={busy}>
+              {busy ? '…' : 'Créer et ajouter au line-up'}
+            </button>
+            <button className="btn btn--outline" type="button" onClick={onClose}>
+              Annuler
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+/* ================================================================== */
 /* FORMULAIRE D'ÉDITION (une vue dédiée par événement)                */
 /* ================================================================== */
 
@@ -550,6 +805,7 @@ function EventEditForm({
       lineup: ed.lineup.join('\n'),
       bizoukEmbed: ed.bizoukEmbed,
       hidden: ed.hidden,
+      schedule: ed.schedule ?? [],
     },
     {
       dataUrl: ed.flyer,
@@ -560,6 +816,7 @@ function EventEditForm({
     },
   );
   const [busy, setBusy] = useState(false);
+  const [newArtist, setNewArtist] = useState(false);
   const artistNames = store.artists.map((a) => a.name);
   const isNewOverride = ed.isStatic && !ed.storeId;
 
@@ -605,6 +862,23 @@ function EventEditForm({
 
   return (
     <div className="admin-tabpanel">
+      {newArtist && (
+        <ArtistQuickForm
+          store={store}
+          setStore={setStore}
+          flash={flash}
+          onClose={() => setNewArtist(false)}
+          onCreated={(name) => {
+            if (
+              !hook.lineupList.some(
+                (x) => normalizeArtistName(x) === normalizeArtistName(name),
+              )
+            ) {
+              hook.setLineup([...hook.lineupList, name]);
+            }
+          }}
+        />
+      )}
       <div className="wiz__top">
         <button type="button" className="admin-back" onClick={onBack}>
           <Icon name="arrow-right" className="icon" /> Retour à la liste
@@ -665,7 +939,20 @@ function EventEditForm({
 
         <fieldset className="admin-section">
           <legend>Line-up &amp; billetterie</legend>
-          <OptionalFields hook={hook} artistNames={artistNames} />
+          <OptionalFields
+            hook={hook}
+            artistNames={artistNames}
+            onNewArtist={() => setNewArtist(true)}
+          />
+        </fieldset>
+
+        <fieldset className="admin-section">
+          <legend>Programme</legend>
+          <p className="admin-field__hint">
+            Déroulé horaire affiché sur la page publique (trié par heure). Laisse
+            vide pour ne rien afficher.
+          </p>
+          <ScheduleEditor hook={hook} />
         </fieldset>
 
         <div className="admin-form__actions">
@@ -691,7 +978,15 @@ function EventEditForm({
 /* CARTE + LISTE                                                      */
 /* ================================================================== */
 
-function EventCard({ ed, onManage }: { ed: EditionLite; onManage: () => void }) {
+function EventCard({
+  ed,
+  onManage,
+  onArchive,
+}: {
+  ed: EditionLite;
+  onManage: () => void;
+  onArchive: () => void;
+}) {
   const up = isUpcoming(ed.date);
   return (
     <article className="ev-card glass">
@@ -705,9 +1000,13 @@ function EventCard({ ed, onManage }: { ed: EditionLite; onManage: () => void }) 
       </div>
       <div className="ev-card__body">
         <div className="ev-card__badges">
-          <span className={up ? 'ev-badge ev-badge--next' : 'ev-badge'}>
-            {up ? 'À venir' : 'Passée'}
-          </span>
+          {ed.archived ? (
+            <span className="ev-badge ev-badge--muted">Archivé</span>
+          ) : (
+            <span className={up ? 'ev-badge ev-badge--next' : 'ev-badge'}>
+              {up ? 'À venir' : 'Passée'}
+            </span>
+          )}
           {ed.hidden && <span className="ev-badge ev-badge--hidden">Privé</span>}
           {ed.isStatic && !ed.storeId && (
             <span className="ev-badge ev-badge--muted">Site</span>
@@ -726,14 +1025,25 @@ function EventCard({ ed, onManage }: { ed: EditionLite; onManage: () => void }) 
           </p>
         )}
       </div>
-      <button type="button" className="btn btn--outline ev-card__manage" onClick={onManage}>
-        Gérer <Icon name="arrow-right" />
-      </button>
+      <div className="ev-card__actions">
+        <button
+          type="button"
+          className="ev-card__archive"
+          aria-label={ed.archived ? 'Sortir des archives' : 'Ranger dans les archives'}
+          title={ed.archived ? 'Sortir des archives' : 'Ranger dans les archives'}
+          onClick={onArchive}
+        >
+          <Icon name="archive" />
+        </button>
+        <button type="button" className="btn btn--outline ev-card__manage" onClick={onManage}>
+          Gérer <Icon name="arrow-right" />
+        </button>
+      </div>
     </article>
   );
 }
 
-type Filter = 'all' | 'upcoming' | 'past';
+type Filter = 'upcoming' | 'past' | 'archived';
 type View = { mode: 'list' } | { mode: 'create' } | { mode: 'edit'; slug: string };
 
 export default function EventsSection({
@@ -741,22 +1051,26 @@ export default function EventsSection({
   setStore,
   flash,
   editions,
+  startInCreate = false,
 }: {
   store: Store;
   setStore: (s: Store) => void;
   flash: (t: string, saved?: boolean) => void;
   editions: EditionLite[];
+  startInCreate?: boolean;
 }) {
   const [eds, setEds] = useState<EditionLite[]>(editions);
-  const [view, setView] = useState<View>({ mode: 'list' });
-  const [filter, setFilter] = useState<Filter>('all');
+  const [view, setView] = useState<View>(
+    startInCreate ? { mode: 'create' } : { mode: 'list' },
+  );
+  const [filter, setFilter] = useState<Filter>('upcoming');
 
   const artistNames = useMemo(() => store.artists.map((a) => a.name), [store.artists]);
 
   const shown = eds.filter((e) => {
-    if (filter === 'upcoming') return isUpcoming(e.date);
-    if (filter === 'past') return !isUpcoming(e.date);
-    return true;
+    if (filter === 'archived') return e.archived;
+    if (e.archived) return false;
+    return filter === 'upcoming' ? isUpcoming(e.date) : !isUpcoming(e.date);
   });
 
   function upsertLite(ev: StoredEvent) {
@@ -767,6 +1081,39 @@ export default function EventsSection({
         ? list.map((x) => (x.slug === ev.slug ? lite : x))
         : [lite, ...list];
     });
+  }
+
+  async function toggleArchived(ed: EditionLite) {
+    const next = !ed.archived;
+    const body: Record<string, unknown> = ed.storeId
+      ? { archived: next }
+      : {
+          slug: ed.slug,
+          name: ed.name,
+          description: ed.description,
+          date: ed.date,
+          time: ed.time,
+          venue: ed.venue,
+          dresscode: ed.dresscode,
+          headliner: ed.headliner,
+          lineup: ed.lineup.join('\n'),
+          bizoukEmbed: ed.bizoukEmbed,
+          hidden: ed.hidden,
+          archived: next,
+        };
+    const res = ed.storeId
+      ? await api(`/api/admin/events/${ed.storeId}`, 'PATCH', body)
+      : await api('/api/admin/events', 'POST', body);
+    if (!res.ok || !res.item) return flash(res.error ?? 'Échec.');
+    const item = res.item;
+    setStore({
+      ...store,
+      events: store.events.some((x) => x.id === item.id)
+        ? store.events.map((x) => (x.id === item.id ? item : x))
+        : [item, ...store.events],
+    });
+    upsertLite(item);
+    flash(next ? 'Événement archivé.' : 'Événement sorti des archives.', res.deployed);
   }
 
   if (view.mode === 'create') {
@@ -810,14 +1157,14 @@ export default function EventsSection({
     <div className="admin-tabpanel">
       <div className="ev-list__top">
         <div className="filters" role="tablist" aria-label="Filtrer">
-          {(['all', 'upcoming', 'past'] as Filter[]).map((f) => (
+          {(['upcoming', 'past', 'archived'] as Filter[]).map((f) => (
             <button
               key={f}
               type="button"
               className={filter === f ? 'filter is-active' : 'filter'}
               onClick={() => setFilter(f)}
             >
-              {f === 'all' ? 'Tous' : f === 'upcoming' ? 'À venir' : 'Passés'}
+              {f === 'upcoming' ? 'À venir' : f === 'past' ? 'Passés' : 'Archives'}
             </button>
           ))}
         </div>
@@ -840,6 +1187,7 @@ export default function EventsSection({
               key={ed.slug}
               ed={ed}
               onManage={() => setView({ mode: 'edit', slug: ed.slug })}
+              onArchive={() => toggleArchived(ed)}
             />
           ))}
         </div>

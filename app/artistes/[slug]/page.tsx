@@ -5,6 +5,8 @@ import Link from 'next/link';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import Icon from '@/components/Icon';
+import ArtistSubscribe from '@/components/ArtistSubscribe';
+import ArtistClaim from '@/components/ArtistClaim';
 import {
   getArtistProfiles,
   getArtistBySlug,
@@ -191,7 +193,15 @@ export default async function ArtistPage({
                 {artist.role && (
                   <span className="artist-role">{artist.role}</span>
                 )}
-                <h1 className="artist-name">{artist.name}</h1>
+                <h1 className="artist-name">
+                  {artist.name}
+                  {artist.verified && (
+                    <span className="artist-verified" title="Page vérifiée par l’artiste">
+                      <Icon name="check" className="icon" />
+                      Certifié
+                    </span>
+                  )}
+                </h1>
               </div>
             </div>
           </div>
@@ -214,6 +224,13 @@ export default async function ArtistPage({
             ))}
           </ul>
         )}
+
+        <div className="artist-actions">
+          <ArtistSubscribe slug={artist.slug} name={artist.name} />
+          {!artist.verified && (
+            <ArtistClaim slug={artist.slug} name={artist.name} />
+          )}
+        </div>
 
         {artist.bio && (
           <section className="artist-section">

@@ -27,7 +27,11 @@ export type IconName =
   | 'download'
   | 'share'
   | 'menu'
-  | 'close';
+  | 'close'
+  | 'check'
+  | 'bell'
+  | 'archive'
+  | 'inbox';
 
 export default function Icon({
   name,

@@ -68,6 +68,8 @@ function storedEventToEdition(ev: StoredEvent): Edition {
     gradient: ev.gradient || heroGradient(palette, dominantColor),
     emoji: ev.emoji || resolveEmoji({ name: ev.name, dominantColor }),
     hidden: ev.hidden === true,
+    archived: ev.archived === true,
+    schedule: Array.isArray(ev.schedule) ? ev.schedule : [],
   };
 }
 
@@ -103,8 +105,10 @@ function mergeOverride(base: Edition, se: StoredEvent, ovr: Edition): Edition {
     gradient: flyerChanged ? ovr.gradient : base.gradient,
     emoji: flyerChanged ? ovr.emoji : base.emoji,
     // la visibilité vient TOUJOURS de la surcharge → une édition statique peut
-    // être masquée sans être autrement modifiée.
+    // être masquée / archivée sans être autrement modifiée.
     hidden: se.hidden === true,
+    archived: se.archived === true,
+    schedule: Array.isArray(se.schedule) && se.schedule.length ? se.schedule : base.schedule,
   };
 }
 
@@ -134,7 +138,7 @@ export function getAllEditions(opts?: { includeHidden?: boolean }): Edition[] {
   // Sans date → considéré comme « à venir très lointain » : remonte en tête de
   // liste (un brouillon fraîchement créé est visible tout de suite).
   return [...merged, ...extra]
-    .filter((e) => (opts?.includeHidden ? true : !e.hidden))
+    .filter((e) => (opts?.includeHidden ? true : !e.hidden && !e.archived))
     .map((e) => ({ ...e, gallery: store.galleries[e.slug] ?? e.gallery ?? [] }))
     .sort((a, b) =>
       (b.dateISO ?? '9999-12-31').localeCompare(a.dateISO ?? '9999-12-31'),
@@ -157,13 +161,13 @@ export function getEditionBySlug(slug: string): Edition | undefined {
  *   édition passée avec son flyer.
  */
 export function nextEditionHidden(): boolean {
-  if (getNextEdition()) return false; // une autre édition à venir existe
+  if (getNextEdition()) return false; // une autre édition à venir (visible) existe
   const rawNext = getAllEditions({ includeHidden: true })
     .filter(isEditionUpcoming)
     .sort((a, b) =>
       (a.dateISO ?? '9999-12-31').localeCompare(b.dateISO ?? '9999-12-31'),
     )[0];
-  return Boolean(rawNext?.hidden);
+  return Boolean(rawNext?.hidden || rawNext?.archived);
 }
 
 /** La prochaine soirée à venir = la plus PROCHE dans le temps (pas juste

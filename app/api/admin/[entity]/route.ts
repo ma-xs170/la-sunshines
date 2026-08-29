@@ -3,6 +3,7 @@ import { isAuthed } from '@/lib/adminAuth';
 import { readStore } from '@/lib/store';
 import { persistStore } from '@/lib/persistStore';
 import { buildArtist, buildEvent, buildAnnouncement } from '@/lib/adminRecords';
+import { notifySubscribersForEvent } from '@/lib/subscriptions';
 
 const ENTITIES = ['artists', 'events', 'announcements'] as const;
 
@@ -59,6 +60,7 @@ export async function POST(req: Request, { params }: Ctx) {
   const built = buildEvent(body as Record<string, unknown>, store);
   if ('error' in built) return NextResponse.json(built, { status: 400 });
   store.events.unshift(built);
+  await notifySubscribersForEvent(store, built); // mute store.notifiedSubscribers
   const saved = await persistStore(store);
   if (!saved.ok) return NextResponse.json({ error: saved.error }, { status: 502 });
   return NextResponse.json(

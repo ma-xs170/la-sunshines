@@ -1620,33 +1620,75 @@ footer{
 }
 .admin-error{color:var(--coral);font-size:13px;font-weight:600;}
 
-/* --- onglets principaux --- */
-.admin-tabs{
-  display:flex;flex-wrap:wrap;gap:6px;
-  margin-bottom:var(--s-24);
-  border-bottom:1px solid var(--panel-border);
-  padding-bottom:var(--s-12);
+/* --- coquille + barre latérale (sidebar) --- */
+.admin-layout{display:flex;min-height:100vh;}
+.admin-layout .admin-shell{flex:1;margin-left:250px;max-width:none;}
+.admin-layout .admin-shell > *{max-width:1080px;}
+.admin-layout .admin-shell > .admin-tabpanel{margin-inline:0;}
+
+.admin-sidebar{
+  position:fixed;top:0;left:0;bottom:0;width:250px;z-index:40;
+  display:flex;flex-direction:column;gap:var(--s-24);
+  padding:var(--s-24) var(--s-16) var(--s-40);
+  background:var(--panel);
+  border-right:1px solid var(--panel-border);
+  backdrop-filter:blur(14px) saturate(1.4);-webkit-backdrop-filter:blur(14px) saturate(1.4);
+  overflow-y:auto;
 }
-.admin-tab{
-  display:inline-flex;align-items:center;gap:7px;
-  padding:9px 16px;border-radius:var(--r-pill);cursor:pointer;
-  font-size:13px;font-weight:700;color:var(--gray);
-  border:1px solid transparent;background:transparent;
-  transition:background .15s var(--ease),color .15s var(--ease),border-color .15s var(--ease);
+.admin-sidebar__brand{
+  display:flex;align-items:center;gap:9px;padding:4px 10px;
+  font-family:var(--font-display,inherit);font-weight:800;
+  font-size:14px;letter-spacing:0.03em;color:var(--ink);
 }
-.admin-tab:hover{background:rgba(25,20,16,0.05);color:var(--ink);}
-.admin-tab.is-active{
-  background:var(--amber);color:var(--ink);
+.admin-sidebar__brand .icon{width:18px;height:18px;color:var(--amber-ink);}
+.admin-sidebar__nav{display:flex;flex-direction:column;gap:var(--s-16);}
+.admin-navgroup{display:flex;flex-direction:column;gap:2px;}
+.admin-navgroup__title{
+  font-size:11px;font-weight:800;letter-spacing:0.09em;text-transform:uppercase;
+  color:var(--gray);padding:8px 10px 4px;
+}
+.admin-navlink{
+  display:flex;align-items:center;gap:10px;width:100%;
+  padding:9px 10px;border-radius:12px;cursor:pointer;text-align:left;
+  font-size:13px;font-weight:600;color:var(--gray);
+  background:transparent;border:1px solid transparent;text-decoration:none;
+  transition:background .15s var(--ease),color .15s var(--ease);
+}
+.admin-navlink .icon{width:16px;height:16px;flex:none;}
+.admin-navlink:hover{background:rgba(25,20,16,0.05);color:var(--ink);}
+.admin-navlink.is-active{
+  background:var(--amber);color:var(--ink);font-weight:700;
   box-shadow:0 6px 16px rgba(255,178,56,0.28);
 }
-.admin-tab--ext{color:var(--gray);text-decoration:none;}
-.admin-tab--ext .icon{width:12px;height:12px;}
-.admin-tab__badge{
-  display:inline-flex;align-items:center;justify-content:center;
+.admin-navlink__badge{
+  margin-left:auto;display:inline-flex;align-items:center;justify-content:center;
   min-width:18px;height:18px;padding:0 5px;border-radius:999px;
   background:var(--coral);color:#fff;font-size:11px;font-weight:800;
 }
-.admin-tab.is-active .admin-tab__badge{background:rgba(25,20,16,0.28);}
+.admin-navlink.is-active .admin-navlink__badge{background:rgba(25,20,16,0.28);}
+.admin-navlink__ext{margin-left:auto;width:12px;height:12px;opacity:.55;}
+
+.admin-sidebar__scrim{display:none;border:0;padding:0;}
+.admin-burger{
+  display:none;width:40px;height:40px;border-radius:12px;
+  align-items:center;justify-content:center;cursor:pointer;color:var(--ink);
+  border:1px solid var(--panel-border-strong);background:var(--panel);
+}
+.admin-burger .icon{width:18px;height:18px;}
+
+@media (max-width:900px){
+  .admin-layout .admin-shell{margin-left:0;}
+  .admin-sidebar{
+    transform:translateX(-100%);transition:transform .22s var(--ease);
+    box-shadow:0 0 44px rgba(0,0,0,0.22);
+  }
+  .admin-layout.is-nav-open .admin-sidebar{transform:translateX(0);}
+  .admin-layout.is-nav-open .admin-sidebar__scrim{
+    display:block;position:fixed;inset:0;z-index:35;
+    background:rgba(20,15,10,0.34);
+  }
+  .admin-burger{display:inline-flex;}
+}
 
 .admin-tabpanel{display:flex;flex-direction:column;gap:var(--s-24);}
 @media (min-width:900px){
@@ -2601,3 +2643,160 @@ footer{
 .admin-ticket--done .admin-ticket__badge{background:rgba(25,20,16,0.1);color:var(--gray);}
 .admin-ticket__meta{font-size:11px;color:var(--gray-dim);}
 .admin-ticket__msg{font-size:13px;color:var(--gray);line-height:1.5;white-space:pre-wrap;}
+
+/* =========================================================
+   Artiste : abonnement + réclamation de page (CTA)
+   ========================================================= */
+.artist-verified{
+  display:inline-flex;align-items:center;gap:5px;vertical-align:middle;
+  margin-left:0.5em;
+  font-family:var(--font-sans,inherit);
+  font-size:0.34em;font-weight:800;letter-spacing:0.05em;text-transform:uppercase;
+  line-height:1;
+  color:#fff;
+  background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.38);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  padding:5px 10px;border-radius:var(--r-pill);
+  text-shadow:none;
+}
+.artist-verified .icon{width:1.05em;height:1.05em;}
+
+.artist-actions{
+  display:flex;flex-wrap:wrap;gap:var(--s-12);
+  margin-top:var(--s-40);
+}
+.artist-cta{display:flex;flex-direction:column;}
+.artist-cta__toggle{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:10px 18px;border-radius:var(--r-pill);cursor:pointer;
+  border:1px solid var(--panel-border-strong);background:var(--panel);
+  font-size:13px;font-weight:700;color:var(--ink);
+  transition:border-color .15s var(--ease),background .15s var(--ease);
+}
+.artist-cta__toggle:hover{border-color:var(--ink);background:rgba(25,20,16,0.04);}
+.artist-cta__toggle .icon{width:15px;height:15px;}
+.artist-cta__form{
+  margin-top:var(--s-16);padding:var(--s-24);border-radius:var(--r-md);
+  display:flex;flex-direction:column;gap:var(--s-12);max-width:440px;
+}
+.artist-cta__title{font-size:14px;font-weight:800;color:var(--ink);}
+.artist-cta__form label{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700;color:var(--ink);}
+.artist-cta__form input[type=email],
+.artist-cta__form input[type=text],
+.artist-cta__form input:not([type]){
+  padding:9px 12px;border-radius:var(--r-sm);
+  border:1px solid var(--panel-border-strong);background:var(--bg);
+  font-size:14px;color:var(--ink);
+}
+.artist-cta__file input{font-size:12px;font-weight:500;}
+.artist-cta__note{
+  font-size:11.5px;line-height:1.5;color:var(--gray);font-weight:500;
+  background:rgba(25,20,16,0.05);border-radius:var(--r-sm);padding:10px 12px;
+}
+.artist-cta__consent{
+  flex-direction:row !important;align-items:flex-start;gap:9px;
+  font-size:11.5px;font-weight:500;color:var(--gray);line-height:1.5;
+}
+.artist-cta__consent input{margin-top:2px;flex:none;}
+.artist-cta__err{color:var(--coral);font-size:12px;font-weight:700;}
+.artist-cta__row{display:flex;gap:var(--s-8);flex-wrap:wrap;}
+.artist-cta__done{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:13px;font-weight:700;color:var(--ink);
+}
+.artist-cta__done .icon{width:16px;height:16px;color:var(--amber-ink);}
+
+/* =========================================================
+   Programme horaire public (running order) — /editions/[slug]
+   ========================================================= */
+.ro{padding:var(--s-16) var(--s-24);border-radius:var(--r-md);}
+.ro__list{list-style:none;display:flex;flex-direction:column;}
+.ro__row{
+  display:grid;grid-template-columns:76px 1fr;gap:var(--s-16);
+  padding:12px 0;align-items:baseline;
+}
+.ro__row:not(:last-child){border-bottom:1px solid var(--ev-line,var(--panel-border));}
+.ro__time{
+  font-family:var(--font-display,inherit);font-weight:800;font-size:15px;
+  color:var(--ev-accent,var(--amber-ink));font-variant-numeric:tabular-nums;
+}
+.ro__body{display:flex;flex-direction:column;gap:2px;}
+.ro__name{font-size:15px;font-weight:700;color:var(--ev-ink,var(--ink));}
+.ro__label{font-size:12px;font-weight:600;color:var(--ev-ink-soft,var(--gray));}
+
+/* =========================================================
+   Admin : éditeur de programme
+   ========================================================= */
+.sched{display:flex;flex-direction:column;gap:var(--s-12);}
+.sched__list{list-style:none;display:flex;flex-direction:column;gap:var(--s-8);}
+.sched__row{
+  display:grid;grid-template-columns:90px 1fr 1fr auto;gap:var(--s-8);align-items:center;
+}
+.sched__row input{
+  padding:8px 10px;border-radius:var(--r-sm);
+  border:1px solid var(--panel-border-strong);background:var(--bg);
+  font-size:13px;color:var(--ink);min-width:0;
+}
+.sched__acts{display:inline-flex;gap:4px;}
+.sched__acts button{
+  width:30px;height:30px;border-radius:8px;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;
+  border:1px solid var(--panel-border-strong);background:var(--panel);color:var(--ink);
+}
+.sched__acts button:disabled{opacity:.35;cursor:default;}
+.sched__acts button .icon{width:14px;height:14px;}
+.sched__del{color:var(--coral) !important;}
+@media (max-width:640px){
+  .sched__row{grid-template-columns:1fr 1fr;grid-auto-flow:row;}
+  .sched__acts{grid-column:1 / -1;justify-content:flex-end;}
+}
+
+.admin-inline-add{margin-top:4px;align-self:flex-start;}
+
+/* =========================================================
+   Admin : modale « + Nouvel artiste »
+   ========================================================= */
+.admin-modal{position:fixed;inset:0;z-index:60;display:flex;align-items:flex-start;justify-content:center;padding:var(--s-40) var(--gutter);overflow-y:auto;}
+.admin-modal__backdrop{position:fixed;inset:0;background:rgba(20,15,10,0.44);}
+.admin-modal__panel{
+  position:relative;width:100%;max-width:560px;border-radius:var(--r-md);
+  padding:var(--s-24);display:flex;flex-direction:column;gap:var(--s-16);
+}
+.admin-modal__head{display:flex;align-items:center;justify-content:space-between;gap:var(--s-16);}
+.admin-modal__head h3{font-size:18px;}
+.admin-modal__x{
+  width:34px;height:34px;border-radius:9px;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;
+  border:1px solid var(--panel-border-strong);background:var(--panel);color:var(--ink);
+}
+.admin-modal__x .icon{width:15px;height:15px;}
+
+/* =========================================================
+   Admin : demandes de vérification
+   ========================================================= */
+.admin-verif{
+  display:flex;flex-direction:column;gap:var(--s-12);
+  padding:14px 16px;border:1px solid var(--panel-border);
+  border-radius:var(--r-sm);background:var(--bg-2);
+}
+.admin-verif__main{display:flex;align-items:center;gap:var(--s-16);flex-wrap:wrap;justify-content:space-between;}
+.admin-verif__acts{display:flex;gap:var(--s-8);flex-wrap:wrap;}
+.admin-verif__acts .btn{padding:8px 16px;font-size:13px;}
+.admin-verif .admin-mini .icon{width:13px;height:13px;}
+
+/* =========================================================
+   Admin : bouton archiver sur les cartes d'événement
+   ========================================================= */
+.ev-card__actions{display:flex;align-items:center;gap:var(--s-8);}
+.ev-card__archive{
+  width:38px;height:38px;border-radius:10px;flex:none;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;
+  border:1px solid var(--panel-border-strong);background:var(--panel);color:var(--gray);
+  transition:color .15s var(--ease),border-color .15s var(--ease);
+}
+.ev-card__archive:hover{color:var(--ink);border-color:var(--ink);}
+.ev-card__archive .icon{width:15px;height:15px;}
+@media (max-width:560px){
+  .ev-card__actions{grid-area:m;justify-self:stretch;}
+  .ev-card__manage{flex:1;}
+}

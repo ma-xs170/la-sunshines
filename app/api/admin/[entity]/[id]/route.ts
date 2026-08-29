@@ -7,6 +7,7 @@ import {
   applyEventPatch,
   applyAnnouncementPatch,
 } from '@/lib/adminRecords';
+import { notifySubscribersForEvent } from '@/lib/subscriptions';
 
 const ENTITIES = ['artists', 'events', 'announcements', 'tickets'];
 
@@ -74,6 +75,7 @@ export async function PATCH(req: Request, { params }: Ctx) {
   const idx = store.events.findIndex((e) => e.id === id);
   if (idx < 0) return NextResponse.json({ error: 'Introuvable.' }, { status: 404 });
   store.events[idx] = applyEventPatch(store.events[idx], body);
+  await notifySubscribersForEvent(store, store.events[idx]); // 1x par (event, abonné)
   const saved = await persistStore(store);
   if (!saved.ok) return NextResponse.json({ error: saved.error }, { status: 502 });
   return NextResponse.json({ ok: true, item: store.events[idx], deployed: saved.deployed });

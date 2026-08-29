@@ -11,6 +11,7 @@ import { isEditionUpcoming } from '@/lib/editions';
 import { getTimetable } from '@/lib/timetables';
 import { getBizoukEmbed } from '@/lib/bizouk';
 import EventTimetable from '@/components/EventTimetable';
+import RunningOrder from '@/components/RunningOrder';
 import BizoukWidget from '@/components/BizoukWidget';
 import BizoukClosed from '@/components/BizoukClosed';
 import EventAtmosphere from '@/components/EventAtmosphere';
@@ -222,13 +223,19 @@ export default async function EditionPage({
           </section>
         )}
 
-        {timetable && (
+        {ed.schedule && ed.schedule.length > 0 ? (
+          <section className="event-section">
+            <p className="script">Le déroulé</p>
+            <h2>Programme</h2>
+            <RunningOrder schedule={ed.schedule} />
+          </section>
+        ) : timetable ? (
           <section className="event-section">
             <p className="script">Le déroulé</p>
             <h2>Programme</h2>
             <EventTimetable timetable={timetable} />
           </section>
-        )}
+        ) : null}
 
         <section className="event-section">
           <p className="script">Localisation</p>
