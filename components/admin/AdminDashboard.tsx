@@ -329,7 +329,9 @@ function VerificationPanel({
   flash: (t: string, saved?: boolean) => void;
 }) {
   const [busy, setBusy] = useState<string | null>(null);
+  const [view, setView] = useState<'pending' | 'verified'>('pending');
   const reqs = store.verificationRequests;
+  const verifiedArtists = store.artists.filter((a) => a.verified);
 
   async function decide(r: VerificationRequest, decision: 'approve' | 'refuse') {
     const label =
@@ -358,64 +360,154 @@ function VerificationPanel({
     );
   }
 
+  async function revoke(a: StoredArtist) {
+    if (
+      !window.confirm(
+        `Retirer la certification de « ${a.name} » ? Le badge « Certifié » disparaîtra de sa page. Réversible.`,
+      )
+    )
+      return;
+    setBusy(a.id);
+    const res = await api(`/api/admin/artists/${a.id}`, 'PATCH', { verified: false });
+    setBusy(null);
+    if (!res.ok) return flash(res.error ?? 'Échec.');
+    setStore({
+      ...store,
+      artists: store.artists.map((x) =>
+        x.id === a.id ? { ...x, verified: false } : x,
+      ),
+    });
+    flash('Certification retirée.', res.deployed);
+  }
+
   return (
     <section className="admin-panel admin-panel--wide glass">
-      <h2>Demandes de vérification</h2>
-      <p className="admin-note admin-note--tight">
-        Un artiste a téléversé une pièce d’identité pour revendiquer sa page. Le
-        document est stocké de façon privée (Vercel Blob) et&nbsp;
-        <strong>supprimé automatiquement dès que tu statues</strong>. Seul le
-        statut «&nbsp;certifié&nbsp;» est conservé.
-      </p>
+      <h2>Vérifications</h2>
 
-      {reqs.length === 0 ? (
-        <p className="admin-list__empty">Aucune demande en attente.</p>
+      <div className="filters" style={{ margin: '0 0 var(--s-16)' }}>
+        <button
+          type="button"
+          className={view === 'pending' ? 'filter is-active' : 'filter'}
+          onClick={() => setView('pending')}
+        >
+          Demandes de vérification
+          {reqs.length > 0 ? ` (${reqs.length})` : ''}
+        </button>
+        <button
+          type="button"
+          className={view === 'verified' ? 'filter is-active' : 'filter'}
+          onClick={() => setView('verified')}
+        >
+          Vérifiés
+          {verifiedArtists.length > 0 ? ` (${verifiedArtists.length})` : ''}
+        </button>
+      </div>
+
+      {view === 'pending' ? (
+        <>
+          <p className="admin-note admin-note--tight">
+            Un artiste a téléversé une pièce d’identité pour revendiquer sa page. Le
+            document est stocké de façon privée (Vercel Blob) et&nbsp;
+            <strong>supprimé automatiquement dès que tu statues</strong>. Seul le
+            statut «&nbsp;certifié&nbsp;» est conservé.
+          </p>
+
+          {reqs.length === 0 ? (
+            <p className="admin-list__empty">Aucune demande en attente.</p>
+          ) : (
+            <ul className="admin-list">
+              {reqs.map((r) => {
+                const artist = store.artists.find((a) => a.slug === r.artistSlug);
+                return (
+                  <li key={r.id} className="admin-verif">
+                    <div className="admin-verif__main">
+                      <span className="admin-list__name">
+                        {artist?.name ?? r.artistSlug}
+                        <small>
+                          Demandé par {r.name} ·{' '}
+                          <a href={`mailto:${r.email}`}>{r.email}</a> ·{' '}
+                          {new Date(r.createdAt).toLocaleString('fr-FR')}
+                        </small>
+                      </span>
+                      <a
+                        className="admin-mini"
+                        href={`/api/admin/verification/${r.id}/document`}
+                        target="_blank"
+                        rel="noopener"
+                      >
+                        <Icon name="shield" className="icon" /> Voir le document
+                      </a>
+                    </div>
+                    <div className="admin-verif__acts">
+                      <button
+                        className="btn btn--amber"
+                        type="button"
+                        disabled={busy === r.id}
+                        onClick={() => decide(r, 'approve')}
+                      >
+                        {busy === r.id ? '…' : 'Approuver'}
+                      </button>
+                      <button
+                        className="btn btn--outline"
+                        type="button"
+                        disabled={busy === r.id}
+                        onClick={() => decide(r, 'refuse')}
+                      >
+                        Refuser
+                      </button>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </>
       ) : (
-        <ul className="admin-list">
-          {reqs.map((r) => {
-            const artist = store.artists.find((a) => a.slug === r.artistSlug);
-            return (
-              <li key={r.id} className="admin-verif">
-                <div className="admin-verif__main">
-                  <span className="admin-list__name">
-                    {artist?.name ?? r.artistSlug}
-                    <small>
-                      Demandé par {r.name} ·{' '}
-                      <a href={`mailto:${r.email}`}>{r.email}</a> ·{' '}
-                      {new Date(r.createdAt).toLocaleString('fr-FR')}
-                    </small>
-                  </span>
-                  <a
-                    className="admin-mini"
-                    href={`/api/admin/verification/${r.id}/document`}
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    <Icon name="shield" className="icon" /> Voir le document
-                  </a>
-                </div>
-                <div className="admin-verif__acts">
-                  <button
-                    className="btn btn--amber"
-                    type="button"
-                    disabled={busy === r.id}
-                    onClick={() => decide(r, 'approve')}
-                  >
-                    {busy === r.id ? '…' : 'Approuver'}
-                  </button>
-                  <button
-                    className="btn btn--outline"
-                    type="button"
-                    disabled={busy === r.id}
-                    onClick={() => decide(r, 'refuse')}
-                  >
-                    Refuser
-                  </button>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+        <>
+          <p className="admin-note admin-note--tight">
+            Artistes dont la page publique affiche le badge «&nbsp;Certifié&nbsp;».
+            Retirer la certification repasse la page en non vérifiée (réversible —
+            l’artiste pourra refaire une demande).
+          </p>
+
+          {verifiedArtists.length === 0 ? (
+            <p className="admin-list__empty">Aucun artiste certifié.</p>
+          ) : (
+            <ul className="admin-list">
+              {verifiedArtists.map((a) => (
+                <li key={a.id} className="admin-verif">
+                  <div className="admin-verif__main">
+                    <span className="admin-list__name">
+                      {a.name}
+                      <small>
+                        /artistes/{a.slug}
+                        {a.role ? ` · ${a.role}` : ''}
+                      </small>
+                    </span>
+                    <a
+                      className="admin-mini"
+                      href={`/artistes/${a.slug}`}
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      <Icon name="check" className="icon" /> Voir la page
+                    </a>
+                  </div>
+                  <div className="admin-verif__acts">
+                    <button
+                      className="btn btn--outline"
+                      type="button"
+                      disabled={busy === a.id}
+                      onClick={() => revoke(a)}
+                    >
+                      {busy === a.id ? '…' : 'Retirer la certification'}
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
       )}
     </section>
   );

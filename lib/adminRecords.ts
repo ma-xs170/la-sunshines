@@ -22,6 +22,7 @@ export type ArtistInput = {
   tiktok?: unknown;
   soundcloud?: unknown;
   email?: unknown;
+  verified?: unknown; // booléen — badge « Certifié » (posé/retiré depuis /admin)
 };
 
 export type EventInput = {
@@ -136,6 +137,12 @@ export function applyArtistPatch(
     tiktok: pick('tiktok', current.tiktok),
     soundcloud: pick('soundcloud', current.soundcloud),
     email: pick('email', current.email),
+    // le badge « Certifié » n'est touché que si `verified` est explicitement fourni
+    // (révocation depuis /admin) ; un patch classique du formulaire le préserve.
+    verified:
+      input.verified !== undefined
+        ? input.verified === true
+        : current.verified === true,
   };
 }
 
