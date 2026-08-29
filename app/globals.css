@@ -1622,29 +1622,30 @@ footer{
 
 /* --- coquille + barre latérale (sidebar) --- */
 .admin-layout{display:flex;min-height:100vh;}
-.admin-layout .admin-shell{flex:1;margin-left:264px;max-width:none;}
+.admin-layout .admin-shell{flex:1;min-width:0;margin-left:272px;max-width:none;}
 .admin-layout .admin-shell > *{max-width:1080px;}
 .admin-layout .admin-shell > .admin-tabpanel{margin-inline:0;}
 
+/* DESKTOP : colonne fixe pleine hauteur, collée au bord gauche.
+   Pas de coins arrondis, pas de marge, fond opaque → aucun effet « pilule
+   flottante ». Le style « tiroir » (translate + ombre) est réservé au mobile
+   dans la media query < 900px plus bas. */
 .admin-sidebar{
-  position:fixed;top:0;left:0;bottom:0;width:264px;z-index:40;
+  position:fixed;inset:0 auto 0 0;width:272px;z-index:40;
   display:flex;flex-direction:column;
   padding:var(--s-24) var(--s-16);
-  background:var(--panel);
-  border-right:1px solid var(--panel-border);
-  backdrop-filter:blur(14px) saturate(1.4);-webkit-backdrop-filter:blur(14px) saturate(1.4);
-  overflow:hidden;
+  background:var(--bg-2);
+  border-right:1px solid var(--panel-border-strong);
+  overflow-y:auto;overscroll-behavior:contain;
 }
 .admin-sidebar__brand{
-  flex:none;display:flex;align-items:center;
-  padding:var(--s-8) var(--s-12) var(--s-24);
-  margin-bottom:var(--s-8);
+  display:flex;align-items:center;
+  padding:var(--s-8) var(--s-12) var(--s-16);
   border-bottom:1px solid var(--panel-border);
 }
-.admin-sidebar__logo{height:28px;width:auto;display:block;}
+.admin-sidebar__logo{height:26px;width:auto;display:block;}
 
 .admin-sidebar__nav{
-  flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;
   display:flex;flex-direction:column;gap:var(--s-24);
   padding:var(--s-16) 0;
 }
@@ -1685,8 +1686,12 @@ footer{
 }
 .admin-navlink--ext:hover .admin-navlink__ext{opacity:1;transform:translate(1px,-1px);}
 
+/* « Se déconnecter » : dans le flux normal, juste sous les liens, séparé par un
+   simple filet — pas épinglé en bas de l'écran. */
 .admin-sidebar__foot{
-  flex:none;padding-top:var(--s-16);border-top:1px solid var(--panel-border);
+  margin-top:var(--s-16);
+  padding-top:var(--s-16);
+  border-top:1px solid var(--panel-border);
 }
 .admin-navlink--logout{color:var(--gray);}
 .admin-navlink--logout:hover{

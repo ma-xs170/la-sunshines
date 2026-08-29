@@ -4,8 +4,31 @@
 
 import { put, del, get } from '@vercel/blob';
 
+/**
+ * Vercel Blob est-il utilisable ?
+ *
+ * Deux modes d'authentification, tous deux gérés automatiquement par le SDK
+ * (`put` / `del` / `get` n'ont JAMAIS besoin qu'on leur passe un token) :
+ *
+ *  1. `BLOB_READ_WRITE_TOKEN` — jeton statique. Injecté si on choisit « exposer
+ *     le token » à la connexion du store, ou renseigné à la main en local.
+ *  2. **OIDC natif** — quand le store Blob est relié au projet sans jeton statique
+ *     (option par défaut aujourd'hui), Vercel injecte à l'exécution un jeton OIDC
+ *     temporaire (`VERCEL_OIDC_TOKEN`, ou l'en-tête `x-vercel-oidc-token`) + le
+ *     `BLOB_STORE_ID`. `@vercel/blob` (>= 2.x) s'authentifie seul avec ça.
+ *
+ * On considère donc le Blob disponible dès qu'un de ces signaux est présent — ou
+ * simplement qu'on tourne sur Vercel (`VERCEL === '1'`), où l'auth OIDC prendra le
+ * relais. Un vrai échec de credentials est de toute façon rattrapé proprement par
+ * les routes appelantes (503 / 502), jamais un crash.
+ */
 export function blobConfigured(): boolean {
-  return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+  return Boolean(
+    process.env.BLOB_READ_WRITE_TOKEN ||
+      process.env.BLOB_STORE_ID ||
+      process.env.VERCEL_OIDC_TOKEN ||
+      process.env.VERCEL === '1',
+  );
 }
 
 const MAX_BYTES = 10 * 1024 * 1024; // 10 Mo
