@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import Image from 'next/image';
 import type {
   Store,
   StoredArtist,
@@ -154,10 +155,23 @@ export default function AdminDashboard({
   return (
     <div className={navOpen ? 'admin-layout is-nav-open' : 'admin-layout'}>
       <aside className="admin-sidebar" aria-label="Navigation de l’administration">
-        <div className="admin-sidebar__brand">
-          <Icon name="sun" className="icon" />
-          <span>LA SUNSHINES</span>
-        </div>
+        <a
+          className="admin-sidebar__brand"
+          href="/"
+          target="_blank"
+          rel="noopener"
+          aria-label="LA SUNSHINES — ouvrir le site"
+        >
+          <Image
+            className="admin-sidebar__logo"
+            src="/images/logo-dark.png"
+            alt="LA SUNSHINES"
+            width={848}
+            height={168}
+            priority
+          />
+        </a>
+
         <nav className="admin-sidebar__nav">
           {NAV.map((group, gi) => (
             <div className="admin-navgroup" key={group.title || `g${gi}`}>
@@ -181,6 +195,7 @@ export default function AdminDashboard({
               ))}
             </div>
           ))}
+
           <div className="admin-navgroup">
             <p className="admin-navgroup__title">Compte</p>
             <a
@@ -191,7 +206,7 @@ export default function AdminDashboard({
             >
               <Icon name="clock" className="icon" />
               <span>Statuts</span>
-              <Icon name="arrow-up-right" className="icon admin-navlink__ext" />
+              <Icon name="arrow-up-right" className="admin-navlink__ext" />
             </a>
             <a
               className="admin-navlink admin-navlink--ext"
@@ -201,14 +216,21 @@ export default function AdminDashboard({
             >
               <Icon name="share" className="icon" />
               <span>Voir le site</span>
-              <Icon name="arrow-up-right" className="icon admin-navlink__ext" />
+              <Icon name="arrow-up-right" className="admin-navlink__ext" />
             </a>
-            <button className="admin-navlink" type="button" onClick={logout}>
-              <Icon name="close" className="icon" />
-              <span>Se déconnecter</span>
-            </button>
           </div>
         </nav>
+
+        <div className="admin-sidebar__foot">
+          <button
+            className="admin-navlink admin-navlink--logout"
+            type="button"
+            onClick={logout}
+          >
+            <Icon name="close" className="icon" />
+            <span>Se déconnecter</span>
+          </button>
+        </div>
       </aside>
 
       <button
