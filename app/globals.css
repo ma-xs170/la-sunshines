@@ -1626,17 +1626,18 @@ footer{
 .admin-layout .admin-shell > *{max-width:1080px;}
 .admin-layout .admin-shell > .admin-tabpanel{margin-inline:0;}
 
-/* DESKTOP : colonne fixe pleine hauteur, collée au bord gauche.
-   Pas de coins arrondis, pas de marge, fond opaque → aucun effet « pilule
-   flottante ». Le style « tiroir » (translate + ombre) est réservé au mobile
-   dans la media query < 900px plus bas. */
+/* Panneau RECTANGULAIRE : colonne pleine hauteur collée au bord gauche de la
+   fenêtre, coins droits, fond opaque, simple filet à droite (aucune ombre large,
+   aucune marge flottante, aucune forme capsule). Identique en desktop et en
+   mobile — SEULE la translation d'ouverture change (media query < 900px). */
 .admin-sidebar{
   position:fixed;inset:0 auto 0 0;width:272px;z-index:40;
   display:flex;flex-direction:column;
   padding:var(--s-24) var(--s-16);
   background:var(--bg-2);
   border-right:1px solid var(--panel-border-strong);
-  overflow-y:auto;overscroll-behavior:contain;
+  border-radius:0;box-shadow:none;
+  overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;
 }
 .admin-sidebar__brand{
   display:flex;align-items:center;
@@ -1656,18 +1657,16 @@ footer{
 }
 .admin-navlink{
   display:flex;align-items:center;gap:var(--s-12);width:100%;
-  padding:10px var(--s-12);border-radius:var(--r-sm);cursor:pointer;text-align:left;
+  padding:10px var(--s-12);border-radius:8px;cursor:pointer;text-align:left;
   font-size:13px;font-weight:600;color:var(--gray);
   background:transparent;border:1px solid transparent;text-decoration:none;
-  transition:background .18s var(--ease),color .18s var(--ease),
-    box-shadow .18s var(--ease),transform .12s var(--ease);
+  transition:background .15s var(--ease),color .15s var(--ease);
 }
 .admin-navlink .icon{width:16px;height:16px;flex:none;}
 .admin-navlink:hover{background:rgba(25,20,16,0.05);color:var(--ink);}
-.admin-navlink:active{transform:scale(0.985);}
+/* lien actif = simple bloc rectangulaire à fond coloré (pas de pilule, pas de glow) */
 .admin-navlink.is-active{
   background:var(--amber);color:var(--ink);font-weight:700;
-  box-shadow:0 6px 16px rgba(255,178,56,0.28);
 }
 .admin-navlink.is-active .icon{color:var(--ink);}
 .admin-navlink__badge{
@@ -1701,18 +1700,16 @@ footer{
 
 .admin-sidebar__scrim{display:none;border:0;padding:0;}
 .admin-burger{
-  display:none;width:40px;height:40px;border-radius:var(--r-sm);
+  display:none;width:40px;height:40px;border-radius:8px;
   align-items:center;justify-content:center;cursor:pointer;color:var(--ink);
-  border:1px solid var(--panel-border-strong);background:var(--panel);
+  border:1px solid var(--panel-border-strong);background:var(--bg-2);
 }
 .admin-burger .icon{width:18px;height:18px;}
 
 @media (max-width:900px){
   .admin-layout .admin-shell{margin-left:0;}
-  .admin-sidebar{
-    transform:translateX(-100%);transition:transform .24s var(--ease);
-    box-shadow:0 0 44px rgba(0,0,0,0.22);
-  }
+  /* même panneau rectangulaire : on ne change QUE la translation d'ouverture */
+  .admin-sidebar{transform:translateX(-100%);transition:transform .24s var(--ease);}
   .admin-layout.is-nav-open .admin-sidebar{transform:translateX(0);}
   .admin-layout.is-nav-open .admin-sidebar__scrim{
     display:block;position:fixed;inset:0;z-index:35;
