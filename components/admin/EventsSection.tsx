@@ -7,6 +7,7 @@ import { resolveEmoji } from '@/lib/editionEmoji';
 import { heroGradient } from '@/lib/gradient';
 import { normalizeArtistName } from '@/lib/artists';
 import { formatEditionDate } from '@/lib/format';
+import { groupSchedule, slotsFromEventTime, normalizeTime } from '@/lib/schedule';
 import Icon from '@/components/Icon';
 import ArtistCombobox from './ArtistCombobox';
 import PlacesAutocomplete from './PlacesAutocomplete';
@@ -147,16 +148,30 @@ function useEventForm(initialForm?: Partial<EventFormState>, initialImg?: Partia
   const schedule = form.schedule;
   const setSchedule = (rows: ScheduleEntry[]) =>
     setForm((f) => ({ ...f, schedule: rows }));
-  const addSchedule = () =>
-    setSchedule([...schedule, { id: uid(), time: '', artistName: '', label: '' }]);
+  /** Ajoute une entrée vide, éventuellement rattachée à un créneau existant. */
+  const addSchedule = (time = '') =>
+    setSchedule([
+      ...schedule,
+      { id: uid(), time, artistName: '', label: '', headliner: false },
+    ]);
   const patchSchedule = (id: string, patch: Partial<ScheduleEntry>) =>
     setSchedule(schedule.map((s) => (s.id === id ? { ...s, ...patch } : s)));
   const removeSchedule = (id: string) =>
     setSchedule(schedule.filter((s) => s.id !== id));
+  /** Change l'heure de toutes les entrées d'un créneau (le groupe se déplace). */
+  const retimeGroup = (oldTime: string, newTime: string) =>
+    setSchedule(
+      schedule.map((s) => (s.time === oldTime ? { ...s, time: newTime } : s)),
+    );
+  /** Réordonne une entrée au sein de son propre créneau (échange avec la
+   *  voisine partageant la même heure). */
   const moveSchedule = (id: string, dir: -1 | 1) => {
     const i = schedule.findIndex((s) => s.id === id);
-    const j = i + dir;
-    if (i < 0 || j < 0 || j >= schedule.length) return;
+    if (i < 0) return;
+    const t = schedule[i].time;
+    let j = i + dir;
+    while (j >= 0 && j < schedule.length && schedule[j].time !== t) j += dir;
+    if (j < 0 || j >= schedule.length) return;
     const next = [...schedule];
     [next[i], next[j]] = [next[j], next[i]];
     setSchedule(next);
@@ -235,6 +250,7 @@ function useEventForm(initialForm?: Partial<EventFormState>, initialImg?: Partia
     addSchedule,
     patchSchedule,
     removeSchedule,
+    retimeGroup,
     moveSchedule,
     payload,
   };
@@ -415,6 +431,17 @@ function ScheduleEditor({ hook }: { hook: Hook }) {
   const names = Array.from(
     new Set([...hook.headlinerList, ...hook.lineupList].filter(Boolean)),
   );
+  const slots = slotsFromEventTime(hook.form.time);
+  const groups = groupSchedule(hook.schedule);
+  const usedTimes = new Set(groups.map((g) => g.time));
+  const nextSlot = slots.find((s) => !usedTimes.has(s)) ?? slots[0] ?? '';
+
+  /** options du <select> d'un créneau — inclut sa valeur actuelle même si elle
+   *  n'est pas dans la grille (valeurs legacy « 18h00 », plages…). */
+  function slotOptions(current: string): string[] {
+    return current && !slots.includes(current) ? [current, ...slots] : slots;
+  }
+
   return (
     <div className="sched">
       <datalist id="sched-artists">
@@ -422,70 +449,110 @@ function ScheduleEditor({ hook }: { hook: Hook }) {
           <option key={n} value={n} />
         ))}
       </datalist>
-      {hook.schedule.length === 0 && (
+
+      {groups.length === 0 && (
         <p className="admin-field__hint">
-          Aucune ligne. Le programme n’apparaît sur le site que s’il contient au
-          moins une entrée.
+          Aucun créneau. Le programme n’apparaît sur le site que s’il contient au
+          moins une entrée. Les entrées qui partagent la même heure sont
+          regroupées automatiquement.
         </p>
       )}
-      <ul className="sched__list">
-        {hook.schedule.map((row, i) => (
-          <li className="sched__row" key={row.id}>
-            <input
-              className="sched__time"
-              value={row.time}
-              placeholder="18h00"
-              onChange={(e) => hook.patchSchedule(row.id, { time: e.target.value })}
-            />
-            <input
-              className="sched__artist"
-              list="sched-artists"
-              value={row.artistName}
-              placeholder="Artiste (line-up ou libre)"
-              onChange={(e) => hook.patchSchedule(row.id, { artistName: e.target.value })}
-            />
-            <input
-              className="sched__label"
-              value={row.label}
-              placeholder="Label (Live, Set DJ…)"
-              onChange={(e) => hook.patchSchedule(row.id, { label: e.target.value })}
-            />
-            <div className="sched__acts">
+
+      <div className="sched__groups">
+        {groups.map((g) => (
+          <div className="sched__group" key={g.time || 'sans-heure'}>
+            <div className="sched__ghead">
+              <select
+                className="sched__time"
+                value={g.time}
+                onChange={(e) => hook.retimeGroup(g.time, e.target.value)}
+              >
+                {!g.time && <option value="">— Heure —</option>}
+                {slotOptions(g.time).map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
               <button
                 type="button"
-                aria-label="Monter"
-                disabled={i === 0}
-                onClick={() => hook.moveSchedule(row.id, -1)}
+                className="admin-mini"
+                onClick={() => hook.addSchedule(g.time)}
               >
-                <Icon name="chevron-left" />
-              </button>
-              <button
-                type="button"
-                aria-label="Descendre"
-                disabled={i === hook.schedule.length - 1}
-                onClick={() => hook.moveSchedule(row.id, 1)}
-              >
-                <Icon name="chevron-right" />
-              </button>
-              <button
-                type="button"
-                className="sched__del"
-                aria-label="Supprimer la ligne"
-                onClick={() => hook.removeSchedule(row.id)}
-              >
-                <Icon name="close" />
+                + Ajouter à ce créneau
               </button>
             </div>
-          </li>
+
+            <ul className="sched__rows">
+              {g.entries.map((row, i) => (
+                <li className="sched__row" key={row.id}>
+                  <input
+                    className="sched__artist"
+                    list="sched-artists"
+                    value={row.artistName}
+                    placeholder="Artiste (line-up ou libre)"
+                    onChange={(e) =>
+                      hook.patchSchedule(row.id, { artistName: e.target.value })
+                    }
+                  />
+                  <input
+                    className="sched__label"
+                    value={row.label}
+                    placeholder="Label (Live, Set DJ…)"
+                    onChange={(e) =>
+                      hook.patchSchedule(row.id, { label: e.target.value })
+                    }
+                  />
+                  <label className="sched__head" title="Tête d’affiche">
+                    <input
+                      type="checkbox"
+                      checked={row.headliner}
+                      onChange={(e) =>
+                        hook.patchSchedule(row.id, { headliner: e.target.checked })
+                      }
+                    />
+                    <span>Tête d’affiche</span>
+                  </label>
+                  <div className="sched__acts">
+                    <button
+                      type="button"
+                      aria-label="Monter dans le créneau"
+                      disabled={i === 0}
+                      onClick={() => hook.moveSchedule(row.id, -1)}
+                    >
+                      <Icon name="chevron-left" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Descendre dans le créneau"
+                      disabled={i === g.entries.length - 1}
+                      onClick={() => hook.moveSchedule(row.id, 1)}
+                    >
+                      <Icon name="chevron-right" />
+                    </button>
+                    <button
+                      type="button"
+                      className="sched__del"
+                      aria-label="Supprimer la ligne"
+                      onClick={() => hook.removeSchedule(row.id)}
+                    >
+                      <Icon name="close" />
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
         ))}
-      </ul>
+      </div>
+
       <button
         type="button"
         className="btn btn--outline"
-        onClick={hook.addSchedule}
+        onClick={() => hook.addSchedule(normalizeTime(nextSlot))}
       >
         <Icon name="clock" />
-        <span>Ajouter une ligne</span>
+        <span>Nouveau créneau</span>
       </button>
     </div>
   );

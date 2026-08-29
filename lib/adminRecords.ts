@@ -76,6 +76,7 @@ function toSchedule(v: unknown): ScheduleEntry[] {
       time: typeof s.time === 'string' ? s.time.trim() : '',
       artistName: typeof s.artistName === 'string' ? s.artistName.trim() : '',
       label: typeof s.label === 'string' ? s.label.trim() : '',
+      headliner: s.headliner === true,
     }))
     .filter((s) => s.time || s.artistName || s.label);
 }

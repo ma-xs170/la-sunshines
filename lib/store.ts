@@ -102,12 +102,15 @@ export interface StoredEvent {
 
 export interface ScheduleEntry {
   id: string;
-  /** heure libre, ex. « 18h00 ». */
+  /** créneau au format « HH:MM » (ex. « 18:00 »). Chaque entrée garde SON heure ;
+   *  le regroupement par créneau identique est purement un traitement d'affichage. */
   time: string;
   /** nom d'artiste (du line-up ou saisie libre). '' possible si label seul. */
   artistName: string;
   /** intitulé optionnel, ex. « Ouverture des portes », « Live », « Set DJ ». */
   label: string;
+  /** tête d'affiche — mise en valeur visuelle sur l'affichage public. */
+  headliner: boolean;
 }
 
 export interface StoredAnnouncement {
@@ -235,6 +238,7 @@ function normalizeEvent(raw: Partial<StoredEvent>): StoredEvent {
             time: typeof s.time === 'string' ? s.time : '',
             artistName: typeof s.artistName === 'string' ? s.artistName : '',
             label: typeof s.label === 'string' ? s.label : '',
+            headliner: s.headliner === true,
           }))
       : [],
   };

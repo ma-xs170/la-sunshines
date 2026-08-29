@@ -2823,35 +2823,72 @@ footer{
 
 /* =========================================================
    Programme horaire public (running order) — /editions/[slug]
+   Timeline verticale : un jalon par créneau, plusieurs entrées dessous.
    ========================================================= */
-.ro{padding:var(--s-16) var(--s-24);border-radius:var(--r-md);}
-.ro__list{list-style:none;display:flex;flex-direction:column;}
-.ro__row{
-  display:grid;grid-template-columns:76px 1fr;gap:var(--s-16);
-  padding:12px 0;align-items:baseline;
+.ro{padding:var(--s-24);border-radius:var(--r-md);}
+.ro__line{list-style:none;display:flex;flex-direction:column;gap:var(--s-24);position:relative;}
+.ro__line::before{
+  content:"";position:absolute;left:5px;top:6px;bottom:6px;width:2px;
+  background:color-mix(in srgb, var(--ev-accent, var(--amber-ink)) 30%, transparent);
 }
-.ro__row:not(:last-child){border-bottom:1px solid var(--ev-line,var(--panel-border));}
+.ro__slot{position:relative;padding-left:var(--s-24);}
+.ro__slot::before{
+  content:"";position:absolute;left:0;top:5px;width:12px;height:12px;border-radius:50%;
+  background:var(--ev-accent, var(--amber-ink));
+  box-shadow:0 0 0 4px color-mix(in srgb, var(--ev-accent, var(--amber-ink)) 16%, transparent);
+}
 .ro__time{
-  font-family:var(--font-display,inherit);font-weight:800;font-size:15px;
+  font-family:var(--font-display,inherit);font-weight:800;font-size:16px;
   color:var(--ev-accent,var(--amber-ink));font-variant-numeric:tabular-nums;
+  letter-spacing:0.01em;margin-bottom:6px;
 }
-.ro__body{display:flex;flex-direction:column;gap:2px;}
+.ro__items{list-style:none;display:flex;flex-direction:column;gap:4px;}
+.ro__item{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;}
 .ro__name{font-size:15px;font-weight:700;color:var(--ev-ink,var(--ink));}
 .ro__label{font-size:12px;font-weight:600;color:var(--ev-ink-soft,var(--gray));}
+.ro__item--head{
+  padding:10px 12px;border-radius:var(--r-sm);margin:4px 0;
+  background:color-mix(in srgb, var(--ev-accent, var(--amber-ink)) 12%, transparent);
+  border-left:3px solid var(--ev-accent, var(--amber-ink));
+}
+.ro__item--head .ro__name{
+  font-family:var(--font-display,inherit);font-size:19px;letter-spacing:-0.01em;
+}
+.ro__tag{
+  flex-basis:100%;font-size:10px;font-weight:800;letter-spacing:0.08em;
+  text-transform:uppercase;color:var(--ev-accent,var(--amber-ink));
+}
 
 /* =========================================================
-   Admin : éditeur de programme
+   Admin : éditeur de programme (regroupé par créneau)
    ========================================================= */
-.sched{display:flex;flex-direction:column;gap:var(--s-12);}
-.sched__list{list-style:none;display:flex;flex-direction:column;gap:var(--s-8);}
-.sched__row{
-  display:grid;grid-template-columns:90px 1fr 1fr auto;gap:var(--s-8);align-items:center;
+.sched{display:flex;flex-direction:column;gap:var(--s-16);}
+.sched__groups{display:flex;flex-direction:column;gap:var(--s-12);}
+.sched__group{
+  border:1px solid var(--panel-border);border-radius:var(--r-sm);
+  padding:var(--s-12);background:rgba(25,20,16,0.02);
+  display:flex;flex-direction:column;gap:var(--s-8);
 }
-.sched__row input{
+.sched__ghead{display:flex;align-items:center;gap:var(--s-8);flex-wrap:wrap;}
+.sched__time{
+  padding:8px 10px;border-radius:var(--r-sm);
+  border:1px solid var(--panel-border-strong);background:var(--bg);
+  font-size:14px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;
+}
+.sched__rows{list-style:none;display:flex;flex-direction:column;gap:var(--s-8);}
+.sched__row{
+  display:grid;grid-template-columns:1fr 1fr auto auto;gap:var(--s-8);align-items:center;
+}
+.sched__row input[type=text],.sched__artist,.sched__label{
   padding:8px 10px;border-radius:var(--r-sm);
   border:1px solid var(--panel-border-strong);background:var(--bg);
   font-size:13px;color:var(--ink);min-width:0;
 }
+.sched__head{
+  display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
+  font-size:11px;font-weight:700;color:var(--gray);
+}
+.sched__head input{width:15px;height:15px;flex:none;}
 .sched__acts{display:inline-flex;gap:4px;}
 .sched__acts button{
   width:30px;height:30px;border-radius:8px;cursor:pointer;
@@ -2862,7 +2899,8 @@ footer{
 .sched__acts button .icon{width:14px;height:14px;}
 .sched__del{color:var(--coral) !important;}
 @media (max-width:640px){
-  .sched__row{grid-template-columns:1fr 1fr;grid-auto-flow:row;}
+  .sched__row{grid-template-columns:1fr 1fr;}
+  .sched__head{grid-column:1 / -1;}
   .sched__acts{grid-column:1 / -1;justify-content:flex-end;}
 }
 
