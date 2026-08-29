@@ -96,7 +96,10 @@ export async function commitStoreToGithub(json: string): Promise<void> {
     );
   }
 
-  if (res.ok) return;
+  if (res.ok) {
+    await triggerVercelRedeploy();
+    return;
+  }
 
   const body = await res.text().catch(() => '');
   if (res.status === 409 || res.status === 422) {
@@ -116,4 +119,21 @@ export async function commitStoreToGithub(json: string): Promise<void> {
   throw new StoreWriteError(
     `Commit GitHub échoué (HTTP ${res.status}). ${body.slice(0, 180)}`,
   );
+}
+
+/**
+ * Filet de sécurité : si le push GitHub ne déclenche pas d'auto-deploy Vercel
+ * (intégration Git désactivée, « Ignored Build Step »…), un Deploy Hook force
+ * le rebuild. Best-effort — un échec ici n'annule pas l'enregistrement.
+ * Créer le hook : Vercel → projet → Settings → Git → Deploy Hooks (branche main),
+ * puis coller l'URL dans la variable d'env VERCEL_DEPLOY_HOOK_URL.
+ */
+async function triggerVercelRedeploy(): Promise<void> {
+  const hook = process.env.VERCEL_DEPLOY_HOOK_URL;
+  if (!hook) return;
+  try {
+    await fetch(hook, { method: 'POST' });
+  } catch (e) {
+    console.error('[githubStore] Deploy Hook Vercel injoignable :', e);
+  }
 }

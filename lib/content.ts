@@ -29,6 +29,12 @@ function storedEventToEdition(ev: StoredEvent): Edition {
     ? new Date(parsedDate).toISOString().slice(0, 10)
     : undefined;
 
+  // Sans date fiable, on traite l'événement comme un BROUILLON à venir (l'admin
+  // renseignera la date ensuite), jamais comme une édition passée : sinon il
+  // serait étiqueté « Passée » et relégué en bas de /editions -> impression
+  // qu'il n'apparaît pas.
+  const upcoming = isFuture || !hasDate;
+
   const dominantColor = ev.dominantColor ?? null;
   const palette = ev.palette ?? [];
 
@@ -40,8 +46,8 @@ function storedEventToEdition(ev: StoredEvent): Edition {
   return {
     slug: ev.slug,
     name: ev.name,
-    status: isFuture ? 'next' : 'past',
-    kicker: isFuture ? 'Prochaine édition' : 'Édition passée',
+    status: upcoming ? 'next' : 'past',
+    kicker: upcoming ? 'Prochaine édition' : 'Édition passée',
     venue: ev.venue.trim() ? ev.venue.trim() : null,
     headliner: cleanHeadliner(ev.headliner.trim() || undefined),
     lineup: stripOrgNames(ev.lineup ?? []),
@@ -112,10 +118,14 @@ export function getAllEditions(): Edition[] {
     .filter((e) => !staticSlugs.has(e.slug))
     .map(storedEventToEdition);
 
-  // galerie admin (par slug) rattachée à chaque édition ; tri chrono décroissant
+  // galerie admin (par slug) rattachée à chaque édition ; tri chrono décroissant.
+  // Sans date → considéré comme « à venir très lointain » : remonte en tête de
+  // liste (un brouillon fraîchement créé est visible tout de suite).
   return [...merged, ...extra]
     .map((e) => ({ ...e, gallery: store.galleries[e.slug] ?? e.gallery ?? [] }))
-    .sort((a, b) => (b.dateISO ?? '').localeCompare(a.dateISO ?? ''));
+    .sort((a, b) =>
+      (b.dateISO ?? '9999-12-31').localeCompare(a.dateISO ?? '9999-12-31'),
+    );
 }
 
 /** Photos de la galerie d'une édition (par slug). */
@@ -132,7 +142,10 @@ export function getEditionBySlug(slug: string): Edition | undefined {
 export function getNextEdition(): Edition | undefined {
   return getAllEditions()
     .filter(isEditionUpcoming)
-    .sort((a, b) => (a.dateISO ?? '').localeCompare(b.dateISO ?? ''))[0];
+    // une édition datée l'emporte sur un brouillon sans date (repoussé en fin)
+    .sort((a, b) =>
+      (a.dateISO ?? '9999-12-31').localeCompare(b.dateISO ?? '9999-12-31'),
+    )[0];
 }
 
 /** Édition mise en avant dans le bandeau CTA de la homepage :

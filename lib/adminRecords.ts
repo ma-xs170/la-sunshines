@@ -8,6 +8,7 @@ import {
   newId,
 } from './store';
 import { slugify, uniqueSlug } from './slug';
+import { editions as staticEditions } from './editions';
 import { heroGradient } from './gradient';
 import { resolveEmoji } from './editionEmoji';
 
@@ -132,14 +133,16 @@ export function buildEvent(
   const palette = toPalette(input.palette);
 
   // slug imposé (surcharge d'une édition du site) : on le garde tel quel ;
-  // sinon slug auto unique dérivé du nom.
+  // sinon slug auto unique — en évitant AUSSI les slugs des éditions du site,
+  // sinon un nouvel événement homonyme deviendrait une surcharge silencieuse
+  // (pas de nouvelle carte sur /editions).
   const forcedSlug = str(input.slug);
   const slug = forcedSlug
     ? forcedSlug
-    : uniqueSlug(
-        slugify(name),
-        store.events.map((e) => e.slug),
-      );
+    : uniqueSlug(slugify(name), [
+        ...store.events.map((e) => e.slug),
+        ...staticEditions.map((e) => e.slug),
+      ]);
 
   return {
     id: newId(),
