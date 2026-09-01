@@ -418,7 +418,7 @@
       ],
       "gradient": "linear-gradient(140deg, #012946 0%, #014777 55%, #012b47 100%)",
       "emoji": "🌙",
-      "hidden": true,
+      "hidden": false,
       "createdAt": "2026-08-29T20:27:04.953Z",
       "description": "",
       "archived": false,
