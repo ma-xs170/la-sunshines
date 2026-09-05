@@ -425,8 +425,15 @@
       "schedule": [
         {
           "id": "mtew2zyg90y5qq",
-          "time": "16",
-          "artistName": "DÉBUT DE L'ÉVÈNEMENT",
+          "time": "22:00",
+          "artistName": "FIN DE L'ÉVÈNEMENT",
+          "label": "",
+          "headliner": false
+        },
+        {
+          "id": "mtoombvxyq85u4",
+          "time": "16:00",
+          "artistName": "",
           "label": "",
           "headliner": false
         }
