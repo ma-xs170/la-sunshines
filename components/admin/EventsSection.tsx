@@ -12,6 +12,7 @@ import Icon from '@/components/Icon';
 import ArtistCombobox from './ArtistCombobox';
 import PlacesAutocomplete from './PlacesAutocomplete';
 import GalleryManager from './GalleryManager';
+import TicketingBlock from './TicketingBlock';
 import type { EditionLite } from './AdminDashboard';
 
 /* ------------------------------------------------------------------ */
@@ -1037,6 +1038,8 @@ function EventEditForm({
       <section className="admin-panel glass">
         <GalleryManager slug={ed.slug} initial={ed.gallery} flash={flash} />
       </section>
+
+      <TicketingBlock slug={ed.slug} />
     </div>
   );
 }

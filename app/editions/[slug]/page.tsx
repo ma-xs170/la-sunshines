@@ -14,6 +14,8 @@ import EventTimetable from '@/components/EventTimetable';
 import RunningOrder from '@/components/RunningOrder';
 import BizoukWidget from '@/components/BizoukWidget';
 import BizoukClosed from '@/components/BizoukClosed';
+import TicketPanel from '@/components/ticketing/TicketPanel';
+import { getPublicTicketing } from '@/lib/ticketing/events';
 import EventAtmosphere from '@/components/EventAtmosphere';
 import EventEmojiField from '@/components/EventEmojiField';
 import EventMap from '@/components/EventMap';
@@ -32,6 +34,10 @@ export function generateStaticParams(): Params[] {
 
 // les événements ajoutés via /admin après le build restent rendus à la demande
 export const dynamicParams = true;
+
+// Le mode de billetterie (Bizouk / interne) se lit dans Supabase : la page se
+// régénère au plus toutes les 60 s, et immédiatement quand l'admin bascule le flag.
+export const revalidate = 60;
 
 export async function generateMetadata({
   params,
@@ -72,6 +78,9 @@ export default async function EditionPage({
   const embed = ed.bizoukEmbed?.trim() || getBizoukEmbed(slug);
   const upcoming = isEditionUpcoming(ed);
   const timetable = getTimetable(slug);
+  // Billetterie interne : null tant que le flag est sur « bizouk » (défaut), que Supabase
+  // n'est pas configuré ou que l'événement n'est pas activé → la page reste identique.
+  const ticketing = upcoming ? await getPublicTicketing(slug) : null;
 
   // Nom d'artiste normalisé pour comparaison (casse, espaces, préfixe « DJ »).
   const normArtist = (s: string) =>
@@ -175,7 +184,20 @@ export default async function EditionPage({
           </div>
         </header>
 
-        {(embed || ed.bizoukUrl) && (
+        {ticketing && (
+          <section className="event-section">
+            <p className="script">Réserver ta place</p>
+            <h2>Billetterie</h2>
+            <TicketPanel
+              slug={slug}
+              tiers={ticketing.tiers}
+              feePercent={ticketing.settings.feePercent}
+              feeFixedCents={ticketing.settings.feeFixedCents}
+            />
+          </section>
+        )}
+
+        {!ticketing && (embed || ed.bizoukUrl) && (
           <section className="event-section">
             <p className="script">
               {upcoming ? 'Réserver ta place' : 'Billetterie'}
@@ -264,7 +286,8 @@ export default async function EditionPage({
           )}
         </section>
 
-        {ed.bizoukUrl && (
+        {/* lien Bizouk de fin de page : masqué quand la billetterie interne est active */}
+        {!ticketing && ed.bizoukUrl && (
           <div className="event-buy">
             <a href={ed.bizoukUrl} target="_blank" rel="noopener">
               Acheter sur Bizouk

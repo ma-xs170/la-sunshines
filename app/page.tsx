@@ -6,6 +6,8 @@ import Infos from '@/components/Infos';
 import CtaBand from '@/components/CtaBand';
 import Footer from '@/components/Footer';
 import BizoukWidget from '@/components/BizoukWidget';
+import TicketPanel from '@/components/ticketing/TicketPanel';
+import { getPublicTicketing } from '@/lib/ticketing/events';
 import {
   getAllEditions,
   getNextEdition,
@@ -15,7 +17,11 @@ import {
 import { isEditionUpcoming } from '@/lib/editions';
 import { getBizoukEmbed } from '@/lib/bizouk';
 
-export default function Home() {
+// Le mode de billetterie (Bizouk / interne) se lit dans Supabase : régénération au plus toutes les
+// 60 s, et immédiatement quand l'admin bascule le flag (revalidatePath).
+export const revalidate = 60;
+
+export default async function Home() {
   const editions = getAllEditions();
   const nextEdition = getNextEdition();
 
@@ -35,6 +41,11 @@ export default function Home() {
     ? upcoming.bizoukEmbed?.trim() || getBizoukEmbed(upcoming.slug)
     : null;
 
+  // Billetterie interne de la prochaine édition : null tant que le flag est sur « bizouk »
+  // (défaut), que Supabase n'est pas configuré ou que l'événement n'est pas activé →
+  // la page reste alors strictement identique à avant.
+  const ticketing = upcoming ? await getPublicTicketing(upcoming.slug) : null;
+
   return (
     <>
       <Nav />
@@ -42,13 +53,22 @@ export default function Home() {
       <main>
         <Hero />
 
-        {upcoming && upcomingEmbed && (
+        {upcoming && (ticketing || upcomingEmbed) && (
           <section className="home-tickets" id="prochaine-billetterie">
             <header className="section-head">
               <span className="script">Prochaine soirée · {upcoming.name}</span>
               <h2>Billetterie</h2>
             </header>
-            <BizoukWidget embed={upcomingEmbed} />
+            {ticketing ? (
+              <TicketPanel
+                slug={upcoming.slug}
+                tiers={ticketing.tiers}
+                feePercent={ticketing.settings.feePercent}
+                feeFixedCents={ticketing.settings.feeFixedCents}
+              />
+            ) : (
+              <BizoukWidget embed={upcomingEmbed!} />
+            )}
           </section>
         )}
 

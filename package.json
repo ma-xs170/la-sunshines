@@ -8,10 +8,13 @@
     "start": "next start",
     "lint": "next lint",
     "colors": "node scripts/extract-flyer-colors.mjs",
-    "seed:artists": "node scripts/seed-artists.mjs"
+    "seed:artists": "node scripts/seed-artists.mjs",
+    "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
     "@mistralai/mistralai": "^2.6.4",
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.116.0",
     "@vercel/analytics": "^2.0.1",
     "@vercel/blob": "^2.8.0",
     "@vercel/kv": "^3.0.0",
@@ -20,12 +23,17 @@
     "lenis": "^1.1.14",
     "lucide-static": "^1.34.0",
     "next": "^15.1.6",
+    "qr-scanner": "^1.4.2",
+    "qrcode": "^1.5.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "resend": "^6.24.0"
+    "resend": "^6.24.0",
+    "stripe": "^22.6.2",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@types/node": "^22.10.7",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19.0.7",
     "@types/react-dom": "^19.0.3",
     "playwright": "^1.62.1",

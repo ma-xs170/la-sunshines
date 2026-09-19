@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import Icon from './Icon';
+import { AccountMenu, AccountLinks } from './auth/AccountMenu';
 
 const LINKS = [
   { href: '/#accueil', label: 'Accueil' },
@@ -171,6 +172,7 @@ export default function Nav() {
               {l.label}
             </a>
           ))}
+          <AccountLinks onNavigate={() => setOpen(false)} />
         </div>
 
         <a
@@ -185,6 +187,7 @@ export default function Nav() {
           <Icon name="ticket" />
           <span>Réserver</span>
         </a>
+        <AccountMenu />
       </nav>
     </div>
   );
