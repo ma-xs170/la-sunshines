@@ -3089,3 +3089,21 @@ nav .acct-links button.link{
 .event--themed .tp__badge{background:rgba(255,255,255,.14);}
 .event--themed .tp__badge--sold_out{background:rgba(255,107,91,.28);color:#ffc2ba;}
 .event--themed .tp__badge--upcoming{background:rgba(255,178,56,.26);}
+
+/* Billetterie — participants + consentements */
+.tp__h{font-weight:800;font-size:14px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:var(--s-8);}
+.tp__people{display:flex;flex-direction:column;gap:var(--s-8);}
+.tp__person{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:var(--s-8);align-items:center;}
+.tp__who{font-size:12px;font-weight:700;color:var(--ev-ink-soft, var(--gray));}
+.tp__person input{
+  font:inherit;font-size:14px;padding:10px 12px;border-radius:var(--r-sm);width:100%;min-width:0;
+  border:1px solid var(--ev-line-strong, var(--panel-border-strong));
+  background:var(--ev-panel, var(--bg-2));color:inherit;
+}
+.tp__consent{display:flex;flex-direction:column;gap:var(--s-8);font-size:13px;}
+.tp__consent label{display:flex;gap:var(--s-8);align-items:flex-start;cursor:pointer;}
+.tp__consent input{margin-top:3px;width:18px;height:18px;flex:none;}
+.tp__consent a{text-decoration:underline;text-underline-offset:2px;}
+.tp__error{color:var(--coral);font-size:13px;font-weight:700;}
+.event--themed .tp__error{color:#ffb3aa;}
+@media (max-width:560px){ .tp__person{grid-template-columns:1fr 1fr;} .tp__who{grid-column:1 / -1;} }

@@ -78,3 +78,46 @@ export const settingSchema = z.discriminatedUnion('key', [
   z.object({ key: z.literal('terms_version'), value: z.string().trim().min(1).max(40) }),
 ]);
 export type SettingInput = z.infer<typeof settingSchema>;
+
+// ---------------------------------------------------------------------
+// Checkout : AUCUN montant ni prix en entrée — seulement des identifiants de
+// tarifs, des quantités et les noms des participants. Le prix est relu en base.
+// ---------------------------------------------------------------------
+const personName = z.string().trim().min(1, 'Indique le prénom et le nom de chaque participant.').max(60, 'Nom trop long.');
+
+export const checkoutSchema = z
+  .object({
+    slug: slugSchema,
+    items: z
+      .array(
+        z.object({
+          tier_id: z.uuid('Tarif invalide.'),
+          quantity: z.number().int('Quantité invalide.').min(1, 'Quantité invalide.').max(20, 'Quantité trop élevée.'),
+          participants: z.array(z.object({ first_name: personName, last_name: personName })).min(1).max(20),
+        }),
+      )
+      .min(1, 'Choisis au moins un billet.')
+      .max(10),
+    accept_terms: z.literal(true, { error: 'Tu dois accepter les CGV et la politique de remboursement.' }),
+    guardian_consent: z.literal(true, {
+      error: 'Tu dois confirmer être le représentant légal du participant mineur ou avoir son autorisation parentale.',
+    }),
+  })
+  .superRefine((v, ctx) => {
+    const ids = new Set<string>();
+    v.items.forEach((it, i) => {
+      if (ids.has(it.tier_id)) ctx.addIssue({ code: 'custom', message: 'Tarif en double.', path: ['items', i] });
+      ids.add(it.tier_id);
+      if (it.participants.length !== it.quantity) {
+        ctx.addIssue({ code: 'custom', message: 'Indique le nom de chaque participant.', path: ['items', i, 'participants'] });
+      }
+    });
+    if (v.items.reduce((n, it) => n + it.quantity, 0) > 20) {
+      ctx.addIssue({ code: 'custom', message: '20 billets maximum par commande.', path: ['items'] });
+    }
+  });
+export type CheckoutInput = z.infer<typeof checkoutSchema>;
+
+export const cancelCheckoutSchema = z.object({
+  order_number: z.string().regex(/^SUN-\d{4,10}$/, 'Commande invalide.'),
+});

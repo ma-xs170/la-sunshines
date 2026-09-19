@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { PublicTier, SaleState } from '@/lib/ticketing/events';
 import { computeFee, formatEuro, formatGp } from '@/lib/ticketing/time';
+import { useAuthUser } from '@/components/auth/useAuthUser';
 
 interface Props {
   slug: string;
@@ -23,6 +24,12 @@ const BADGE: Record<Exclude<SaleState, 'on_sale'>, string> = {
 export default function TicketPanel({ slug, tiers: initial, feePercent, feeFixedCents }: Props) {
   const [tiers, setTiers] = useState(initial);
   const [qty, setQty] = useState<Record<string, number>>({});
+  const { ready, user } = useAuthUser();
+  const [people, setPeople] = useState<Record<string, { first_name: string; last_name: string }[]>>({});
+  const [terms, setTerms] = useState(false);
+  const [guardian, setGuardian] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
 
   const refresh = useCallback(async () => {
     try {
@@ -86,6 +93,53 @@ export default function TicketPanel({ slug, tiers: initial, feePercent, feeFixed
       return { ...q, [t.id]: Math.max(0, Math.min(max, (q[t.id] ?? 0) + d)) };
     });
 
+  // un champ nom / prénom par billet choisi
+  useEffect(() => {
+    setPeople((cur) => {
+      const next: typeof cur = {};
+      for (const t of tiers) {
+        const n = qty[t.id] ?? 0;
+        if (n > 0) next[t.id] = Array.from({ length: n }, (_, i) => cur[t.id]?.[i] ?? { first_name: '', last_name: '' });
+      }
+      return next;
+    });
+  }, [qty, tiers]);
+
+  const setPerson = (tid: string, i: number, k: 'first_name' | 'last_name', v: string) =>
+    setPeople((cur) => ({ ...cur, [tid]: (cur[tid] ?? []).map((p, j) => (j === i ? { ...p, [k]: v } : p)) }));
+
+  async function pay() {
+    setError('');
+    const items = tiers
+      .filter((t) => (qty[t.id] ?? 0) > 0)
+      .map((t) => ({ tier_id: t.id, quantity: qty[t.id], participants: people[t.id] ?? [] }));
+    if (items.some((it) => it.participants.some((p) => !p.first_name.trim() || !p.last_name.trim()))) {
+      return setError('Indique le prénom et le nom de chaque participant.');
+    }
+    if (!terms) return setError('Accepte les CGV et la politique de remboursement.');
+    if (!guardian) return setError('Confirme être le représentant légal du participant mineur ou avoir son autorisation parentale.');
+    setBusy(true);
+    try {
+      // AUCUN prix envoyé : le serveur relit tout en base
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug, items, accept_terms: terms, guardian_consent: guardian }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.url) {
+        setError(data.error ?? 'Le paiement n’a pas pu démarrer. Réessaie.');
+        refresh();
+        setBusy(false);
+        return;
+      }
+      window.location.assign(data.url);
+    } catch {
+      setError('Connexion impossible. Vérifie ton réseau.');
+      setBusy(false);
+    }
+  }
+
   const allClosed = tiers.every((t) => t.state !== 'on_sale' && t.state !== 'upcoming' && t.state !== 'sold_out');
 
   return (
@@ -128,15 +182,46 @@ export default function TicketPanel({ slug, tiers: initial, feePercent, feeFixed
 
       {!allClosed && (
         <div className="tp__total">
+          {count > 0 && (
+            <div className="tp__people">
+              <p className="tp__h">Participants</p>
+              {tiers.filter((t) => (qty[t.id] ?? 0) > 0).flatMap((t) =>
+                (people[t.id] ?? []).map((p, i) => (
+                  <div className="tp__person" key={t.id + i}>
+                    <span className="tp__who">{t.name} · billet {i + 1}</span>
+                    <input placeholder="Prénom" value={p.first_name} maxLength={60} autoComplete="off"
+                      onChange={(e) => setPerson(t.id, i, 'first_name', e.target.value)} aria-label={`Prénom — ${t.name} ${i + 1}`} />
+                    <input placeholder="Nom" value={p.last_name} maxLength={60} autoComplete="off"
+                      onChange={(e) => setPerson(t.id, i, 'last_name', e.target.value)} aria-label={`Nom — ${t.name} ${i + 1}`} />
+                  </div>
+                )),
+              )}
+            </div>
+          )}
           <dl>
             <div><dt>Sous-total</dt><dd>{formatEuro(subtotal)}</dd></div>
             {fee > 0 && <div><dt>Frais de service</dt><dd>{formatEuro(fee)}</dd></div>}
             <div className="tp__grand"><dt>Total</dt><dd>{formatEuro(subtotal + fee)}</dd></div>
           </dl>
-          <button type="button" className="btn btn--amber" disabled title="Le paiement en ligne arrive bientôt">
-            {count > 0 ? `Réserver ${count} billet${count > 1 ? 's' : ''}` : 'Choisis tes billets'}
-          </button>
-          <p className="tp__note">Paiement en ligne bientôt disponible.</p>
+          {count > 0 && (
+            <div className="tp__consent">
+              <label><input type="checkbox" checked={terms} onChange={(e) => setTerms(e.target.checked)} />
+                <span>J’accepte les <a href="/cgv" target="_blank" rel="noopener">CGV</a> et la <a href="/remboursement" target="_blank" rel="noopener">politique de remboursement</a>.</span></label>
+              <label><input type="checkbox" checked={guardian} onChange={(e) => setGuardian(e.target.checked)} />
+                <span>Je suis le représentant légal du participant mineur, ou j’ai son autorisation parentale.</span></label>
+            </div>
+          )}
+          {error && <p className="tp__error" role="alert">{error}</p>}
+          {ready && !user ? (
+            <a className="btn btn--amber" href={`/connexion?next=${encodeURIComponent(`/editions/${slug}`)}`}>
+              Se connecter pour réserver
+            </a>
+          ) : (
+            <button type="button" className="btn btn--amber" disabled={count === 0 || busy || !ready} onClick={pay}>
+              {busy ? 'Redirection vers le paiement…' : count > 0 ? `Payer ${formatEuro(subtotal + fee)}` : 'Choisis tes billets'}
+            </button>
+          )}
+          <p className="tp__note">Paiement sécurisé par Stripe. TVA non applicable, art. 293 B du CGI. Places réservées 15 minutes pendant le paiement.</p>
         </div>
       )}
     </div>
