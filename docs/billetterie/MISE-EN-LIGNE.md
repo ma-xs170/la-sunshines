@@ -80,7 +80,9 @@ Prérequis du compte Stripe : activation (identité de **l'entité qui vend**, v
 2. Compte admin : `/inscription` → confirme → `update public.profiles set role = 'admin' where id = (select id from auth.users where email = '…');`. Comptes de porte : rôle `staff`.
 3. Variables **Production** (§1.1) puis **redéploie**. `npm run smoke -- https://<domaine>` : tout doit être ✔ (flag encore sur Bizouk).
 4. Configure l'édition (bloc Billetterie), **sans** basculer le flag : `ticketing_enabled` coché, statut *Publié* → rien n'est visible tant que le mode global est `bizouk`.
-5. Test réel de bout en bout **avec ta propre carte** sur un tarif de test à 0,50 € (`Actif` décoché pour le public **n'est pas possible** : crée-le puis désactive-le après ton test) ; rembourse-le depuis l'admin. Vérifie email, billet, scan, remboursement.
+5. **Test réel avec ta propre carte** (Stripe Live) : crée dans l'événement un tarif « Test interne » à **0,50 €**, stock **1**, max 1 par commande ;
+   bascule le flag **en heures creuses** ; achète ce billet, vérifie email, « Mes billets », scan ; **rembourse-le depuis l'admin** ; **archive** le tarif ;
+   repasse sur Bizouk si tu n'as pas fini la configuration. (Le flag est global : pendant ces minutes, les visiteurs voient le panneau de tarifs.)
 6. Fais relire et complète les pages légales (`LEGAL.md`) : **`/cgv` contient encore la zone « médiateur — à compléter »**.
 7. **Feu vert** → `/admin/billetterie` → **Billetterie interne**. Prends les 10 premières minutes pour surveiller Stripe → Webhooks et l'admin.
 
