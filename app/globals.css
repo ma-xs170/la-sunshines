@@ -2953,3 +2953,80 @@ footer{
   .ev-card__actions{grid-area:m;justify-self:stretch;}
   .ev-card__manage{flex:1;}
 }
+
+/* =========================================================
+   Comptes clients — /connexion, /inscription, /compte…
+   Réutilise .contact-form / .contact-field (design system existant).
+   ========================================================= */
+.auth.content-page{max-width:520px;}
+.auth-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-12);}
+.auth-hint{font-size:12px;color:var(--gray-dim);font-weight:500;}
+.auth-links{
+  display:flex;justify-content:space-between;gap:var(--s-12);flex-wrap:wrap;
+  font-size:13px;font-weight:600;color:var(--gray);
+}
+.auth-links a{color:var(--amber-ink);text-decoration:underline;text-underline-offset:3px;}
+.auth-notice,.auth-ok{
+  border-radius:var(--r-sm);padding:12px 14px;font-size:14px;font-weight:600;
+  margin-bottom:var(--s-16);
+}
+.auth-notice{background:rgba(255,178,56,0.16);border:1px solid rgba(255,178,56,0.35);}
+.auth-ok{background:rgba(46,160,90,0.12);border:1px solid rgba(46,160,90,0.35);color:#1f7a45;}
+.auth-actions{display:flex;gap:var(--s-12);flex-wrap:wrap;margin-top:var(--s-24);}
+.auth-google{width:100%;justify-content:center;}
+.auth-divider{
+  display:flex;align-items:center;gap:var(--s-12);color:var(--gray-dim);
+  font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;
+}
+.auth-divider::before,.auth-divider::after{content:"";flex:1;height:1px;background:var(--panel-border);}
+.auth-form .btn:disabled{opacity:.6;cursor:progress;}
+.auth-form input:disabled{opacity:.7;}
+@media (max-width:560px){ .auth-row{grid-template-columns:1fr;} }
+
+/* Menu compte du header */
+nav .acct{position:relative;margin-left:6px;display:inline-flex;}
+nav a.acct__login{
+  padding:10px 14px;border-radius:var(--r-pill);
+  font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;
+  transition:background .18s var(--ease);
+}
+nav a.acct__login:hover{background:#EFE9DE;}
+.acct__btn{
+  width:40px;height:40px;border-radius:var(--r-pill);
+  background:var(--ink);color:var(--white);font-weight:800;font-size:14px;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:transform .18s var(--ease);
+}
+.acct__btn:hover{transform:translateY(-1px);}
+.acct__menu{
+  position:absolute;right:0;top:calc(100% + 12px);min-width:200px;
+  background:rgba(255,255,255,0.98);border-radius:var(--r-md);padding:8px;
+  box-shadow:0 18px 40px rgba(0,0,0,0.28);
+  display:flex;flex-direction:column;gap:2px;
+}
+.acct__who{
+  padding:8px 12px;font-size:12px;font-weight:700;color:var(--gray);
+  text-transform:uppercase;letter-spacing:0.06em;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.acct__menu a,.acct__out{
+  padding:10px 12px;border-radius:var(--r-sm);font-size:14px;font-weight:600;
+  color:var(--ink);text-align:left;
+}
+.acct__menu a:hover,.acct__out:hover{background:#EFE9DE;}
+.acct__out{color:var(--coral);}
+/* liens compte dans le menu mobile : cachés sur desktop */
+.acct-links{display:none;}
+@media (max-width:820px){
+  nav .acct{display:none;}
+  nav .acct-links{
+    display:flex;flex-direction:column;gap:2px;
+    margin-top:6px;padding-top:6px;border-top:1px solid var(--panel-border);
+  }
+  nav .acct-links .link{text-align:left;}
+  nav .acct-links__out{color:var(--coral);}
+}
+nav .acct-links button.link{
+  padding:12px 14px;font-size:14px;font-weight:600;border-radius:var(--r-pill);
+  background:none;border:0;cursor:pointer;font-family:inherit;
+}
