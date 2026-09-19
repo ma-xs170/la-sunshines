@@ -3030,3 +3030,62 @@ nav .acct-links button.link{
   padding:12px 14px;font-size:14px;font-weight:600;border-radius:var(--r-pill);
   background:none;border:0;cursor:pointer;font-family:inherit;
 }
+
+/* =========================================================
+   Billetterie interne — panneau de tarifs (page événement) + bloc admin
+   Visible uniquement quand le mode « natif » est activé.
+   ========================================================= */
+.tp{padding:var(--s-24);display:flex;flex-direction:column;gap:var(--s-16);}
+.tp__list{list-style:none;display:flex;flex-direction:column;gap:var(--s-12);}
+.tp__tier{
+  display:flex;justify-content:space-between;align-items:center;gap:var(--s-16);
+  padding:var(--s-16);border-radius:var(--r-md);
+  border:1px solid var(--ev-line, var(--panel-border));
+  background:var(--ev-panel, var(--panel));
+}
+.tp__tier.is-off{opacity:.62;}
+.tp__name{font-weight:700;font-size:16px;}
+.tp__desc{font-size:13px;color:var(--ev-ink-soft, var(--gray));margin-top:2px;}
+.tp__stock{font-size:12px;font-weight:700;color:var(--ev-accent, var(--amber-ink));margin-top:4px;}
+.tp__stock:empty{display:none;}
+.tp__side{display:flex;flex-direction:column;align-items:flex-end;gap:var(--s-8);flex:none;}
+.tp__price{font-family:var(--font-display);font-weight:800;font-size:18px;}
+.tp__stepper{display:inline-flex;align-items:center;gap:var(--s-4);}
+.tp__stepper button{
+  width:40px;height:40px;border-radius:var(--r-pill);font-size:20px;font-weight:700;line-height:1;
+  border:1px solid var(--ev-line-strong, var(--panel-border-strong));color:inherit;
+}
+.tp__stepper button:disabled{opacity:.35;cursor:not-allowed;}
+.tp__stepper span{min-width:28px;text-align:center;font-weight:800;}
+.tp__badge{
+  font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;
+  padding:6px 12px;border-radius:var(--r-pill);white-space:nowrap;
+  background:rgba(25,20,16,.08);
+}
+.tp__badge--upcoming{background:rgba(255,178,56,.22);}
+.tp__badge--sold_out{background:rgba(255,107,91,.2);color:#b3261e;}
+.tp__total{display:flex;flex-direction:column;gap:var(--s-12);border-top:1px solid var(--ev-line, var(--panel-border));padding-top:var(--s-16);}
+.tp__total dl{display:flex;flex-direction:column;gap:var(--s-4);font-size:14px;}
+.tp__total dl div{display:flex;justify-content:space-between;}
+.tp__grand{font-weight:800;font-size:17px;}
+.tp__total .btn{align-self:stretch;justify-content:center;}
+.tp__total .btn:disabled{opacity:.55;cursor:not-allowed;transform:none;}
+.tp__note{font-size:12px;text-align:center;color:var(--ev-ink-soft, var(--gray));}
+@media (max-width:560px){
+  .tp{padding:var(--s-16);}
+  .tp__tier{flex-direction:column;align-items:stretch;}
+  .tp__side{flex-direction:row;justify-content:space-between;align-items:center;}
+}
+
+.tb h2{margin-bottom:var(--s-8);}
+.tb h3{font-size:16px;margin:var(--s-24) 0 var(--s-12);}
+.tb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:var(--s-12);align-items:end;}
+.tb-check{flex-direction:row;align-items:center;gap:var(--s-12);}
+.tb-check input{width:20px;height:20px;}
+.tb-form,.tb-tier{display:flex;flex-direction:column;gap:var(--s-12);}
+.tb-tier{padding:var(--s-16);border:1px solid var(--panel-border);border-radius:var(--r-md);margin-bottom:var(--s-12);}
+.tb-archived{margin-top:var(--s-16);font-size:13px;color:var(--gray);}
+.tb-archived ul{margin:var(--s-8) 0 0 var(--s-16);}
+.event--themed .tp__badge{background:rgba(255,255,255,.14);}
+.event--themed .tp__badge--sold_out{background:rgba(255,107,91,.28);color:#ffc2ba;}
+.event--themed .tp__badge--upcoming{background:rgba(255,178,56,.26);}

@@ -5,6 +5,7 @@
 | Fichier | Phase | Contenu |
 |---|---|---|
 | `20260920000100_auth_profiles.sql` | 1 | profils, rôles, réglages (`app_settings`), RLS |
+| `20260920000200_ticketing_core.sql` | 2 | événements, tarifs, commandes, billets, réservation atomique, fonctions admin, RLS |
 
 Elles ne sont **appliquées automatiquement nulle part**. Pour les appliquer :
 SQL Editor Supabase (coller le fichier), ou `npx supabase link` puis `npx supabase db push`.
@@ -15,8 +16,14 @@ Coller `001_rls_profiles.sql` dans le SQL Editor **après** la migration 001. Le
 dans une transaction annulée (`ROLLBACK`) : aucune donnée n'est conservée. Il s'arrête sur
 `FAIL n : …` au premier problème ; sinon il affiche `ALL OK`.
 
-Les tests sur les commandes / billets (un client ne voit pas ceux d'un autre) arrivent avec la
-migration qui crée ces tables (phase 2).
+Phase 2 — après la migration 002, dans cet ordre :
+- `002_rls_ticketing.sql` : un client ne lit ni ne modifie les commandes / lignes / billets d'un autre,
+  aucune écriture directe sur aucune table de billetterie, fonctions sensibles réservées au service_role.
+- `002_rules.sql` : réservation (prix relu en base, expiration 15 min, snapshot, frais), fenêtres de vente,
+  capacité du tarif ET de l'événement, expiration sans cron, plancher de stock, archivage, audit, prix ≥ 0,50 €.
+- `002_concurrency.mjs` : 50 connexions réelles en parallèle (jamais plus de places que de stock).
+  Écrit puis supprime des données : à lancer sur une base de TEST, jamais en production.
+  `cd supabase/tests && npm i --no-save pg && DATABASE_URL=… node 002_concurrency.mjs`
 
 ## Premier admin (manuel, jamais automatique)
 

@@ -198,6 +198,11 @@ export default function AdminDashboard({
 
           <div className="admin-navgroup">
             <p className="admin-navgroup__title">Compte</p>
+            <a className="admin-navlink admin-navlink--ext" href="/admin/billetterie">
+              <Icon name="ticket" className="icon" />
+              <span>Billetterie</span>
+              <Icon name="arrow-up-right" className="admin-navlink__ext" />
+            </a>
             <a
               className="admin-navlink admin-navlink--ext"
               href="/status"

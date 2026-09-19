@@ -13,6 +13,9 @@ export async function parseBody<S extends z.ZodType>(
   req: Request,
   schema: S,
 ): Promise<{ data: z.output<S> } | { res: NextResponse }> {
+  if (!(req.headers.get('content-type') ?? '').includes('application/json')) {
+    return { res: fail('Requête invalide.', 415) };
+  }
   let raw: unknown;
   try {
     raw = await req.json();
