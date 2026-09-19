@@ -3166,3 +3166,4 @@ nav .acct-links button.link{
 .ord small{color:var(--gray);}
 .ord-detail{display:flex;flex-direction:column;gap:var(--s-16);}
 .ord-stats{margin-top:var(--s-8);}
+.tp__note a{text-decoration:underline;text-underline-offset:2px;}

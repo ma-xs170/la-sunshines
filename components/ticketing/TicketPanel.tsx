@@ -221,7 +221,7 @@ export default function TicketPanel({ slug, tiers: initial, feePercent, feeFixed
               {busy ? 'Redirection vers le paiement…' : count > 0 ? `Payer ${formatEuro(subtotal + fee)}` : 'Choisis tes billets'}
             </button>
           )}
-          <p className="tp__note">Paiement sécurisé par Stripe. TVA non applicable, art. 293 B du CGI. Places réservées 15 minutes pendant le paiement.</p>
+          <p className="tp__note">Paiement sécurisé par Stripe. TVA non applicable, art. 293 B du CGI. Places réservées 15 minutes pendant le paiement. <a href="/mentions-legales" target="_blank" rel="noopener">Mentions légales</a> · <a href="/cgv" target="_blank" rel="noopener">CGV</a> · <a href="/remboursement" target="_blank" rel="noopener">Remboursement</a></p>
         </div>
       )}
     </div>

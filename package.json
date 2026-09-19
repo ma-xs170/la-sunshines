@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "colors": "node scripts/extract-flyer-colors.mjs",
-    "seed:artists": "node scripts/seed-artists.mjs"
+    "seed:artists": "node scripts/seed-artists.mjs",
+    "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
     "@mistralai/mistralai": "^2.6.4",

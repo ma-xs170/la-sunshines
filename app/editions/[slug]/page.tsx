@@ -286,7 +286,8 @@ export default async function EditionPage({
           )}
         </section>
 
-        {ed.bizoukUrl && (
+        {/* lien Bizouk de fin de page : masqué quand la billetterie interne est active */}
+        {!ticketing && ed.bizoukUrl && (
           <div className="event-buy">
             <a href={ed.bizoukUrl} target="_blank" rel="noopener">
               Acheter sur Bizouk
