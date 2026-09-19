@@ -7,6 +7,7 @@ import { getAllEditions } from '@/lib/content';
 import { getTicketingSettings } from '@/lib/ticketing/settings';
 import { formatGp } from '@/lib/ticketing/time';
 import AdminSettingsForm from '@/components/ticketing/AdminSettingsForm';
+import EventStats from '@/components/ticketing/admin/EventStats';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Billetterie · Admin', robots: { index: false, follow: false } };
@@ -49,6 +50,11 @@ export default async function BilletterieAdminPage() {
   return shell(
     <>
       <AdminSettingsForm initial={settings} />
+      <div className="admin-form__actions">
+        <a className="btn btn--outline" href="/admin/billetterie/commandes">Commandes</a>
+        <a className="btn btn--outline" href="/admin/billetterie/invitations">Invitations</a>
+        <a className="btn btn--outline" href="/admin/scan">Scan à l’entrée</a>
+      </div>
       <section className="admin-panel glass admin-panel--wide">
         <h2>Événements en billetterie</h2>
         <p className="admin-hint">Pour configurer les dates, tarifs et stocks : ouvre l’événement dans l’admin, bloc « Billetterie ».</p>
@@ -62,6 +68,7 @@ export default async function BilletterieAdminPage() {
                 <p className="admin-hint">
                   {formatGp(r.starts_at)} · {STATUS[r.status] ?? r.status} · billetterie {r.ticketing_enabled ? 'activée' : 'désactivée'} · {r.consumed} / {r.capacity} places
                 </p>
+                <EventStats slug={r.event_slug} />
               </div>
             </li>
           ))}

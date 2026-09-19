@@ -121,3 +121,44 @@ export type CheckoutInput = z.infer<typeof checkoutSchema>;
 export const cancelCheckoutSchema = z.object({
   order_number: z.string().regex(/^SUN-\d{4,10}$/, 'Commande invalide.'),
 });
+
+// ---------------------------------------------------------------------
+// Administration des commandes, remboursements, invitations, scan
+// ---------------------------------------------------------------------
+export const ORDER_STATUSES = ['pending', 'paid', 'expired', 'cancelled', 'partially_refunded', 'refunded'] as const;
+
+export const orderListSchema = z.object({
+  event: slugSchema.optional(),
+  status: z.enum(ORDER_STATUSES).optional(),
+  // recherche libre : uniquement des caractères sûrs (pas de syntaxe de filtre PostgREST)
+  q: z.string().trim().max(80).regex(/^[\p{L}\p{N}@.\s'_-]*$/u, 'Recherche invalide.').optional(),
+  page: z.coerce.number().int().min(1).max(10000).default(1),
+});
+
+export const refundSchema = z.object({
+  request_id: z.uuid('Requête invalide.'),                          // clé d'idempotence (double clic)
+  amount_cents: z.number().int().min(1, 'Montant invalide.').max(1000000).optional(),   // absent = tout le reste
+  reason: z.string().trim().max(200, 'Motif trop long.').default(''),
+  cancel_ticket_ids: z.array(z.uuid()).max(20).default([]),
+});
+
+export const invitationSchema = z.object({
+  slug: slugSchema,
+  tier_id: z.uuid('Tarif invalide.'),
+  guests: z
+    .array(
+      z.object({
+        email: z.string().trim().toLowerCase().pipe(z.email('Email invalide.')),
+        first_name: z.string().trim().min(1, 'Prénom requis.').max(60),
+        last_name: z.string().trim().min(1, 'Nom requis.').max(60),
+        quantity: z.number().int().min(1).max(20).default(1),
+      }),
+    )
+    .min(1, 'Ajoute au moins un invité.')
+    .max(50, '50 invités maximum par envoi.'),
+});
+
+export const scanSchema = z.object({
+  code: z.string().trim().min(1, 'Code manquant.').max(100),
+  event_id: z.uuid('Événement invalide.'),
+});
