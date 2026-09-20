@@ -27,6 +27,7 @@ export const USERS = {
   cust2: { id: 'c2000000-0000-4000-8000-000000000002', email: 'cust2@test.local', password: 'Passw0rd!', role: 'customer', first: 'Denis',   last: 'Autre',  phone: '0690222222' },
   admin: { id: 'ad000000-0000-4000-8000-0000000000ad', email: 'admin@test.local', password: 'Passw0rd!', role: 'admin',    first: 'Alex',    last: 'Admin',  phone: '0690333333' },
   staff: { id: '57000000-0000-4000-8000-000000000057', email: 'staff@test.local', password: 'Passw0rd!', role: 'staff',    first: 'Sam',     last: 'Porte',  phone: '0690444444' },
+  orgb:  { id: '0b000000-0000-4000-8000-0000000000b2', email: 'orgb@test.local',  password: 'Passw0rd!', role: 'customer', first: 'Olivia',  last: 'Autre-Orga', phone: '0690555555' },
 };
 const userJson = (u) => ({ id: u.id, aud: 'authenticated', role: 'authenticated', email: u.email, email_confirmed_at: '2026-01-01T00:00:00Z', app_metadata: {}, user_metadata: {}, created_at: '2026-01-01T00:00:00Z' });
 const session = (u) => { const exp = Math.floor(Date.now() / 1000) + 3600; return { access_token: sign({ sub: u.id, role: 'authenticated', aud: 'authenticated', email: u.email, exp }), token_type: 'bearer', expires_in: 3600, expires_at: exp, refresh_token: 'rt_' + u.id, user: userJson(u) }; };

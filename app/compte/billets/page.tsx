@@ -31,6 +31,7 @@ interface Row {
   order_items: { event_title: string; event_starts_at: string; tier_name: string; quantity: number }[];
   tickets: { id: string; status: string; holder_first_name: string; holder_last_name: string }[];
 }
+const isActive = (status: string) => status === 'valid' || status === 'used';
 
 // Lecture sous RLS : un client ne voit QUE ses commandes et ses billets.
 export default async function MesBilletsPage() {
@@ -71,13 +72,14 @@ export default async function MesBilletsPage() {
                 <h2 className="tk__h">Billets à venir</h2>
                 <ul className="tk__grid">
                   {upcoming.map(({ t, o }) => (
-                    <li key={t.id}>
+                    <li key={t.id} className="tk__item">
                       <a className={'tk__card glass' + (t.status === 'valid' || t.status === 'used' ? '' : ' is-off')} href={`/compte/billets/${t.id}`}>
                         <span className="tk__title">{o.order_items[0]?.event_title}</span>
                         <span className="tk__meta">{formatGp(o.order_items[0]?.event_starts_at)}</span>
                         <span className="tk__meta">{t.holder_first_name} {t.holder_last_name} · {o.order_items[0]?.tier_name}</span>
                         <span className={`tk__badge tk__badge--${t.status}`}>{TICKET_LABEL[t.status] ?? t.status}</span>
                       </a>
+                      {isActive(t.status) && <a className="tk__pdf" href={`/api/tickets/${t.id}/pdf`}>Télécharger le PDF</a>}
                     </li>
                   ))}
                 </ul>
@@ -99,6 +101,7 @@ export default async function MesBilletsPage() {
                       <strong>{formatEuro(o.total_cents)}</strong>
                       <span className={`tk__badge tk__badge--${o.status}`}>{ORDER_LABEL[o.status] ?? o.status}</span>
                       {o.status === 'pending' && <a className="admin-link" href={`/commande/succes?order=${o.order_number}`}>Suivre</a>}
+                      {o.tickets.some((t) => isActive(t.status)) && <a className="tk__pdf" href={`/api/orders/${o.id}/pdf`}>PDF de la commande</a>}
                     </div>
                   </li>
                 ))}

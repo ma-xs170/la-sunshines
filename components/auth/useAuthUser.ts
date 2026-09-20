@@ -7,6 +7,8 @@ import { supabaseConfigured } from '@/lib/supabase/config';
 export interface NavUser {
   email: string;
   firstName: string;
+  /** admin ou membre d'un organisateur : sert UNIQUEMENT à afficher l'entrée « Organisateur » du menu. */
+  isOrganizer: boolean;
 }
 
 // AFFICHAGE uniquement (menu du header). Ne sert JAMAIS à autoriser quoi que ce
@@ -29,11 +31,17 @@ export function useAuthUser(): { ready: boolean; user: NavUser | null } {
       }
       const { data } = await supabase
         .from('profiles')
-        .select('first_name')
+        .select('first_name, role')
         .eq('id', userId)
         .maybeSingle();
+      let isOrganizer = data?.role === 'admin';
+      if (!isOrganizer) {
+        // RLS : un utilisateur ne voit que ses propres appartenances
+        const { count } = await supabase.from('organizer_members').select('organizer_id', { count: 'exact', head: true });
+        isOrganizer = (count ?? 0) > 0;
+      }
       if (alive) {
-        setState({ ready: true, user: { email: email ?? '', firstName: data?.first_name ?? '' } });
+        setState({ ready: true, user: { email: email ?? '', firstName: data?.first_name ?? '', isOrganizer } });
       }
     }
 

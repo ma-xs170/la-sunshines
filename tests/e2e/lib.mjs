@@ -10,6 +10,7 @@ export const USERS = {
   cust:  { id: 'c1000000-0000-4000-8000-000000000001', email: 'cust@test.local',  password: 'Passw0rd!' },
   cust2: { id: 'c2000000-0000-4000-8000-000000000002', email: 'cust2@test.local', password: 'Passw0rd!' },
   admin: { id: 'ad000000-0000-4000-8000-0000000000ad', email: 'admin@test.local', password: 'Passw0rd!' },
+  orgb:  { id: '0b000000-0000-4000-8000-0000000000b2', email: 'orgb@test.local',  password: 'Passw0rd!' },
   staff: { id: '57000000-0000-4000-8000-000000000057', email: 'staff@test.local', password: 'Passw0rd!' },
 };
 export const db = new pg.Client({ connectionString: 'postgresql://postgres:pw@localhost:54329/main' });

@@ -91,6 +91,15 @@ async function HelpBody() {
       </section>
 
       <section className="admin-panel glass admin-panel--wide">
+        <h2>6. Billets PDF et espace organisateur</h2>
+        <ul className="admin-hint">
+          <li>Chaque billet a un <strong>PDF</strong> (un billet = une page), joint à l’email de confirmation et téléchargeable dans « Mes billets ». Le bloc « Organisateur » du PDF (nom, SIRET, ou responsable) se règle dans <a href="/admin/billetterie">Billetterie</a> &gt; Organisateur : sans SIRET ni responsable, le PDF affiche « [À COMPLÉTER] ».</li>
+          <li><a href="/organisateur">/organisateur</a> : ventes, participants, renvoi du PDF, messages d’information (jamais de promotion), export CSV. Réservé aux comptes admin et aux membres de l’organisateur ; chacun ne voit que ses événements. Donner l’accès : voir <code>docs/billetterie/ORGANISATEUR.md</code> (requête SQL).</li>
+          <li>Chaque consultation, export et envoi est enregistré dans le journal d’audit.</li>
+        </ul>
+      </section>
+
+      <section className="admin-panel glass admin-panel--wide">
         <h2>Dépannage rapide</h2>
         <ul className="admin-hint">
           <li><strong>« Supabase n’est pas configuré »</strong> : variables <code>NEXT_PUBLIC_SUPABASE_URL</code>, <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>, <code>SUPABASE_SERVICE_ROLE_KEY</code> manquantes sur Vercel.</li>

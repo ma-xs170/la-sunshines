@@ -10,6 +10,12 @@ const nextConfig = {
   // un rebuild qui rebundlerait le fichier.
   outputFileTracingIncludes: {
     '/**': ['./data/content.json'],
+    // billets PDF : polices du site (assets/fonts), logo et flyers lus à l'exécution (chemins calculés, invisibles du tracer)
+    '/api/tickets/**': ['./assets/fonts/**', './public/images/logo-dark.png', './public/images/editions/**'],
+    '/api/orders/**': ['./assets/fonts/**', './public/images/logo-dark.png', './public/images/editions/**'],
+    '/api/stripe/webhook': ['./assets/fonts/**', './public/images/logo-dark.png', './public/images/editions/**'],
+    '/api/billetterie/**': ['./assets/fonts/**', './public/images/logo-dark.png', './public/images/editions/**'],
+    '/api/organisateur/**': ['./assets/fonts/**', './public/images/logo-dark.png', './public/images/editions/**'],
   },
 };
 
