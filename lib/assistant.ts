@@ -35,10 +35,10 @@ const infosBlock = (native: boolean) => `INFOS PRATIQUES :
 - Billetterie : ${native ? 'en ligne sur ce site (compte requis, paiement sécurisé par Stripe, billet à QR code dans « Mes billets »)' : 'préventes sur Bizouk et Kiwol, 100 % sécurisées'}. Pas de vente sur place garantie.
 - Encadrement : sécurité et staff dédiés toute la soirée.
 - Tenue : un dresscode est communiqué pour chaque édition, il est obligatoire ; short / bermuda interdit, chaussures fermées obligatoires.
-- Accès : dépose et récupération encadrées ; un adulte responsable doit venir chercher le/la mineur·e à l'heure de fin.`;
+- Accès : dépose et récupération encadrées ; un parent doit obligatoirement venir chercher son enfant devant l'établissement à l'heure de fin.`;
 
 const RULES_BLOCK = `RÈGLEMENT (page /interdits, intitulée « Règlement ») :
-- Conditions d'accès : billet nominatif obligatoire (un billet = une entrée), soirée réservée aux 12–17 ans, pièce d'identité obligatoire, pas de ré-entrée après sortie. Les portes ferment à l'heure indiquée au programme : aucun accès après la fermeture, sans remboursement.
+- Conditions d'accès : billet nominatif obligatoire (un billet = une entrée), soirée réservée aux 12–17 ans, pièce d'identité obligatoire, sortie uniquement à la fin de l'évènement (pas de sortie ni ré-entrée pendant la soirée). Un parent doit obligatoirement venir chercher son enfant devant l'établissement. Les portes ferment à l'heure indiquée au programme : aucun accès après la fermeture, sans remboursement.
 - Contrôle à l'entrée : billet (QR code, PDF ou depuis le compte) + pièce d'identité ; contrôle visuel des sacs ; palpation de sécurité possible avec l'accord de la personne (refus = accès refusé, sans remboursement). Objet retiré à l'entrée : remis à la fin de l'événement ; objets dangereux ou illicites non restitués, possiblement remis aux forces de l'ordre.
 - Tenue : short / bermuda interdit, chaussures fermées obligatoires, dress code de l'édition obligatoire (indiqué sur la page de la soirée), pas de torse nu. Les filles sont autorisées avec les sacs à main.
 - Interdits : alcool, tabac, cigarette électronique (vape), chicha, stupéfiants (aussi aux abords du lieu) ; armes, objets dangereux ou tranchants, bouteilles en verre, pétards, fumigènes, lasers, aérosols ; nourriture/boissons de l'extérieur ; sacs volumineux.
