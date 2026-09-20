@@ -5,9 +5,11 @@ import Footer from '@/components/Footer';
 import PageHero from '@/components/PageHero';
 import Icon from '@/components/Icon';
 import Checklist from '@/components/organizer/Checklist';
+import NewsBanner from '@/components/organizer/NewsBanner';
 import EventBrowser from '@/components/organizer/EventBrowser';
 import type { CardEvent } from '@/lib/organizer/browse';
 import { getOrgContext } from '@/lib/organizer/context';
+import { newsFor } from '@/lib/organizer/news';
 import { editorial, orgRpc, type OrgEventRow } from '@/lib/organizer/data';
 import { can } from '@/lib/organizer/roles';
 import { eventState } from '@/lib/organizer/status';
@@ -37,7 +39,7 @@ export default async function OrganizerHome() {
 
   const role = current.my_role;
   const manage = can(role, 'manage');
-  const r = await orgRpc<OrgEventRow[]>('org_events', { p_actor: s.userId });
+  const [r, news] = await Promise.all([orgRpc<OrgEventRow[]>('org_events', { p_actor: s.userId }), newsFor(s.userId)]);
   const rows = (r.ok ? r.data : []).filter((e) => e.organizer_id === current.id);
   const events: CardEvent[] = rows.map((e) => {
     const ed = editorial(e.slug);
@@ -49,6 +51,7 @@ export default async function OrganizerHome() {
 
   return (
     <main className="org org-home">
+      <NewsBanner items={news ?? []} />
       <div className="org-head">
         <div>
           <h1 className="org-head__title">Bienvenue</h1>

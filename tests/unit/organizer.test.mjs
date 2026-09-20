@@ -91,3 +91,25 @@ test('liste : onglets, puces, recherche sans accents, lieu et période', () => {
   assert.equal(slugs({ to: '2026-11-30' }), 'af');
   assert.equal(slugs({ from: '2026-11-01', to: '2026-11-01' }), 'af');  // bornes incluses (jour entier, heure de Guadeloupe)
 });
+
+// ---- actualités : nettoyage du texte (aucun HTML), image https seulement
+import { cleanNewsTitle, cleanNewsBody, safeImageUrl, paragraphs, isNewsCategory } from '../../lib/news/text.ts';
+
+test('actualités : le contenu est du texte simple, sans chevrons ni caractères de contrôle', () => {
+  assert.equal(cleanNewsTitle('  Nouvelle <b>page</b>\n Analyse '), 'Nouvelle b page /b Analyse');
+  assert.equal(cleanNewsTitle('<img src=x onerror=alert(1)>'), 'img src=x onerror=alert(1)');
+  assert.equal(cleanNewsBody('Ligne 1\r\nLigne 2 <script>alert(1)</script>\u0000\u0007'), 'Ligne 1\nLigne 2 scriptalert(1)/script');
+  assert.equal(cleanNewsBody('a\n\n\n\n\nb'), 'a\n\nb');
+  assert.equal(cleanNewsTitle('x'.repeat(300)).length, 120);
+  assert.equal(/[<>]/.test(cleanNewsBody('<<>>a<')), false);
+  assert.deepEqual(paragraphs('un\ndeux\n\ntrois'), ['un\ndeux', 'trois']);
+});
+test('actualités : image = URL https uniquement', () => {
+  assert.equal(safeImageUrl('https://cdn.example/a.png'), 'https://cdn.example/a.png');
+  for (const bad of ['http://x.io/a.png', 'javascript:alert(1)', 'data:image/png;base64,AAA', '//x.io/a.png', 'https://x.io/a b.png', 'https://x.io/"onerror=1', 'ftp://x', 'https://' + 'a'.repeat(600)]) assert.equal(safeImageUrl(bad), null, bad);
+  assert.equal(safeImageUrl(''), null); assert.equal(safeImageUrl(null), null);
+});
+test('actualités : catégories connues', () => {
+  for (const c of ['nouveaute', 'important', 'maintenance']) assert.equal(isNewsCategory(c), true);
+  for (const c of ['promo', '', null, 'IMPORTANT']) assert.equal(isNewsCategory(c), false);
+});

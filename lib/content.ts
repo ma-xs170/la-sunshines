@@ -20,6 +20,7 @@ import { resolveEmoji } from './editionEmoji';
 import { bizoukUrlFromEmbed } from './slug';
 import { stripOrgNames, cleanHeadliner } from './artists';
 import { formatEditionDate } from './format';
+import { withTestEvent } from './testEdition';
 
 function storedEventToEdition(ev: StoredEvent): Edition {
   const parsedDate = Date.parse(ev.date);
@@ -121,7 +122,9 @@ function mergeOverride(base: Edition, se: StoredEvent, ovr: Edition): Edition {
  */
 export function getAllEditions(opts?: { includeHidden?: boolean }): Edition[] {
   const store = readStoreSync();
-  const eventBySlug = new Map(store.events.map((e) => [e.slug, e]));
+  // + l'événement de test du code (uniquement en local / Preview avec TICKETING_FORCE_MODE=internal, jamais en production)
+  const storedEvents = withTestEvent(store.events);
+  const eventBySlug = new Map(storedEvents.map((e) => [e.slug, e]));
   const staticSlugs = new Set(staticEditions.map((e) => e.slug));
 
   // 1) éditions du site, avec surcharge admin éventuelle (même slug)
@@ -130,7 +133,7 @@ export function getAllEditions(opts?: { includeHidden?: boolean }): Edition[] {
     return se ? mergeOverride(base, se, storedEventToEdition(se)) : base;
   });
   // 2) événements admin purs (slug inconnu côté statique)
-  const extra = store.events
+  const extra = storedEvents
     .filter((e) => !staticSlugs.has(e.slug))
     .map(storedEventToEdition);
 

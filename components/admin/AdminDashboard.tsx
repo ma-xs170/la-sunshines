@@ -203,6 +203,11 @@ export default function AdminDashboard({
               <span>Billetterie</span>
               <Icon name="arrow-up-right" className="admin-navlink__ext" />
             </a>
+            <a className="admin-navlink admin-navlink--ext" href="/admin/actualites">
+              <Icon name="bell" className="icon" />
+              <span>Actualités organisateurs</span>
+              <Icon name="arrow-up-right" className="admin-navlink__ext" />
+            </a>
             <a
               className="admin-navlink admin-navlink--ext"
               href="/status"
