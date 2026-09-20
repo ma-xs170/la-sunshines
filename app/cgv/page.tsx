@@ -30,7 +30,7 @@ export default async function CgvPage() {
           <h2>4. Billets</h2>
           <p>Chaque billet est nominatif, porte un QR code unique et n’est valable qu’une seule fois, pour l’événement et le tarif indiqués. Le QR code ne doit pas être partagé : le premier scan à l’entrée est le seul valable.</p>
           <h2>5. Mineurs</h2>
-          <p>Les événements s’adressent à un public de 12 à 17 ans. Avant tout paiement, l’acheteur déclare <strong>avoir 18 ans ou disposer de l’autorisation de son représentant légal</strong> (et, lorsqu’il achète pour d’autres participants mineurs, être leur représentant légal ou avoir leur autorisation). Cette déclaration est enregistrée avec la commande. Le <a href="/interdits">règlement de l’événement</a> s’applique.</p>
+          <p>Les événements s’adressent à un public de 12 à 17 ans. Avant tout paiement, l’acheteur déclare <strong>avoir 18 ans ou disposer de l’autorisation de son représentant légal</strong> (et, lorsqu’il achète pour d’autres participants mineurs, être leur représentant légal ou avoir leur autorisation). Cette déclaration est enregistrée avec la commande. Le <a href="/interdits">règlement de l’événement</a> s’applique : l’accès peut être refusé, ou la personne exclue, en cas de non-respect du règlement ou d’arrivée après la fermeture des portes, sans remboursement (voir la <a href="/remboursement">politique de remboursement</a>).</p>
           <h2>6. Rétractation</h2>
           <p>Conformément à l’article L221-28 12° du Code de la consommation, le droit de rétractation ne s’applique pas aux prestations de loisirs fournies à une date déterminée.</p>
           <h2>7. Annulation ou report</h2>

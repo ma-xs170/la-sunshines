@@ -22,7 +22,7 @@ function buildCards(lieu: string): InfoCard[] {
       title: 'Encadrement',
       text: 'Sécurité & staff dédiés toute la soirée',
     },
-    { icon: 'shirt', title: 'Tenue', text: "Dresscode selon l'édition" },
+    { icon: 'shirt', title: 'Tenue', text: "Dresscode selon l'édition, chaussures fermées, pas de short" },
     { icon: 'car', title: 'Accès', text: 'Dépose & récupération encadrées' },
   ];
 }
