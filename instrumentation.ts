@@ -7,5 +7,9 @@ export async function register() {
     const { assertStripeKeyPolicy } = await import('./lib/stripe-guard');
     const { warning } = assertStripeKeyPolicy();
     if (warning) console.warn(warning);
+    const { forceModeIgnoredInProduction } = await import('./lib/ticketing/force-mode');
+    if (forceModeIgnoredInProduction(process.env)) {
+      console.warn('[billetterie] TICKETING_FORCE_MODE est défini en PRODUCTION : ignoré (le mode vient uniquement de la base). Supprime cette variable.');
+    }
   }
 }

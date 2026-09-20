@@ -15,7 +15,7 @@ async function patch(key: string, value: unknown): Promise<string | null> {
 
 // Flag global Bizouk ⇄ billetterie interne + frais de service. Effet immédiat, sans redéployer.
 export default function AdminSettingsForm({ initial }: { initial: TicketingSettings }) {
-  const [mode, setMode] = useState(initial.mode);
+  const [mode, setMode] = useState(initial.dbMode); // réglage RÉEL en base (jamais le mode forcé par l'environnement)
   const [pct, setPct] = useState(String(initial.feePercent));
   const [fix, setFix] = useState(String(initial.feeFixedCents / 100));
   const [msg, setMsg] = useState('');
@@ -49,6 +49,13 @@ export default function AdminSettingsForm({ initial }: { initial: TicketingSetti
   return (
     <div className="admin-panel glass">
       <h2>Mode de billetterie</h2>
+      {initial.forced && (
+        <p className="admin-note" role="status">
+          <strong>Mode de test forcé sur cet environnement</strong> (<code>TICKETING_FORCE_MODE=internal</code>) : la
+          billetterie interne est active ICI seulement (local / Preview). Le réglage ci-dessous est le réglage réel, partagé
+          avec la production, et n’est pas modifié par ce forçage.
+        </p>
+      )}
       <p className="admin-hint">
         <strong>Bizouk</strong> (défaut) : les pages événement affichent le widget Bizouk, la billetterie interne est
         invisible. <strong>Interne</strong> : les événements dont la billetterie est activée affichent les tarifs
