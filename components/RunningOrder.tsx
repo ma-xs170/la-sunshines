@@ -1,4 +1,5 @@
 import type { ScheduleEntry } from '@/lib/store';
+import { ArtistText } from '@/components/ArtistName';
 import { groupSchedule } from '@/lib/schedule';
 
 /**
@@ -23,7 +24,11 @@ export default function RunningOrder({ schedule }: { schedule: ScheduleEntry[] }
                   key={e.id}
                 >
                   {e.headliner && <span className="ro__tag">Tête d’affiche</span>}
-                  {e.artistName && <span className="ro__name">{e.artistName}</span>}
+                  {e.artistName && (
+                    <span className="ro__name">
+                      <ArtistText text={e.artistName} slugs={e.artistSlugs} />
+                    </span>
+                  )}
                   {e.label && <span className="ro__label">{e.label}</span>}
                 </li>
               ))}

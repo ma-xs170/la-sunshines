@@ -7,6 +7,7 @@ import { resolveEmoji } from '@/lib/editionEmoji';
 import { heroGradient } from '@/lib/gradient';
 import { normalizeArtistName } from '@/lib/artists';
 import { formatEditionDate } from '@/lib/format';
+import { linkArtistText } from '@/lib/artistLinks';
 import { groupSchedule, slotsFromEventTime, normalizeTime } from '@/lib/schedule';
 import Icon from '@/components/Icon';
 import ArtistCombobox from './ArtistCombobox';
@@ -428,7 +429,62 @@ function OptionalFields({
   );
 }
 
-function ScheduleEditor({ hook }: { hook: Hook }) {
+/** Lien d'une ligne du programme vers des profils artistes : automatique par nom
+ *  tant que rien n'est choisi ; les artistes choisis ici sont prioritaires. */
+function ScheduleLinks({
+  row,
+  artists,
+  onChange,
+}: {
+  row: ScheduleEntry;
+  artists: StoredArtist[];
+  onChange: (slugs: string[] | undefined) => void;
+}) {
+  const explicit = (row.artistSlugs ?? []).filter((s) => artists.some((a) => a.slug === s));
+  const auto = linkArtistText(row.artistName, artists)
+    .filter((seg) => seg.slug)
+    .map((seg) => seg.text);
+  const nameOf = (slug: string) => artists.find((a) => a.slug === slug)?.name ?? slug;
+  const available = artists.filter((a) => !explicit.includes(a.slug));
+  return (
+    <div className="sched__links">
+      {explicit.map((slug) => (
+        <span className="sched__chip" key={slug}>
+          {nameOf(slug)}
+          <button
+            type="button"
+            aria-label={`Retirer le lien vers ${nameOf(slug)}`}
+            onClick={() => {
+              const next = explicit.filter((x) => x !== slug);
+              onChange(next.length ? next : undefined);
+            }}
+          >
+            ×
+          </button>
+        </span>
+      ))}
+      <select
+        aria-label="Lier cette ligne à un artiste"
+        value=""
+        onChange={(e) => e.target.value && onChange([...explicit, e.target.value])}
+      >
+        <option value="">{explicit.length ? '+ Autre artiste' : 'Lier à un artiste…'}</option>
+        {available.map((a) => (
+          <option key={a.slug} value={a.slug}>
+            {a.name}
+          </option>
+        ))}
+      </select>
+      {explicit.length === 0 && (
+        <span className="sched__auto">
+          {auto.length ? `Liaison auto : ${auto.join(', ')}` : 'Aucun lien (texte simple)'}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function ScheduleEditor({ hook, artists }: { hook: Hook; artists: StoredArtist[] }) {
   const names = Array.from(
     new Set([...hook.headlinerList, ...hook.lineupList].filter(Boolean)),
   );
@@ -540,6 +596,13 @@ function ScheduleEditor({ hook }: { hook: Hook }) {
                       <Icon name="close" />
                     </button>
                   </div>
+                  <ScheduleLinks
+                    row={row}
+                    artists={artists}
+                    onChange={(artistSlugs) =>
+                      hook.patchSchedule(row.id, { artistSlugs })
+                    }
+                  />
                 </li>
               ))}
             </ul>
@@ -1020,7 +1083,7 @@ function EventEditForm({
             Déroulé horaire affiché sur la page publique (trié par heure). Laisse
             vide pour ne rien afficher.
           </p>
-          <ScheduleEditor hook={hook} />
+          <ScheduleEditor hook={hook} artists={store.artists} />
         </fieldset>
 
         <div className="admin-form__actions">

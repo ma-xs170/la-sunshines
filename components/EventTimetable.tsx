@@ -1,3 +1,4 @@
+import { ArtistText } from '@/components/ArtistName';
 import {
   isTimetableGroup,
   type Timetable,
@@ -18,7 +19,9 @@ function Row({ row, sub = false }: { row: TimetableRow; sub?: boolean }) {
       ) : (
         <span className="tt-dot" aria-hidden="true">·</span>
       )}
-      <span className="tt-label">{row.label}</span>
+      <span className="tt-label">
+        <ArtistText text={row.label} />
+      </span>
     </li>
   );
 }

@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { findArtistProfile } from '@/lib/artistProfiles';
+import { findArtistProfile, getArtistProfiles } from '@/lib/artistProfiles';
+import { linkArtistText } from '@/lib/artistLinks';
 
 /**
  * Affiche un nom d'artiste. S'il existe un profil (fiche créée dans /admin), le
@@ -47,6 +48,41 @@ export function ArtistNameList({
           <ArtistName name={p} className={className} />
         </span>
       ))}
+    </>
+  );
+}
+
+/**
+ * Texte libre de programme (« DJ Sosonne · DJ Dalton », « Timalash & Lil Scott ») :
+ * chaque nom qui correspond à un profil devient un lien distinct ; séparateurs et
+ * noms sans profil restent du texte simple (aucun lien mort). `slugs` = lien
+ * explicite posé dans l'admin, prioritaire sur la liaison automatique.
+ */
+export function ArtistText({
+  text,
+  slugs,
+  className,
+}: {
+  text: string;
+  slugs?: string[];
+  className?: string;
+}) {
+  const segments = linkArtistText(text, getArtistProfiles(), slugs);
+  return (
+    <>
+      {segments.map((seg, i) =>
+        seg.slug ? (
+          <Link
+            key={i}
+            href={`/artistes/${seg.slug}`}
+            className={className ? `${className} artist-name-link` : 'artist-name-link'}
+          >
+            {seg.text}
+          </Link>
+        ) : (
+          <span key={i}>{seg.text}</span>
+        ),
+      )}
     </>
   );
 }

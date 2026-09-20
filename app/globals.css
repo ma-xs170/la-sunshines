@@ -1159,6 +1159,42 @@ footer{
 .lineup__pill .artist-name-link:hover{background:rgba(25,20,16,0.04);text-decoration:none;}
 .lineup__pill .artist-name-link:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
 
+/* Programme (déroulé) : noms d'artistes cliquables. Lien discret — même encre que
+   le texte, soulignement fin + accent de la page au survol / focus. Aucun impact
+   sur la mise en page : pas de padding horizontal, hauteur de ligne inchangée. */
+.ro__name .artist-name-link,
+.tt-label .artist-name-link{
+  color:inherit;text-decoration:none;
+  background-image:linear-gradient(currentColor,currentColor);
+  background-repeat:no-repeat;background-position:0 100%;background-size:0 1px;
+  transition:color .15s ease, background-size .2s ease;
+  border-radius:3px;
+}
+.ro__name .artist-name-link:hover,
+.tt-label .artist-name-link:hover{
+  color:var(--ev-accent,var(--amber-ink));text-decoration:none;
+  background-size:100% 1px;
+}
+.ro__name .artist-name-link:focus-visible,
+.tt-label .artist-name-link:focus-visible{
+  outline:2px solid var(--ev-accent,var(--amber-ink));outline-offset:2px;
+  color:var(--ev-accent,var(--amber-ink));background-size:100% 1px;
+}
+/* tactile : pas de survol → soulignement fin permanent (repère de lien) et zone
+   cliquable élargie (padding/margin inline compensés : la ligne ne bouge pas). */
+@media (pointer:coarse){
+  .ro__name .artist-name-link,
+  .tt-label .artist-name-link{
+    padding:10px 4px;margin:-10px -4px;background-image:none;
+    text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;
+    text-decoration-color:color-mix(in srgb, currentColor 40%, transparent);
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  .ro__name .artist-name-link,
+  .tt-label .artist-name-link{transition:none;}
+}
+
 /* ================================================================
    Theming intégral de la page événement — TOUTES les sections, tous
    les éléments. Chaque couleur vient d'une variable --ev-* (pageTheme,
@@ -2889,6 +2925,23 @@ footer{
   font-size:11px;font-weight:700;color:var(--gray);
 }
 .sched__head input{width:15px;height:15px;flex:none;}
+.sched__links{
+  grid-column:1 / -1;display:flex;flex-wrap:wrap;align-items:center;gap:6px;
+}
+.sched__links select{
+  padding:6px 8px;border-radius:var(--r-sm);font-size:12px;min-height:32px;
+  border:1px solid var(--panel-border-strong);background:var(--bg);color:var(--ink);
+}
+.sched__chip{
+  display:inline-flex;align-items:center;gap:4px;padding:4px 4px 4px 10px;
+  border-radius:var(--r-pill);font-size:12px;font-weight:700;
+  background:color-mix(in srgb, var(--amber) 22%, transparent);color:var(--ink);
+}
+.sched__chip button{
+  width:22px;height:22px;border-radius:50%;line-height:1;font-size:14px;color:var(--ink);
+}
+.sched__chip button:hover{background:rgba(25,20,16,0.1);}
+.sched__auto{font-size:11px;color:var(--gray);}
 .sched__acts{display:inline-flex;gap:4px;}
 .sched__acts button{
   width:30px;height:30px;border-radius:8px;cursor:pointer;
