@@ -100,6 +100,12 @@ export interface StoredEvent {
   createdAt: string;
 }
 
+export function cleanSlugs(v: unknown): string[] | undefined {
+  if (!Array.isArray(v)) return undefined;
+  const out = v.filter((x): x is string => typeof x === 'string' && x.trim() !== '').map((x) => x.trim());
+  return out.length ? [...new Set(out)] : undefined;
+}
+
 export interface ScheduleEntry {
   id: string;
   /** créneau au format « HH:MM » (ex. « 18:00 »). Chaque entrée garde SON heure ;
@@ -111,6 +117,9 @@ export interface ScheduleEntry {
   label: string;
   /** tête d'affiche — mise en valeur visuelle sur l'affichage public. */
   headliner: boolean;
+  /** Lien explicite vers un ou plusieurs profils artistes (slugs). Absent/vide →
+   *  liaison automatique par nom. Prioritaire sur l'automatique quand renseigné. */
+  artistSlugs?: string[];
 }
 
 export interface StoredAnnouncement {
@@ -239,6 +248,7 @@ function normalizeEvent(raw: Partial<StoredEvent>): StoredEvent {
             artistName: typeof s.artistName === 'string' ? s.artistName : '',
             label: typeof s.label === 'string' ? s.label : '',
             headliner: s.headliner === true,
+            ...(cleanSlugs(s.artistSlugs) ? { artistSlugs: cleanSlugs(s.artistSlugs) } : {}),
           }))
       : [],
   };

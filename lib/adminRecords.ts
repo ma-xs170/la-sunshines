@@ -7,6 +7,7 @@ import {
   type StoredAnnouncement,
   type ScheduleEntry,
   newId,
+  cleanSlugs,
 } from './store';
 import { slugify, uniqueSlug } from './slug';
 import { editions as staticEditions } from './editions';
@@ -77,6 +78,7 @@ function toSchedule(v: unknown): ScheduleEntry[] {
       artistName: typeof s.artistName === 'string' ? s.artistName.trim() : '',
       label: typeof s.label === 'string' ? s.label.trim() : '',
       headliner: s.headliner === true,
+      ...(cleanSlugs(s.artistSlugs) ? { artistSlugs: cleanSlugs(s.artistSlugs) } : {}),
     }))
     .filter((s) => s.time || s.artistName || s.label);
 }
