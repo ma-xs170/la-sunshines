@@ -20,7 +20,7 @@ Mis à jour à la fin de chaque phase.
 - Realtime « push » non fait (voir D7).
 
 ## À FAIRE PAR MATHIS
-1. Appliquer les migrations **010 → 014** sur la base (variable `POSTGRES_URL_NON_POOLING` absente de `.env.local`) : d'abord `supabase/tests/002_verify.sql`, puis `014_verify.sql` pour contrôle.
+1. ~~Appliquer les migrations 010 → 014~~ : **faites le 20/09/2026** (connexion session, port 5432). `002_verify.sql` : 221 contrôles, 0 échec ; `014_verify.sql` : 6/6. Sauvegarde des données (JSON + définitions de fonctions, `pg_dump` absent) dans `~/sunshines-backups/2026-09-20-avant-migrations-010-014/`, hors dépôt : à supprimer quand tu n'en as plus besoin (données personnelles).
 2. Vérifier le domaine Resend (e-mails d'invitation admin, phase 5).
 3. Variables Vercel : à lister au fur et à mesure des phases.
 4. Validation juridique de l'autorisation parentale, SIRET à vérifier (phases suivantes).
