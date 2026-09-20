@@ -4,6 +4,7 @@ import { readStore } from '@/lib/store';
 import { persistStore } from '@/lib/persistStore';
 import { buildArtist, buildEvent, buildAnnouncement } from '@/lib/adminRecords';
 import { notifySubscribersForEvent } from '@/lib/subscriptions';
+import { setArtistEmail } from '@/lib/privateData';
 
 const ENTITIES = ['artists', 'events', 'announcements'] as const;
 
@@ -35,6 +36,10 @@ export async function POST(req: Request, { params }: Ctx) {
     const built = buildArtist(body as Record<string, unknown>, store);
     if ('error' in built) return NextResponse.json(built, { status: 400 });
     store.artists.unshift(built);
+    // l'email est PRIVÉ (Supabase) ; jamais écrit dans le fichier de contenu (dépôt public)
+    if (built.email && !(await setArtistEmail(built.slug, built.email))) {
+      return NextResponse.json({ error: 'Stockage privé (Supabase) indisponible : email non enregistré.' }, { status: 503 });
+    }
     const saved = await persistStore(store);
     if (!saved.ok) return NextResponse.json({ error: saved.error }, { status: 502 });
     return NextResponse.json(
@@ -60,7 +65,7 @@ export async function POST(req: Request, { params }: Ctx) {
   const built = buildEvent(body as Record<string, unknown>, store);
   if ('error' in built) return NextResponse.json(built, { status: 400 });
   store.events.unshift(built);
-  await notifySubscribersForEvent(store, built); // mute store.notifiedSubscribers
+  await notifySubscribersForEvent(store, built); // abonnés et suivi dans Supabase
   const saved = await persistStore(store);
   if (!saved.ok) return NextResponse.json({ error: saved.error }, { status: 502 });
   return NextResponse.json(

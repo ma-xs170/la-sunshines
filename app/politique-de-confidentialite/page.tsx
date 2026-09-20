@@ -4,6 +4,7 @@ import Footer from '@/components/Footer';
 import PageHero from '@/components/PageHero';
 import { getTicketingSettings } from '@/lib/ticketing/settings';
 import { supabaseConfigured } from '@/lib/supabase/config';
+import { supabaseAdminConfigured } from '@/lib/supabase/admin';
 
 export const revalidate = 60;
 
@@ -23,6 +24,9 @@ export default async function PrivacyPage() {
   const accounts = native || supabaseConfigured();
   // L'assistant n'existe que si la clé Mistral est configurée.
   const assistant = Boolean(process.env.MISTRAL_API_KEY);
+  // Abonnements aux artistes, emails de connexion et certifications : base privée (Supabase), jamais dans le code source public.
+  const artistsData = supabaseAdminConfigured();
+  const certification = artistsData && Boolean(process.env.BLOB_READ_WRITE_TOKEN);
   return (
     <>
       <Nav />
@@ -75,6 +79,27 @@ export default async function PrivacyPage() {
               n’avez pas donné votre accord.
             </li>
           </ul>
+          {artistsData && (
+            <ul>
+              <li>
+                <strong>Abonnement aux annonces d’un artiste</strong> : adresse email et artiste suivi, avec votre
+                consentement (case à cocher). Vous recevez un email lorsque cet artiste est annoncé au line-up d’une
+                soirée ; chaque email contient un lien de désabonnement en un clic.
+              </li>
+              <li>
+                <strong>Espace artiste</strong> : l’adresse email d’un artiste sert uniquement à lui envoyer ses liens
+                de connexion (à usage unique, valables 30 minutes). Elle n’est jamais affichée publiquement.
+              </li>
+              {certification && (
+                <li>
+                  <strong>Certification d’une page artiste</strong> : nom, adresse email et copie d’une pièce
+                  d’identité. La pièce est stockée dans un espace privé, consultée uniquement par l’équipe, et
+                  <strong> supprimée dès que la décision est prise</strong> ; seul le fait que la page est « certifiée »
+                  est conservé.
+                </li>
+              )}
+            </ul>
+          )}
           {assistant && (
             <ul>
               <li>
@@ -128,6 +153,8 @@ export default async function PrivacyPage() {
           <p>
             Le traitement des messages de contact repose sur notre intérêt
             légitime à répondre à vos sollicitations.{' '}
+            {artistsData &&
+              'L’abonnement aux annonces d’un artiste repose sur votre consentement, retirable en un clic ; la vérification d’une page artiste, sur la demande de l’artiste. '}
             {accounts &&
               'La gestion du compte, des commandes et des billets repose sur l’exécution du contrat conclu avec vous ; la conservation des pièces de vente, sur une obligation légale ; le contrôle à l’entrée et la lutte contre la fraude, sur notre intérêt légitime. '}
             Le dépôt de cookies non
@@ -210,6 +237,13 @@ export default async function PrivacyPage() {
               traiter votre demande. Vous pouvez en demander la suppression à
               tout moment.
             </li>
+            {artistsData && (
+              <li>
+                <strong>Abonnements aux artistes</strong> : jusqu’à votre désabonnement.{' '}
+                <strong>Emails de connexion des artistes</strong> : tant que la page artiste existe.
+                {certification && ' Pièces d’identité : supprimées dès la décision de l’équipe.'}
+              </li>
+            )}
             {assistant && (
               <li>
                 <strong>Demandes de support de l’assistant</strong> :{' '}

@@ -9,6 +9,7 @@ import {
 } from '@/lib/adminRecords';
 import { notifySubscribersForEvent } from '@/lib/subscriptions';
 import { deleteSupportTicket, setSupportTicketStatus } from '@/lib/supportTickets';
+import { setArtistEmail } from '@/lib/privateData';
 
 const ENTITIES = ['artists', 'events', 'announcements', 'tickets'];
 
@@ -50,6 +51,10 @@ export async function PATCH(req: Request, { params }: Ctx) {
     const idx = store.artists.findIndex((a) => a.id === id);
     if (idx < 0) return NextResponse.json({ error: 'Introuvable.' }, { status: 404 });
     store.artists[idx] = applyArtistPatch(store.artists[idx], body);
+    // l'email est PRIVÉ (Supabase) ; on ne le met à jour que s'il est fourni, et jamais dans le fichier de contenu
+    if (body.email !== undefined && !(await setArtistEmail(store.artists[idx].slug, String(body.email)))) {
+      return NextResponse.json({ error: 'Stockage privé (Supabase) indisponible : email non enregistré.' }, { status: 503 });
+    }
     const saved = await persistStore(store);
     if (!saved.ok) return NextResponse.json({ error: saved.error }, { status: 502 });
     return NextResponse.json({ ok: true, item: store.artists[idx], deployed: saved.deployed });

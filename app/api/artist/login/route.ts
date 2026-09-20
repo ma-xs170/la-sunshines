@@ -4,9 +4,8 @@
 
 import { NextResponse } from 'next/server';
 import { readStore } from '@/lib/store';
-import { persistStore } from '@/lib/persistStore';
 import { grantArtistSession } from '@/lib/artistAuth';
-import { findValidLoginToken } from '@/lib/artistLogin';
+import { consumeArtistLoginToken } from '@/lib/privateData';
 import { siteUrl } from '@/lib/mail';
 
 export const runtime = 'nodejs';
@@ -21,22 +20,17 @@ export async function GET(req: Request) {
     return NextResponse.redirect(`${base}/artistes?login=invalide`);
   }
 
-  const store = await readStore();
-  const entry = findValidLoginToken(store, token);
-  if (!entry) {
+  // jeton à usage unique, consommé de façon atomique (Supabase) : un second clic est refusé
+  const slug = await consumeArtistLoginToken(token);
+  if (!slug) {
     return NextResponse.redirect(`${base}/artistes?login=expire`);
   }
 
-  const artist = store.artists.find((a) => a.slug === entry.artistSlug);
+  const store = await readStore();
+  const artist = store.artists.find((a) => a.slug === slug);
   if (!artist || !artist.verified) {
     return NextResponse.redirect(`${base}/artistes?login=invalide`);
   }
-
-  // brûle le jeton
-  store.artistLoginTokens = store.artistLoginTokens.map((t) =>
-    t.token === token ? { ...t, used: true } : t,
-  );
-  await persistStore(store);
 
   await grantArtistSession(artist.slug);
   return NextResponse.redirect(`${base}/artistes/${artist.slug}/modifier`);

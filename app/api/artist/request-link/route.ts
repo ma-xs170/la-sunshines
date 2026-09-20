@@ -4,9 +4,9 @@
 
 import { NextResponse } from 'next/server';
 import { readStore } from '@/lib/store';
-import { persistStore } from '@/lib/persistStore';
 import { rateLimit, clientIp } from '@/lib/rateLimit';
-import { issueArtistLoginToken, sendArtistMagicLink } from '@/lib/artistLogin';
+import { sendArtistMagicLink } from '@/lib/artistLogin';
+import { getArtistEmail, issueArtistLoginToken } from '@/lib/privateData';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -39,10 +39,9 @@ export async function POST(req: Request) {
   const artist = store.artists.find((a) => a.slug === slug);
 
   // conditions non révélées au client : on renvoie la même réponse quoi qu'il arrive
-  if (artist && artist.verified && artist.email) {
-    const token = issueArtistLoginToken(store, artist.slug);
-    const saved = await persistStore(store);
-    if (saved.ok) void sendArtistMagicLink(artist, token);
+  if (artist && artist.verified && (await getArtistEmail(artist.slug))) {
+    const token = await issueArtistLoginToken(artist.slug);
+    if (token) void sendArtistMagicLink(artist, token);
   }
 
   return NextResponse.json(GENERIC);

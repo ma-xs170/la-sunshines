@@ -61,7 +61,6 @@ export function artistSocials(
     { kind: 'instagram', icon: 'instagram', label: 'Instagram', value: a.instagram },
     { kind: 'tiktok', icon: 'tiktok', label: 'TikTok', value: a.tiktok },
     { kind: 'soundcloud', icon: 'soundcloud', label: 'SoundCloud', value: a.soundcloud },
-    { kind: 'email', icon: 'mail', label: 'Email', value: a.email },
   ];
   return defs
     .map((d) => ({ ...d, href: socialHref(d.kind, d.value) }))

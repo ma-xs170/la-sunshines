@@ -19,7 +19,7 @@ const SOCIALS: { k: 'instagram' | 'tiktok' | 'soundcloud' | 'email'; label: stri
   { k: 'instagram', label: 'Instagram', ph: 'https://instagram.com/… ou @pseudo' },
   { k: 'tiktok', label: 'TikTok', ph: 'https://tiktok.com/@… ou @pseudo' },
   { k: 'soundcloud', label: 'SoundCloud', ph: 'https://soundcloud.com/…' },
-  { k: 'email', label: 'Email public', ph: 'artiste@exemple.com' },
+  { k: 'email', label: 'Email de connexion (privé, jamais affiché)', ph: 'artiste@exemple.com' },
 ];
 
 export default function ArtistSelfEdit({

@@ -1,5 +1,4 @@
-import { readStore } from '@/lib/store';
-import { persistStore } from '@/lib/persistStore';
+import { removeSubscriptionByToken } from '@/lib/privateData';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -20,15 +19,12 @@ a{display:inline-block;margin-top:18px;background:#FFB238;color:#191410;font-wei
 
 async function unsubscribe(token: string): Promise<Response> {
   if (!token) return page('Lien invalide', 'Ce lien de désabonnement est incomplet.');
-  const store = await readStore();
-  const before = store.subscriptions.length;
-  store.subscriptions = store.subscriptions.filter((s) => s.token !== token);
-  if (store.subscriptions.length === before) {
-    return page('Déjà désabonné', 'Cet abonnement n’existe plus — rien à faire.');
-  }
-  const saved = await persistStore(store);
-  if (!saved.ok) {
+  const removed = await removeSubscriptionByToken(token);
+  if (removed === null) {
     return page('Oups', 'Impossible de finaliser pour l’instant. Réessaie dans un instant.');
+  }
+  if (!removed) {
+    return page('Déjà désabonné', 'Cet abonnement n’existe plus — rien à faire.');
   }
   return page('Désabonnement confirmé', 'Tu ne recevras plus d’emails pour cet artiste.');
 }

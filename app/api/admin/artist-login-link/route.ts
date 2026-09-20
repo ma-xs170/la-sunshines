@@ -6,8 +6,8 @@
 import { NextResponse } from 'next/server';
 import { isAuthed } from '@/lib/adminAuth';
 import { readStore } from '@/lib/store';
-import { persistStore } from '@/lib/persistStore';
-import { issueArtistLoginToken, sendArtistMagicLink } from '@/lib/artistLogin';
+import { sendArtistMagicLink } from '@/lib/artistLogin';
+import { getArtistEmail, issueArtistLoginToken, privateStorageConfigured } from '@/lib/privateData';
 import { mailConfigured } from '@/lib/mail';
 
 export const runtime = 'nodejs';
@@ -37,20 +37,23 @@ export async function POST(req: Request) {
       { status: 409 },
     );
   }
-  if (!artist.email) {
+  if (!privateStorageConfigured()) {
+    return NextResponse.json({ error: 'Stockage privé (Supabase) non configuré.' }, { status: 503 });
+  }
+  const email = await getArtistEmail(artist.slug);
+  if (!email) {
     return NextResponse.json(
       { error: 'Aucune adresse email sur cette fiche — renseigne-la d’abord.' },
       { status: 409 },
     );
   }
 
-  const token = issueArtistLoginToken(store, artist.slug);
-  const saved = await persistStore(store);
-  if (!saved.ok) {
-    return NextResponse.json({ error: saved.error }, { status: 502 });
+  const token = await issueArtistLoginToken(artist.slug);
+  if (!token) {
+    return NextResponse.json({ error: 'Impossible de créer le lien. Réessaie.' }, { status: 502 });
   }
 
-  const sent = await sendArtistMagicLink(artist, token);
+  const sent = await sendArtistMagicLink(artist, token, email);
   if (!sent && mailConfigured()) {
     return NextResponse.json(
       { error: 'Le jeton a été créé mais l’email n’est pas parti. Réessaie.' },
@@ -60,8 +63,7 @@ export async function POST(req: Request) {
 
   return NextResponse.json({
     ok: true,
-    email: artist.email,
-    deployed: saved.deployed,
+    email,
     // en dev sans Resend configuré : renvoyer l'URL pour tester à la main
     devLink: mailConfigured()
       ? undefined
