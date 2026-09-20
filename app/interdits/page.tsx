@@ -26,6 +26,7 @@ const SECTIONS: Section[] = [
       'Un parent (ou responsable légal) doit obligatoirement venir chercher son enfant devant l’établissement, à l’heure de fin indiquée.',
       'L’organisation se réserve le droit de refuser l’accès à toute personne ne respectant pas le présent règlement, sans remboursement.',
       'En achetant un billet, tu acceptes ce règlement.',
+      'Droit à l’image : des photos et vidéos peuvent être réalisées pendant la soirée. En achetant un billet, tu autorises (et ton représentant légal autorise) l’organisation à utiliser ton image dans le cadre de la communication de LA SUNSHINES.',
     ],
   },
   {
