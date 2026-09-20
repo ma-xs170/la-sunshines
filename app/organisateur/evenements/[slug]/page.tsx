@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation';
 import PageHero from '@/components/PageHero';
 import ProgressBar from '@/components/organizer/ProgressBar';
 import SalesChart from '@/components/organizer/SalesChart';
+import LiveRefresh from '@/components/organizer/LiveRefresh';
 import ParticipantsSection from '@/components/organizer/ParticipantsSection';
 import TiersPanel from '@/components/organizer/TiersPanel';
 import Scanner from '@/components/ticketing/Scanner';
@@ -63,6 +64,7 @@ export default async function OrganizerEventPage({ params, searchParams }: { par
           <span className={`org-state org-state--${state}`}>{STATE_LABEL[state]}</span>
         </div>
 
+        <LiveRefresh slug={slug} />
         <section className="org-kpis" aria-label="Chiffres clés">
           <div className="glass org-kpi"><span className="kicker">Billets vendus</span><strong>{stats.sold}</strong><span>sur {stats.capacity} places</span></div>
           <div className="glass org-kpi"><span className="kicker">Places restantes</span><strong>{stats.remaining}</strong><span>{stats.reserved > 0 ? `dont ${stats.reserved} en cours de paiement` : 'disponibles'}</span></div>

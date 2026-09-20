@@ -19,6 +19,6 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
 
   return NextResponse.json(
     { tiers: (data ?? []).map((r: { tier_id: string; remaining: number; state: string }) => ({ id: r.tier_id, remaining: r.remaining, state: r.state })) },
-    { headers: { 'Cache-Control': 'public, s-maxage=3, stale-while-revalidate=10' } },
+    { headers: { 'Cache-Control': 'public, s-maxage=1, stale-while-revalidate=1' } },
   );
 }

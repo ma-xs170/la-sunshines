@@ -7,6 +7,7 @@
 
 import { writeStore, type Store } from './store';
 import { StoreWriteError, githubStoreEnabled } from './githubStore';
+import { revalidatePublicSite } from './revalidate';
 
 export type PersistResult =
   | { ok: true; deployed: boolean }
@@ -15,6 +16,7 @@ export type PersistResult =
 export async function persistStore(store: Store): Promise<PersistResult> {
   try {
     await writeStore(store);
+    revalidatePublicSite();   // effet immédiat sur le site (en production, la fiche se met à jour au redéploiement déclenché par le commit)
     return { ok: true, deployed: githubStoreEnabled() };
   } catch (e) {
     console.error('[persistStore] échec de l’enregistrement :', e);

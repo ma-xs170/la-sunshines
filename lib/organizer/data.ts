@@ -47,6 +47,7 @@ export interface OrgEventRow {
 }
 export interface OrgAccountRow {
   id: string; name: string; my_role: 'admin' | 'owner' | 'manager' | 'staff';
+  reference: string | null; account_status: 'pending' | 'approved' | 'suspended';
   legal_form: string | null; siret: string | null; responsible_name: string | null; address: string | null; contact_email: string | null;
   stripe_connected: boolean | null; stripe_ready: boolean | null;
 }

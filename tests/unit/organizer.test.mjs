@@ -113,3 +113,52 @@ test('actualités : catégories connues', () => {
   for (const c of ['nouveaute', 'important', 'maintenance']) assert.equal(isNewsCategory(c), true);
   for (const c of ['promo', '', null, 'IMPORTANT']) assert.equal(isNewsCategory(c), false);
 });
+
+import { accountMenu, eventMenu, visibleMenu, eventSlugOf, isActiveHref, activeGroupId, crumbs } from '../../lib/organizer/menu.ts';
+const caps = { admin: () => true, owner: () => true, manager: (c) => c !== 'owner', staff: (c) => c === 'scan' };
+
+test('menu : le contexte évènement se déclenche sur /evenements/<slug>, pas sur /nouveau', () => {
+  assert.equal(eventSlugOf('/organisateur/evenements/la-nuit-des-ombres'), 'la-nuit-des-ombres');
+  assert.equal(eventSlugOf('/organisateur/evenements/la-nuit-des-ombres/tarifs'), 'la-nuit-des-ombres');
+  assert.equal(eventSlugOf('/organisateur/evenements/nouveau'), null);
+  assert.equal(eventSlugOf('/organisateur/evenements'), null);
+  assert.equal(eventSlugOf('/organisateur'), null);
+});
+
+test('menu : filtré par rôle (le staff ne voit que le contrôle d’accès)', () => {
+  const labels = (role) => visibleMenu(eventMenu('x'), caps[role]).flatMap((g) => g.items.map((i) => i.label));
+  assert.deepEqual(labels('staff'), ['Tableau de bord', 'Scan à l’entrée', 'Liste d’entrée', 'Historique des scans']);
+  assert.ok(!labels('manager').includes('Récapitulatif'));
+  assert.ok(labels('owner').includes('Récapitulatif'));
+  assert.deepEqual(visibleMenu(accountMenu(), caps.staff).map((g) => g.id), ['dashboard', 'events', 'news', 'help']);
+  assert.ok(visibleMenu(accountMenu(), caps.staff).find((g) => g.id === 'events').items.every((i) => i.label === 'Tous mes évènements'));
+});
+
+test('menu : aucune entrée cliquable sans page, aucun href en double', () => {
+  for (const menu of [accountMenu(), eventMenu('x')]) {
+    const all = menu.flatMap((g) => g.items);
+    const hrefs = all.filter((i) => i.href).map((i) => i.href);
+    assert.equal(new Set(hrefs).size, hrefs.length);
+    assert.ok(all.some((i) => !i.href), 'les pages non construites sont marquées « bientôt »');
+  }
+});
+
+test('menu : entrée active selon le chemin et l’onglet', () => {
+  assert.equal(isActiveHref('/organisateur/evenements/x', '/organisateur/evenements/x', null), true);
+  assert.equal(isActiveHref('/organisateur/evenements/x', '/organisateur/evenements/x', 'scan'), false);
+  assert.equal(isActiveHref('/organisateur/evenements/x?onglet=scan', '/organisateur/evenements/x', 'scan'), true);
+  assert.equal(isActiveHref(undefined, '/organisateur', null), false);
+  assert.equal(activeGroupId(eventMenu('x'), '/organisateur/evenements/x', 'tarifs'), 'ev-tickets');
+  assert.equal(activeGroupId(accountMenu(), '/organisateur/paiements', null), 'org');
+});
+
+test('menu : le sous-titre « Distribuer » suit le filtrage', () => {
+  const sales = (role) => visibleMenu(eventMenu('x'), caps[role]).find((g) => g.id === 'ev-sales');
+  assert.deepEqual(sales('manager').sub, { after: 2, label: 'Distribuer' });
+});
+
+test('fil d’Ariane', () => {
+  assert.deepEqual(crumbs('/organisateur').map((c) => c.label), ['Espace organisateur']);
+  assert.deepEqual(crumbs('/organisateur/evenements/x').map((c) => c.label), ['Espace organisateur', 'Mes évènements', 'Évènement']);
+  assert.equal(crumbs('/organisateur/paiements').at(-1).href, undefined);
+});

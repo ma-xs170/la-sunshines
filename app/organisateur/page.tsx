@@ -7,13 +7,10 @@ import Icon from '@/components/Icon';
 import Checklist from '@/components/organizer/Checklist';
 import NewsBanner from '@/components/organizer/NewsBanner';
 import EventBrowser from '@/components/organizer/EventBrowser';
-import type { CardEvent } from '@/lib/organizer/browse';
+import { loadCardEvents } from '@/lib/organizer/cards';
 import { getOrgContext } from '@/lib/organizer/context';
 import { newsFor } from '@/lib/organizer/news';
-import { editorial, orgRpc, type OrgEventRow } from '@/lib/organizer/data';
 import { can } from '@/lib/organizer/roles';
-import { eventState } from '@/lib/organizer/status';
-import { formatGp } from '@/lib/ticketing/time';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Espace organisateur · LA SUNSHINES', robots: { index: false, follow: false } };
@@ -39,15 +36,8 @@ export default async function OrganizerHome() {
 
   const role = current.my_role;
   const manage = can(role, 'manage');
-  const [r, news] = await Promise.all([orgRpc<OrgEventRow[]>('org_events', { p_actor: s.userId }), newsFor(s.userId)]);
-  const rows = (r.ok ? r.data : []).filter((e) => e.organizer_id === current.id);
-  const events: CardEvent[] = rows.map((e) => {
-    const ed = editorial(e.slug);
-    return {
-      slug: e.slug, title: ed.title, startsAt: e.starts_at, dateLabel: formatGp(e.starts_at), venue: e.venue_name, state: eventState(e), archived: e.archived,
-      sold: e.sold, reserved: e.reserved, capacity: e.capacity, entered: e.entered, revenueCents: e.revenue_cents, hasFlyer: Boolean(ed.flyer), organizerName: e.organizer_name,
-    };
-  });
+  const [list, news] = await Promise.all([loadCardEvents(s.userId, current.id), newsFor(s.userId)]);
+  const events = list.events;
 
   return (
     <main className="org org-home">
@@ -61,7 +51,7 @@ export default async function OrganizerHome() {
       </div>
 
       {manage && <Checklist org={{ ...current, name: current.name, stripe_ready: current.stripe_ready }} editable={can(role, 'owner')} />}
-      {!r.ok && <p className="admin-error" role="alert">Impossible de charger les événements pour l’instant.</p>}
+      {!list.ok && <p className="admin-error" role="alert">Impossible de charger les événements pour l’instant.</p>}
       <EventBrowser events={events} canManage={manage} canCreate={manage} />
     </main>
   );
