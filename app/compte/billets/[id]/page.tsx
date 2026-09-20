@@ -28,7 +28,7 @@ export default async function BilletPage({ params }: { params: Promise<{ id: str
   const supabase = await createSupabaseServerClient();
   const { data: t } = await supabase
     .from('tickets')
-    .select('id, code, status, used_at, holder_first_name, holder_last_name, order_items(event_title, event_starts_at, venue_name, venue_address, tier_name), orders(order_number)')
+    .select('id, code, reference, status, used_at, holder_first_name, holder_last_name, order_items(event_title, event_starts_at, venue_name, venue_address, tier_name), orders(order_number)')
     .eq('id', id)
     .maybeSingle();
   if (!t) notFound();
@@ -56,9 +56,11 @@ export default async function BilletPage({ params }: { params: Promise<{ id: str
             <div><dt>Lieu</dt><dd>{item.venue_name}{item.venue_address ? ` — ${item.venue_address}` : ''}</dd></div>
             {t.status === 'used' && t.used_at && <div><dt>Scanné le</dt><dd>{formatGp(t.used_at)}</dd></div>}
           </dl>
+          <dl className="tk__dl"><div><dt>Référence</dt><dd>{t.reference}</dd></div></dl>
           {active && <p className="tk__code" aria-label="Code du billet">{formatCode(t.code)}</p>}
           <div className="auth-actions">
-            {active && <a className="btn btn--amber" href={`/api/tickets/${t.id}/image?download=1`}>Télécharger le billet</a>}
+            {active && <a className="btn btn--amber" href={`/api/tickets/${t.id}/pdf`}>Télécharger le PDF</a>}
+            {active && <a className="btn btn--outline" href={`/api/tickets/${t.id}/image?download=1`}>Image du QR</a>}
             <a className="btn btn--outline" href="/compte/billets">Mes billets</a>
           </div>
           <p className="auth-hint">Présente ce QR code à l’entrée. Il n’est valable qu’une fois : ne le partage pas.</p>

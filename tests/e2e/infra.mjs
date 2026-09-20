@@ -27,6 +27,7 @@ export const USERS = {
   cust2: { id: 'c2000000-0000-4000-8000-000000000002', email: 'cust2@test.local', password: 'Passw0rd!', role: 'customer', first: 'Denis',   last: 'Autre',  phone: '0690222222' },
   admin: { id: 'ad000000-0000-4000-8000-0000000000ad', email: 'admin@test.local', password: 'Passw0rd!', role: 'admin',    first: 'Alex',    last: 'Admin',  phone: '0690333333' },
   staff: { id: '57000000-0000-4000-8000-000000000057', email: 'staff@test.local', password: 'Passw0rd!', role: 'staff',    first: 'Sam',     last: 'Porte',  phone: '0690444444' },
+  orgb:  { id: '0b000000-0000-4000-8000-0000000000b2', email: 'orgb@test.local',  password: 'Passw0rd!', role: 'customer', first: 'Olivia',  last: 'Autre-Orga', phone: '0690555555' },
 };
 const userJson = (u) => ({ id: u.id, aud: 'authenticated', role: 'authenticated', email: u.email, email_confirmed_at: '2026-01-01T00:00:00Z', app_metadata: {}, user_metadata: {}, created_at: '2026-01-01T00:00:00Z' });
 const session = (u) => { const exp = Math.floor(Date.now() / 1000) + 3600; return { access_token: sign({ sub: u.id, role: 'authenticated', aud: 'authenticated', email: u.email, exp }), token_type: 'bearer', expires_in: 3600, expires_at: exp, refresh_token: 'rt_' + u.id, user: userJson(u) }; };
@@ -135,7 +136,8 @@ async function main() {
     NEXT_PUBLIC_SUPABASE_URL: `http://127.0.0.1:${PORTS.gw}`, NEXT_PUBLIC_SUPABASE_ANON_KEY: ANON, SUPABASE_SERVICE_ROLE_KEY: SERVICE,
     STRIPE_SECRET_KEY: 'sk_test_e2e', STRIPE_API_MOCK: `127.0.0.1:${PORTS.stripe}`, STRIPE_WEBHOOK_SECRET: 'whsec_e2e_secret',
     TICKET_HMAC_SECRET: 'e2e-ticket-hmac-secret-e2e-ticket-hmac-secret', RESEND_API_KEY: 're_e2e', RESEND_BASE_URL: `http://127.0.0.1:${PORTS.resend}`,
-    MAIL_FROM: 'La Sunshines <billets@test.local>', NEXT_PUBLIC_SITE_URL: `http://localhost:${PORTS.next}`, ADMIN_PASSWORD: 'e2e-admin' };
+    // .env.local (celui de l'utilisateur) peut définir TICKETING_FORCE_MODE : le banc doit pouvoir tester le mode Bizouk
+    TICKETING_FORCE_MODE: '', MAIL_FROM: 'La Sunshines <billets@test.local>', NEXT_PUBLIC_SITE_URL: `http://localhost:${PORTS.next}`, ADMIN_PASSWORD: 'e2e-admin' };
   delete env.KV_REST_API_URL;
   const next = spawn('npx', ['next', 'dev', '-p', String(PORTS.next)], { cwd: ROOT, env, stdio: ['ignore', 'pipe', 'pipe'] });
   next.stdout.on('data', (d) => process.env.VERBOSE && process.stdout.write('[next] ' + d)); next.stderr.on('data', (d) => process.env.VERBOSE && process.stderr.write('[next!] ' + d));

@@ -186,6 +186,15 @@ export default async function PrivacyPage() {
                 l’assistant pour produire les réponses, selon ses propres conditions de traitement.
               </li>
             )}
+            {native && (
+              <li>
+                <strong>Organisateurs des événements</strong> : l’organisateur d’un événement (aujourd’hui l’association THE MOUV)
+                reçoit, pour gérer cet événement, les données des participants de <strong>ses</strong> événements : nom, prénom,
+                adresse email et numéro de téléphone de l’acheteur, tarif, référence du billet, statut et entrée. Il peut renvoyer un
+                billet, exporter la liste et envoyer des messages d’information liés à l’événement (jamais de promotion). Chaque
+                consultation, export et envoi est enregistré dans un journal ; un organisateur ne voit jamais les événements d’un autre.
+              </li>
+            )}
             {accounts && (
               <>
                 <li>
@@ -237,6 +246,11 @@ export default async function PrivacyPage() {
               traiter votre demande. Vous pouvez en demander la suppression à
               tout moment.
             </li>
+            {native && (
+              <li>
+                <strong>Journal des consultations, exports et envois des organisateurs</strong> : conservé avec les données de billetterie.
+              </li>
+            )}
             {artistsData && (
               <li>
                 <strong>Abonnements aux artistes</strong> : jusqu’à votre désabonnement.{' '}

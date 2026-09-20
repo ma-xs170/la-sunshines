@@ -8,6 +8,7 @@ import { getTicketingSettings } from '@/lib/ticketing/settings';
 import { formatGp } from '@/lib/ticketing/time';
 import AdminSettingsForm from '@/components/ticketing/AdminSettingsForm';
 import EventStats from '@/components/ticketing/admin/EventStats';
+import OrganizerForm, { type OrganizerInfo } from '@/components/ticketing/OrganizerForm';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Billetterie · Admin', robots: { index: false, follow: false } };
@@ -38,6 +39,7 @@ export default async function BilletterieAdminPage() {
   const settings = await getTicketingSettings(true);
   const db = createSupabaseAdminClient();
   const { data: events } = await db.from('ticketed_events').select('id, event_slug, status, ticketing_enabled, capacity, starts_at').order('starts_at', { ascending: false });
+  const { data: orgs } = await db.from('organizers').select('id, name, legal_form, siret, responsible_name, address, contact_email').order('created_at');
   const names = new Map(getAllEditions({ includeHidden: true }).map((e) => [e.slug, e.name]));
 
   const rows = await Promise.all(
@@ -50,6 +52,7 @@ export default async function BilletterieAdminPage() {
   return shell(
     <>
       <AdminSettingsForm initial={settings} />
+      {((orgs ?? []) as OrganizerInfo[]).map((o) => <OrganizerForm key={o.id} initial={o} />)}
       <div className="admin-form__actions">
         <a className="btn btn--outline" href="/admin/billetterie/commandes">Commandes</a>
         <a className="btn btn--outline" href="/admin/billetterie/invitations">Invitations</a>

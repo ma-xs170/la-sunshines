@@ -18,7 +18,7 @@ process.on('exit', stop); process.on('SIGINT', () => { stop(); process.exit(130)
 for (let i = 0; i < 180 && !fs.existsSync(ready); i++) await new Promise((r) => setTimeout(r, 2000));
 if (!fs.existsSync(ready)) { console.error('Le banc n’a pas démarré à temps.'); stop(); process.exit(1); }
 let failed = false;
-for (const s of ['s3', 's4', 's5', 's6', 's7', 's8']) {
+for (const s of ['s3', 's4', 's5', 's6', 's7', 's8', 's9']) {
   console.log(`\n### ${s}`);
   const r = spawnSync('node', [path.join(HERE, s + '.mjs')], { encoding: 'utf8' });
   const lines = (r.stdout || '').split('\n').filter((l) => /^FAIL|ALL OK|ÉCHEC/.test(l));

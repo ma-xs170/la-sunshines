@@ -11,9 +11,11 @@
 import 'server-only';
 import { Resend } from 'resend';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { mailLayout, siteUrl } from '@/lib/mail';
+import { mailLayout, mailButton, mailScript, siteUrl } from '@/lib/mail';
 import { formatCode } from './tokens';
 import { qrPng } from './qr';
+import { loadTicketPages } from './pdf/data';
+import { renderTicketsPdf } from './pdf/render';
 import { formatEuro, formatGp } from './time';
 
 const FALLBACK_FROM = 'LA SUNSHINES <onboarding@resend.dev>';
@@ -70,23 +72,25 @@ export function buildConfirmationEmail(order: MailOrder, base: string) {
   const fee = order.fee_cents > 0 ? `<tr><td style="padding:4px 0">Frais de service</td><td style="padding:4px 0;text-align:right">${formatEuro(order.fee_cents)}</td></tr>` : '';
   const blocks = order.tickets
     .map(
-      (t, i) => `<div style="border:1px solid #e8e0d2;border-radius:14px;padding:16px;margin:0 0 14px;text-align:center">
-<p style="margin:0 0 4px;font-weight:700">${esc(t.holder_first_name)} ${esc(t.holder_last_name)}</p>
-<p style="margin:0 0 10px;color:#6b6358;font-size:13px">${esc(t.tier_name)}</p>
-<img src="cid:qr-${i}" width="200" height="200" alt="QR code du billet ${i + 1}" style="display:block;margin:0 auto 8px" />
+      (t, i) => `<div style="background:#FFF8EE;border:1px solid rgba(25,20,16,0.10);border-radius:18px;padding:18px 16px;margin:0 0 14px;text-align:center">
+<p style="margin:0 0 2px;font-weight:700;font-size:16px">${esc(t.holder_first_name)} ${esc(t.holder_last_name)}</p>
+<p style="margin:0 0 12px;color:rgba(25,20,16,0.64);font-size:13px">${esc(t.tier_name)}</p>
+<img src="cid:qr-${i}" width="200" height="200" alt="QR code du billet ${i + 1}" style="display:block;margin:0 auto 10px;background:#fff;border-radius:14px;padding:6px" />
 <p style="margin:0 0 8px;font-family:monospace;font-size:12px;letter-spacing:.04em">${formatCode(t.code)}</p>
-<a href="${base}/compte/billets/${t.id}" style="color:#A5670F;font-size:13px">Ouvrir ce billet</a></div>`,
+<a href="${base}/compte/billets/${t.id}" style="color:#A5670F;font-size:13px;font-weight:600">Ouvrir ce billet</a></div>`,
     )
     .join('');
   const html = mailLayout(`
-<h1 style="font-size:20px;margin:0 0 8px">Tes billets sont prêts 🎉</h1>
+${mailScript('Ta soirée t’attend')}
+<h1 style="font-size:24px;margin:0 0 12px">Tes billets sont prêts</h1>
 <p style="margin:0 0 4px">Salut ${esc(order.buyer_first_name || '')}, merci pour ta commande <strong>${esc(order.order_number)}</strong>.</p>
-<p style="margin:0 0 16px"><strong>${esc(title)}</strong><br>${esc(formatGp(first?.event_starts_at))}<br>${esc(first?.venue_name ?? '')}${first?.venue_address ? ' — ' + esc(first.venue_address) : ''}</p>
+<p style="margin:0 0 18px"><strong>${esc(title)}</strong><br>${esc(formatGp(first?.event_starts_at))}<br>${esc(first?.venue_name ?? '')}${first?.venue_address ? ' — ' + esc(first.venue_address) : ''}</p>
 ${blocks}
-<p style="margin:16px 0 4px;font-size:13px;color:#6b6358">Présente le QR code à l'entrée (sur ton téléphone ou imprimé). Chaque billet n'est valable qu'une fois : ne le partage pas.</p>
-<table style="width:100%;border-collapse:collapse;font-size:14px;margin-top:12px">${lines}${fee}
-<tr><td style="padding:8px 0 0;font-weight:700;border-top:1px solid #e8e0d2">Total</td><td style="padding:8px 0 0;text-align:right;font-weight:700;border-top:1px solid #e8e0d2">${formatEuro(order.total_cents)}</td></tr></table>
-<p style="margin:12px 0 0;font-size:12px;color:#8a8378">${FOOT} Retrouve tous tes billets dans <a href="${base}/compte/billets" style="color:#A5670F">Mes billets</a>.</p>`);
+<p style="margin:0 0 18px;text-align:center">${mailButton(`${base}/compte/billets`, 'Voir mes billets')}</p>
+<p style="margin:0 0 4px;font-size:13px;color:rgba(25,20,16,0.64)">Tes billets sont aussi en <strong>PDF</strong> en pièce jointe (un billet = une page), et téléchargeables dans « Mes billets ». Présente le QR code à l'entrée, sur ton téléphone ou imprimé. Chaque billet n'est valable qu'une fois : ne le partage pas.</p>
+<table style="width:100%;border-collapse:collapse;font-size:14px;margin-top:14px">${lines}${fee}
+<tr><td style="padding:8px 0 0;font-weight:700;border-top:1px solid rgba(25,20,16,0.10)">Total</td><td style="padding:8px 0 0;text-align:right;font-weight:700;border-top:1px solid rgba(25,20,16,0.10)">${formatEuro(order.total_cents)}</td></tr></table>
+<p style="margin:14px 0 0;font-size:12px;color:rgba(25,20,16,0.55)">${FOOT} Retrouve tous tes billets dans <a href="${base}/compte/billets">Mes billets</a>.</p>`);
   const text = [
     `Tes billets — ${title}`,
     `Commande ${order.order_number} · ${formatEuro(order.total_cents)}`,
@@ -94,7 +98,7 @@ ${blocks}
     '',
     ...order.tickets.map((t, i) => `Billet ${i + 1} — ${t.holder_first_name} ${t.holder_last_name} (${t.tier_name}) : ${formatCode(t.code)}`),
     '',
-    `Tous tes billets : ${base}/compte/billets`,
+    `Tes billets sont aussi en PDF en pièce jointe. Tous tes billets : ${base}/compte/billets`,
     FOOT,
   ].join('\n');
   return { subject: `Tes billets — ${title} (${order.order_number})`, html, text };
@@ -104,7 +108,7 @@ ${blocks}
 export function buildStockLostEmail(order: MailOrder, base: string) {
   const title = order.items[0]?.event_title ?? 'ton événement';
   const html = mailLayout(`
-<h1 style="font-size:20px;margin:0 0 8px">Ta commande n'a pas pu être confirmée</h1>
+<h1 style="font-size:22px;margin:0 0 12px">Ta commande n'a pas pu être confirmée</h1>
 <p>Salut ${esc(order.buyer_first_name || '')}, les places de <strong>${esc(title)}</strong> ont été épuisées pendant ton paiement (commande <strong>${esc(order.order_number)}</strong>).</p>
 <p><strong>Tu es remboursé(e) intégralement</strong> (${formatEuro(order.total_cents)}, frais compris) sur ta carte bancaire, sous 5 à 10 jours ouvrés selon ta banque. Aucune action n'est nécessaire.</p>
 <p style="font-size:13px;color:#6b6358">Désolé pour ce désagrément. <a href="${base}/editions" style="color:#A5670F">Voir les éditions</a> · <a href="${base}/contact" style="color:#A5670F">Nous contacter</a></p>`);
@@ -133,9 +137,19 @@ export async function sendOrderEmail(db: SupabaseClient, orderId: string, opts: 
       const base = siteUrl();
       const withTickets = order.tickets.length > 0;
       const mail = withTickets ? buildConfirmationEmail(order, base) : buildStockLostEmail(order, base);
-      const attachments = withTickets
+      const attachments: { filename: string; content: Buffer; contentId?: string }[] = withTickets
         ? await Promise.all(order.tickets.map(async (t, i) => ({ filename: `billet-${order.order_number}-${i + 1}.png`, content: await qrPng(t.code, 480), contentId: `qr-${i}` })))
         : [];
+      // PDF des billets (une page par billet) en pièce jointe. Un échec de génération n'empêche JAMAIS l'email :
+      // il part sans le PDF (les QR restent dans le corps du message et le PDF dans « Mes billets »).
+      if (withTickets) {
+        try {
+          const pages = (await loadTicketPages(db, { orderId })).filter((p) => p.status === 'valid' || p.status === 'used');
+          if (pages.length > 0) attachments.push({ filename: `billets-${order.order_number}.pdf`, content: await renderTicketsPdf(pages, `Billets ${order.order_number}`) });
+        } catch (e) {
+          console.error('[order-mail] PDF non joint pour', orderId, ':', e instanceof Error ? e.message : e);
+        }
+      }
       const { error } = await new Resend(key).emails.send({
         from: process.env.MAIL_FROM || FALLBACK_FROM,
         to: [order.buyer_email],

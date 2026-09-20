@@ -52,6 +52,7 @@ export function AccountMenu() {
         <div className="acct__menu" role="menu">
           <p className="acct__who">{user.firstName || user.email}</p>
           <a role="menuitem" href="/compte/billets">Mes billets</a>
+          {user.isOrganizer && <a role="menuitem" href="/organisateur">Organisateur</a>}
           <a role="menuitem" href="/compte">Mon compte</a>
           <LogoutButton className="acct__out" />
         </div>
@@ -70,6 +71,7 @@ export function AccountLinks({ onNavigate }: { onNavigate?: () => void }) {
       {user ? (
         <>
           <a className="link" href="/compte/billets" onClick={onNavigate}>Mes billets</a>
+          {user.isOrganizer && <a className="link" href="/organisateur" onClick={onNavigate}>Organisateur</a>}
           <a className="link" href="/compte" onClick={onNavigate}>Mon compte</a>
           <LogoutButton className="link acct-links__out" />
         </>

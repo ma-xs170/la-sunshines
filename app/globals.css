@@ -3248,6 +3248,9 @@ nav .acct-links button.link{
 .org__meta{display:flex;align-items:center;gap:var(--s-16);flex-wrap:wrap;margin:calc(var(--s-16) * -1) 0 var(--s-24);}
 .org-muted{color:var(--gray);font-size:14px;line-height:1.6;font-weight:500;}
 .org h2{font-size:clamp(19px,1.6vw + 13px,26px);margin-bottom:var(--s-16);}
+/* la règle globale `section` du site (largeur de texte + marge de bande) ne s'applique pas aux blocs de l'espace organisateur */
+.org section{max-width:none;margin-left:0;margin-right:0;}
+.org-kpis,.org-part{padding:0;}
 .org-count{font-family:'Inter',sans-serif;font-size:13px;font-weight:700;letter-spacing:0;text-transform:none;background:var(--amber);color:var(--ink);border-radius:var(--r-pill);padding:3px 11px;vertical-align:middle;margin-left:6px;}
 
 /* choix liste / carrousel */
@@ -3278,7 +3281,7 @@ nav .acct-links button.link{
 .org-card__title{font-family:var(--font-display);text-transform:uppercase;font-weight:800;letter-spacing:-0.03em;font-size:clamp(17px,1.4vw + 12px,24px);line-height:1.08;overflow-wrap:anywhere;}
 .org-card__venue{font-size:14px;color:var(--gray);font-weight:500;}
 .org-card__foot{font-size:12px;color:var(--gray-dim);font-weight:600;}
-.org-card--row .org-card__media{width:132px;min-height:132px;}
+.org-card--row .org-card__media{width:190px;min-height:150px;}
 .org-card--tile{flex-direction:column;height:100%;}
 .org-card--tile .org-card__media{aspect-ratio:4/3;}
 .org-card--tile .org-card__body{padding:var(--s-16);}
