@@ -1,0 +1,24 @@
+import * as L from './lib.mjs';
+const { ok, section, as, q, USERS } = L;
+await L.resetDb();
+const admin = await as(USERS.admin);
+const anon = new L.Client();
+section('Accueil et page événement : Bizouk (défaut) puis billetterie interne');
+let home = await anon.req('/'); let ev = await anon.req('/editions/la-nuit-des-ombres');
+ok(home.status === 200 && /payment-frame/.test(home.data) && !/class="tp /.test(home.data), 'flag Bizouk : accueil = widget Bizouk, pas de panneau interne');
+ok(/bizouk__frame/.test(ev.data) && !/class="tp /.test(ev.data) && /Acheter sur Bizouk/.test(ev.data), 'flag Bizouk : page événement inchangée (widget + lien « Acheter sur Bizouk »)');
+await L.setupEvent(admin);   // passe en « native » + configure l'événement
+await new Promise((r) => setTimeout(r, 500));
+home = await anon.req('/'); ev = await anon.req('/editions/la-nuit-des-ombres');
+ok(/class="tp /.test(home.data) && !/bizouk__frame/.test(home.data), 'flag interne : accueil = panneau de tarifs, plus de widget Bizouk');
+ok(/class="tp /.test(ev.data) && !/bizouk__frame/.test(ev.data) && !/Acheter sur Bizouk/.test(ev.data), 'flag interne : page événement = panneau, plus de lien « Acheter sur Bizouk »');
+ok(/href="\/mentions-legales"/.test(ev.data) && /href="\/cgv"/.test(ev.data) && /href="\/remboursement"/.test(ev.data), 'panneau : liens vers mentions légales, CGV et remboursement');
+const cgv = await anon.req('/cgv'), rem = await anon.req('/remboursement');
+ok(cgv.status === 200 && /THE MOUV/.test(cgv.data) && /104 253 943 00013/.test(cgv.data) && /293 B/.test(cgv.data), '/cgv : vendeur, SIRET et article 293 B repris du site');
+ok(rem.status === 200 && /remboursé/i.test(rem.data), '/remboursement accessible en mode interne');
+await admin.req('/api/billetterie/admin/settings', { method: 'PATCH', body: { key: 'ticketing_mode', value: 'bizouk' } });
+await new Promise((r) => setTimeout(r, 500));
+home = await anon.req('/'); const cgv2 = await anon.req('/cgv');
+ok(/payment-frame/.test(home.data) && !/class="tp /.test(home.data), 'retour à Bizouk (retour arrière immédiat) : accueil = Bizouk');
+ok(cgv2.status === 404, '/cgv de nouveau 404');
+const f = L.summary('accueil + événement + pages légales selon le flag'); process.exit(f ? 1 : 0);

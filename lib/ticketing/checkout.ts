@@ -12,7 +12,7 @@ import type { TicketingSettings } from './settings';
 
 export const CHECKOUT_ERRORS: Record<string, { status: number; message: string }> = {
   AUTH_REQUIRED: { status: 401, message: 'Connexion requise.' },
-  CONSENT_REQUIRED: { status: 400, message: 'Tu dois accepter les CGV, la politique de remboursement et l’autorisation parentale.' },
+  CONSENT_REQUIRED: { status: 400, message: 'Tu dois accepter les CGV, la politique de remboursement et confirmer avoir 18 ans ou l’autorisation de ton représentant légal.' },
   INVALID_ITEMS: { status: 400, message: 'Commande invalide.' },
   INVALID_PARTICIPANTS: { status: 400, message: 'Indique le nom de chaque participant.' },
   EVENT_NOT_ON_SALE: { status: 409, message: 'La billetterie de cet événement n’est pas ouverte.' },

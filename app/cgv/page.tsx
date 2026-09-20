@@ -21,7 +21,7 @@ export default async function CgvPage() {
           <p>
             Les billets sont vendus par l’association <strong>THE MOUV</strong> (association loi 1901), organisatrice des soirées LA SUNSHINES —
             SIRET 104 253 943 00013 — 1 Morne Caruel, Cité Deboisvieux, 97139 Les Abymes. Contact : <a href="mailto:themouv2.0971@gmail.com">themouv2.0971@gmail.com</a>{' '}
-            ou page <a href="/contact">Contact</a>. Le site est édité par LAWCY MUSIC (voir les <a href="/mentions-legales">Mentions légales</a>).
+            ou page <a href="/contact">Contact</a>. Le site est édité par LAWCY MUSIC, qui n’est pas le vendeur (voir les <a href="/mentions-legales">Mentions légales</a>).
           </p>
           <h2>2. Prix et TVA</h2>
           <p>Les prix sont indiqués en euros, toutes taxes comprises. <strong>TVA non applicable, article 293 B du CGI.</strong> Des frais de service peuvent s’ajouter au prix ; ils sont affichés avant le paiement.</p>
@@ -30,13 +30,13 @@ export default async function CgvPage() {
           <h2>4. Billets</h2>
           <p>Chaque billet est nominatif, porte un QR code unique et n’est valable qu’une seule fois, pour l’événement et le tarif indiqués. Le QR code ne doit pas être partagé : le premier scan à l’entrée est le seul valable.</p>
           <h2>5. Mineurs</h2>
-          <p>Les événements s’adressent à un public de 12 à 17 ans. L’acheteur déclare être le représentant légal du ou des participants mineurs, ou disposer de leur autorisation parentale. Le règlement de l’événement s’applique.</p>
+          <p>Les événements s’adressent à un public de 12 à 17 ans. Avant tout paiement, l’acheteur déclare <strong>avoir 18 ans ou disposer de l’autorisation de son représentant légal</strong> (et, lorsqu’il achète pour d’autres participants mineurs, être leur représentant légal ou avoir leur autorisation). Cette déclaration est enregistrée avec la commande. Le <a href="/interdits">règlement de l’événement</a> s’applique.</p>
           <h2>6. Rétractation</h2>
           <p>Conformément à l’article L221-28 12° du Code de la consommation, le droit de rétractation ne s’applique pas aux prestations de loisirs fournies à une date déterminée.</p>
           <h2>7. Annulation ou report</h2>
           <p>En cas d’annulation de l’événement par l’organisateur, les billets sont remboursés. Voir la <a href="/remboursement">politique de remboursement</a>.</p>
           <h2>8. Données personnelles</h2>
-          <p>Voir la <a href="/politique-de-confidentialite">politique de confidentialité</a>.</p>
+          <p>Les données nécessaires à la commande sont traitées conformément à la <a href="/politique-de-confidentialite">politique de confidentialité</a> (sous-traitants : Supabase, Stripe, Resend, Vercel ; droits d’accès, de rectification et d’effacement).</p>
           <h2>9. Litiges</h2>
           <p>Droit français. En cas de litige, contacte-nous d’abord ; à défaut d’accord, tu peux recourir à un médiateur de la consommation : [COORDONNÉES DU MÉDIATEUR — À COMPLÉTER].</p>
         </section>

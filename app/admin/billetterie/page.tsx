@@ -54,6 +54,7 @@ export default async function BilletterieAdminPage() {
         <a className="btn btn--outline" href="/admin/billetterie/commandes">Commandes</a>
         <a className="btn btn--outline" href="/admin/billetterie/invitations">Invitations</a>
         <a className="btn btn--outline" href="/admin/scan">Scan à l’entrée</a>
+        <a className="btn btn--outline" href="/admin/billetterie/aide">Aide</a>
       </div>
       <section className="admin-panel glass admin-panel--wide">
         <h2>Événements en billetterie</h2>

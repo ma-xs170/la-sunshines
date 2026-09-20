@@ -16,20 +16,20 @@
 
 | # | Sujet | Constat | À faire |
 |---|---|---|---|
-| 1 | **Mentions légales — § Billetterie** | Dit que la billetterie est assurée par **Bizouk** et que les conditions de vente « relèvent de Bizouk ». Faux dès que le flag passe sur « interne ». | Réécrire (texte proposé ci-dessous). *Fichier existant : je ne l'ai pas modifié sans ton accord.* |
-| 2 | **Politique de confidentialité** | Dit « site vitrine : **aucune création de compte** », ne mentionne ni comptes, ni commandes, ni **données de participants mineurs**, ni Supabase / Stripe / Resend. § 6 « Billetterie (Bizouk) » obsolète. | Mettre à jour **avant** l'ouverture (texte proposé). |
+| 1 | **Mentions légales — § Billetterie** | Dit que la billetterie est assurée par **Bizouk** et que les conditions de vente « relèvent de Bizouk ». Faux dès que le flag passe sur « interne ». | **Fait (20/09/2026)** : la page suit le réglage — texte Bizouk tant que le flag est sur Bizouk, texte billetterie interne (THE MOUV, Stripe, CGV, TVA 293 B) une fois activé. |
+| 2 | **Politique de confidentialité** | Dit « site vitrine : **aucune création de compte** », ne mentionne ni comptes, ni commandes, ni **données de participants mineurs**, ni Supabase / Stripe / Resend. § 6 « Billetterie (Bizouk) » obsolète. | **Fait (20/09/2026)** : comptes, commandes, participants mineurs, Supabase / Stripe / Resend / Vercel, durées, transferts hors UE. Textes à faire relire. |
 | 3 | **Qui vend ?** | Les mentions disent que la billetterie relève de **THE MOUV** ; le site est édité par **LAWCY MUSIC**. | Confirmer que **le compte Stripe** (et son IBAN, nom sur relevé, détails publics) appartient bien à l'entité qui vend (THE MOUV d'après les CGV). |
 | 4 | **TVA « art. 293 B »** | Cette mention vise la franchise en base des entreprises. Une **association** peut relever d'un autre régime (non-assujettie / exonérée). Tu m'as demandé la mention 293 B : elle est en place. | À faire confirmer par ton comptable ; si le régime diffère, la mention est à changer (CGV, Stripe, email, panneau). |
 | 5 | **Médiateur de la consommation** | Absent de tout le site ; **obligatoire** pour vendre à des consommateurs. `/cgv` contient `[COORDONNÉES DU MÉDIATEUR — À COMPLÉTER]` (visible une fois le flag activé). | Adhérer à un médiateur et compléter l'article 9 des CGV. **Bloquant.** |
-| 6 | **Responsable de la publication** | « **Mathis** » : prénom seul. | Indiquer nom et prénom. |
-| 7 | **Hébergement** | Seul Vercel est cité ; les données (comptes, commandes) sont désormais chez **Supabase** (région à préciser). | Ajouter Supabase (et sa région) aux mentions / à la confidentialité. |
+| 6 | **Responsable de la publication** | « **Mathis** » : prénom seul. | Reste **[NOM DE FAMILLE — À COMPLÉTER]** dans `app/mentions-legales/page.tsx`. |
+| 7 | **Hébergement** | Seul Vercel est cité ; les données (comptes, commandes) sont désormais chez **Supabase** (région à préciser). | **Fait** (Supabase cité) ; reste **[RÉGION DU PROJET SUPABASE — À COMPLÉTER]** (mentions légales + confidentialité). |
 | 8 | **Canaux de vente en double** | Après activation, restent visibles : bouton « **Préventes Bizouk & Kiwol** » (bandeau d'accueil `CtaBand`, cartes d'éditions `EditionCard`), ligne « Préventes Bizouk & Kiwol » de `Infos`. | Décision commerciale : retirer, ou garder si tu vends encore sur ces plateformes. ⚠ Le **stock interne est indépendant de celui de Bizouk** : mets la capacité interne = places restantes hors Bizouk pour éviter la survente. |
 | 9 | **Assistant (chatbot)** | `lib/assistant.ts` affirme que les remboursements se font « directement auprès de Bizouk » et que la vente est sur « Bizouk et Kiwol ». | Adapter le prompt à la nouvelle politique (`/remboursement`). |
 | 10 | **Règlement (`/interdits`)** | « Exclusion immédiate, **sans remboursement** » : cohérent avec la politique de remboursement. « Billet + pièce d'identité » à l'entrée : le scan QR s'ajoute, sans contradiction. | Rien. |
 | 11 | **Domaine d'envoi des emails** | Le site utilise `la-sunshines.vercel.app` ; l'adresse de contact est un **Gmail**. Resend et le SMTP Supabase exigent un **domaine que tu possèdes** (DNS). | Acheter/utiliser un domaine, le vérifier dans Resend (bloquant pour les emails vers les clients). |
-| 12 | **Mineurs** | Les billets concernent des 12–17 ans ; les CGV et une case dédiée exigent que l'acheteur soit le représentant légal ou ait l'autorisation parentale. Les noms des participants mineurs sont stockés. | Mentionner cette collecte et sa durée dans la confidentialité (texte proposé). |
+| 12 | **Mineurs** | Les billets concernent des 12–17 ans ; les CGV et une case dédiée exigent que l'acheteur soit le représentant légal ou ait l'autorisation parentale. Les noms des participants mineurs sont stockés. | **Fait** : collecte des noms des participants (dont mineurs) et durées décrites dans la confidentialité ; case « J’ai 18 ans ou l’autorisation de mon représentant légal » au paiement. |
 
-## C. Textes proposés (à faire relire)
+## C. Textes proposés (à faire relire) — désormais intégrés aux pages, conservés ici pour référence
 
 **Mentions légales — remplacer le § « Billetterie » :**
 > La vente de billets pour les soirées LA SUNSHINES est assurée directement par l'association THE MOUV via la billetterie en ligne de ce site
