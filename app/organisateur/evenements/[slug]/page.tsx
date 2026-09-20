@@ -1,7 +1,5 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
-import Nav from '@/components/Nav';
-import Footer from '@/components/Footer';
 import PageHero from '@/components/PageHero';
 import ProgressBar from '@/components/organizer/ProgressBar';
 import SalesChart from '@/components/organizer/SalesChart';
@@ -63,8 +61,7 @@ export default async function OrganizerEventPage({ params, searchParams }: { par
 
   return (
     <>
-      <Nav />
-      <main className="org content-page">
+      <main className="org org-page">
         <p className="org__back"><a href="/organisateur">← Tous les événements</a></p>
         <PageHero eyebrow={stats.organizer.name} title={ed.title} lead={`${formatGp(stats.starts_at)}${stats.venue_name ? ' · ' + stats.venue_name : ''}`} />
         <div className="org__meta">
@@ -120,7 +117,6 @@ export default async function OrganizerEventPage({ params, searchParams }: { par
           )}
         </section>
       </main>
-      <Footer />
     </>
   );
 }

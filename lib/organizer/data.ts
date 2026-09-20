@@ -19,6 +19,9 @@ const MESSAGES: Record<string, OrgFailure> = {
   NO_RECIPIENTS: { status: 400, message: 'Aucun destinataire pour ce choix.' },
   TOO_MANY_RECIPIENTS: { status: 400, message: 'Trop de destinataires (500 maximum par message).' },
   RATE_LIMIT: { status: 429, message: 'Limite atteinte : 3 messages maximum par événement et par 24 heures.' },
+  ORG_NAME_REQUIRED: { status: 400, message: 'Le nom de la structure est obligatoire.' },
+  BAD_SIRET: { status: 400, message: 'Le SIRET doit comporter 14 chiffres.' },
+  BAD_EMAIL: { status: 400, message: 'Adresse email invalide.' },
   REPLY_TO_MISSING: { status: 409, message: 'L’organisateur n’a pas d’adresse de réponse : [À COMPLÉTER] dans les informations de l’organisateur.' },
 };
 
@@ -39,6 +42,12 @@ export async function orgRpc<T>(fn: string, args: Record<string, unknown>): Prom
 export interface OrgEventRow {
   slug: string; status: string; ticketing_enabled: boolean; starts_at: string; venue_name: string; capacity: number;
   sold: number; reserved: number; entered: number; organizer_id: string; organizer_name: string;
+  my_role: string; archived: boolean; revenue_cents: number | null;
+}
+export interface OrgAccountRow {
+  id: string; name: string; my_role: 'admin' | 'owner' | 'manager' | 'staff';
+  legal_form: string | null; siret: string | null; responsible_name: string | null; address: string | null; contact_email: string | null;
+  stripe_connected: boolean | null; stripe_ready: boolean | null;
 }
 export interface OrgTierStat { tier_id: string; name: string; price_cents: number; quantity_total: number; archived: boolean; sold: number; reserved: number; revenue_cents: number }
 export interface OrgStats {

@@ -18,7 +18,7 @@ end $$;
 insert into auth.users (id, email) values
   ('ad000000-0000-0000-0000-0000000000ad', 'admin@test.local'),
   ('01000000-0000-0000-0000-000000000001', 'owner-a@test.local'),
-  ('01000000-0000-0000-0000-000000000002', 'viewer-a@test.local'),
+  ('01000000-0000-0000-0000-000000000002', 'staff-a@test.local'),
   ('0b000000-0000-0000-0000-000000000003', 'owner-b@test.local'),
   ('c1000000-0000-0000-0000-000000000001', 'cust@test.local'),
   ('50000000-0000-0000-0000-000000000005', 'stranger@test.local');
@@ -28,7 +28,7 @@ update public.profiles set role = 'admin' where id = 'ad000000-0000-0000-0000-00
 insert into public.organizers (id, name, contact_email) values ('0b0b0b0b-0000-0000-0000-00000000000b', 'Autre Orga', '');
 insert into public.organizer_members (organizer_id, user_id, role) values
   ((select id from public.organizers where is_default), '01000000-0000-0000-0000-000000000001', 'owner'),
-  ((select id from public.organizers where is_default), '01000000-0000-0000-0000-000000000002', 'viewer'),
+  ((select id from public.organizers where is_default), '01000000-0000-0000-0000-000000000002', 'staff'),
   ('0b0b0b0b-0000-0000-0000-00000000000b', '0b000000-0000-0000-0000-000000000003', 'owner');
 
 insert into public.ticketed_events (id, event_slug, starts_at, capacity, ticketing_enabled, status, venue_name) values
@@ -62,7 +62,7 @@ update public.tickets set status = 'used', used_at = now() where code = 'CODE-A2
 
 do $$
 declare
-  ow_a constant uuid := '01000000-0000-0000-0000-000000000001'; vw_a constant uuid := '01000000-0000-0000-0000-000000000002';
+  ow_a constant uuid := '01000000-0000-0000-0000-000000000001'; st_a constant uuid := '01000000-0000-0000-0000-000000000002';
   ow_b constant uuid := '0b000000-0000-0000-0000-000000000003'; adm constant uuid := 'ad000000-0000-0000-0000-0000000000ad';
   cust constant uuid := 'c1000000-0000-0000-0000-000000000001'; stranger constant uuid := '50000000-0000-0000-0000-000000000005';
   org_a uuid; n int; j jsonb; got text; msg uuid;
@@ -144,18 +144,18 @@ begin
   raise notice 'OK 6 : participants (recherche, filtres tarif / statut, tri, pagination) et consultation journalisée';
 
   -- 7 : export CSV — owner / manager / admin seulement, TOUJOURS journalisé
-  perform pg_temp.expect('FORBIDDEN', format('select public.org_export_participants(%L, ''evt-a'')', vw_a));
+  perform pg_temp.expect('FORBIDDEN', format('select public.org_export_participants(%L, ''evt-a'')', st_a));
   perform pg_temp.expect('FORBIDDEN', format('select public.org_export_participants(%L, ''evt-a'')', ow_b));
   j := public.org_export_participants(ow_a, 'evt-a');  if jsonb_array_length(j) <> 3 then raise exception 'FAIL 7a : export'; end if;
   j := public.org_export_participants(ow_a, 'evt-a');
   select count(*) into n from public.audit_log where actor_id = ow_a and action = 'organizer.export_csv' and (meta ->> 'rows')::int = 3;
   if n <> 2 then raise exception 'FAIL 7b : % exports journalisés (attendu 2)', n; end if;
-  j := public.org_participants(vw_a, 'evt-a');  if (j ->> 'total')::int <> 3 then raise exception 'FAIL 7c : le lecteur doit pouvoir consulter'; end if;
-  raise notice 'OK 7 : export réservé aux owner / manager / admin et journalisé à chaque fois ; lecteur = lecture seule';
+  perform pg_temp.expect('FORBIDDEN', format('select public.org_participants(%L, ''evt-a'')', st_a));   -- le staff ne fait que scanner
+  raise notice 'OK 7 : export réservé aux owner / manager / admin et journalisé à chaque fois ; staff : aucune lecture des participants';
 
   -- 8 : messages — droits, aperçu, limites, journalisation, résultats
-  perform pg_temp.expect('FORBIDDEN', format('select public.org_message_preview(%L, ''evt-a'', ''all'')', vw_a));
-  perform pg_temp.expect('FORBIDDEN', format('select public.org_message_create(%L, ''evt-a'', ''Sujet'', ''Corps'', ''all'')', vw_a));
+  perform pg_temp.expect('FORBIDDEN', format('select public.org_message_preview(%L, ''evt-a'', ''all'')', st_a));
+  perform pg_temp.expect('FORBIDDEN', format('select public.org_message_create(%L, ''evt-a'', ''Sujet'', ''Corps'', ''all'')', st_a));
   perform pg_temp.expect('FORBIDDEN', format('select public.org_message_create(%L, ''evt-a'', ''Sujet'', ''Corps'', ''all'')', ow_b));
   perform pg_temp.expect('REPLY_TO_MISSING', format('select public.org_message_create(%L, ''evt-b'', ''Sujet'', ''Corps'', ''all'')', ow_b));
   j := public.org_message_preview(ow_a, 'evt-a', 'all');
@@ -181,7 +181,8 @@ begin
   perform public.org_message_create(ow_a, 'evt-a', 'Parking', 'Le parking ouvre à 18 h.', 'tier', 'a9000000-0000-0000-0000-00000000001a');
   perform public.org_message_create(ow_a, 'evt-a', 'Vestiaire', 'Un vestiaire est disponible.', 'all');
   perform pg_temp.expect('RATE_LIMIT', format('select public.org_message_create(%L, ''evt-a'', ''Quatrième'', ''Corps'', ''all'')', ow_a));
-  j := public.org_messages_list(vw_a, 'evt-a');  if jsonb_array_length(j) <> 3 then raise exception 'FAIL 8j : historique'; end if;
+  perform pg_temp.expect('FORBIDDEN', format('select public.org_messages_list(%L, ''evt-a'')', st_a));
+  j := public.org_messages_list(ow_a, 'evt-a');  if jsonb_array_length(j) <> 3 then raise exception 'FAIL 8j : historique'; end if;
   raise notice 'OK 8 : messages — droits, aperçu masqué, périmètres, limite 3 / 24 h, statuts d''envoi, journalisation';
 
   -- 9 : org_log et renvoi de billet

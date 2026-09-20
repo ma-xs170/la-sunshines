@@ -31,7 +31,16 @@ export type IconName =
   | 'check'
   | 'bell'
   | 'archive'
-  | 'inbox';
+  | 'inbox'
+  | 'help'
+  | 'grid'
+  | 'list'
+  | 'search'
+  | 'filter'
+  | 'plus'
+  | 'chevron-down'
+  | 'alert'
+  | 'scan';
 
 export default function Icon({
   name,
