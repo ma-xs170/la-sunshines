@@ -27,7 +27,8 @@ begin
   exception when others then got := sqlstate;
   end;
   if got is null then raise exception 'FAIL : SQLSTATE % attendu, aucune erreur (%)', p_state, p_sql; end if;
-  if got <> p_state then raise exception 'FAIL : SQLSTATE % attendu, reçu % (%)', p_state, got, p_sql; end if;
+  -- p_state peut lister plusieurs codes acceptables (« 23001|23503 ») : la version de Postgres change le code d'un DELETE bloqué par une FK RESTRICT.
+  if got <> all (string_to_array(p_state, '|')) then raise exception 'FAIL : SQLSTATE % attendu, reçu % (%)', p_state, got, p_sql; end if;
 end $$;
 
 -- réserve `qty` places d'UN tarif ; renvoie l'id de commande
@@ -297,7 +298,7 @@ begin
   if res <> 'archived' then raise exception 'FAIL 7c : tarif vendu → % (attendu archived)', res; end if;
   select count(*) into n from public.ticket_tiers where id = 'a5000000-0000-0000-0000-000000000005' and archived_at is not null and not is_active;
   if n <> 1 then raise exception 'FAIL 7d : le tarif vendu n''est pas archivé'; end if;
-  perform pg_temp.expect_state('23001', $q$delete from public.ticket_tiers where id = 'a5000000-0000-0000-0000-000000000005'$q$);
+  perform pg_temp.expect_state('23001|23503', $q$delete from public.ticket_tiers where id = 'a5000000-0000-0000-0000-000000000005'$q$);
   perform pg_temp.expect('TIER_ARCHIVED', $q$
     select public.admin_save_tier('ad000000-0000-0000-0000-0000000000ad', 'evt-sup', 'a5000000-0000-0000-0000-000000000005', 'S', '', 1000, 50, 6, null, null, true, 0) $q$);
   -- un tarif jamais vendu se supprime

@@ -41,7 +41,7 @@
 > commandes, billets, **noms et prénoms des participants** (dont des mineurs) ; historique d'entrée (date/heure du scan du billet).
 > Finalités : gérer la commande, émettre et contrôler les billets, assurer la sécurité de l'événement, répondre aux demandes, respecter les obligations comptables.
 > Base légale : exécution du contrat ; obligation légale (conservation comptable, **10 ans** pour les pièces de vente) ; intérêt légitime (sécurité, lutte contre la fraude).
-> Conservation : compte tant qu'il est actif puis 3 ans d'inactivité ; billets et commandes conformément aux obligations comptables.
+> Conservation : compte tant que la suppression n'est pas demandée ; commandes et billets 10 ans (obligation comptable), sans purge automatique (voir `docs/billetterie/RGPD.md`).
 > Destinataires / sous-traitants : **Supabase** (base de données et authentification — région : [À PRÉCISER]), **Stripe** (paiement ; Stripe est responsable de traitement de vos données bancaires, que nous ne recevons jamais),
 > **Resend** (envoi des emails), **Vercel** (hébergement). Certains transferts hors UE reposent sur les clauses contractuelles types.
 > Mineurs : les achats sont réalisés par un représentant légal ou avec son autorisation.

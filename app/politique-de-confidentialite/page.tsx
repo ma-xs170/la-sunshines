@@ -187,19 +187,20 @@ export default async function PrivacyPage() {
           <ul>
             <li>
               <strong>Messages de contact</strong> : conservés le temps de
-              traiter votre demande, puis jusqu’à 12 mois à des fins de suivi,
-              avant suppression.
+              traiter votre demande. Vous pouvez en demander la suppression à
+              tout moment.
             </li>
             {accounts && (
               <>
                 <li>
-                  <strong>Compte</strong> : tant qu’il est actif, puis 3 ans après la dernière connexion, avant
-                  suppression.
+                  <strong>Compte</strong> : conservé tant que vous ne demandez pas sa suppression. Vous pouvez la
+                  demander à tout moment par email : le compte et le profil sont alors supprimés, et vos commandes
+                  restent conservées sans lien avec un compte.
                 </li>
                 <li>
-                  <strong>Commandes, billets et données des participants</strong> : conservés pendant la durée
-                  des obligations comptables (10 ans pour les pièces de vente), y compris l’historique de
-                  contrôle du billet à l’entrée.
+                  <strong>Commandes, billets et données des participants</strong> : conservés au titre des
+                  obligations comptables (10 ans pour les pièces de vente), y compris l’historique de contrôle du
+                  billet à l’entrée. Ils ne sont pas supprimés automatiquement avant ce délai.
                 </li>
               </>
             )}
