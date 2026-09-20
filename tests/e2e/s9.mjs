@@ -165,9 +165,9 @@ ok(/role="progressbar"/.test(r.data) && /Évolution des ventes/.test(r.data), 'b
 ok(/Élodie Dupont-Martin/.test(r.data) && /Denis Autre/.test(r.data), 'liste des participants');
 ok(/cust@test\.local/.test(r.data), 'email des participants (acheteur) visible du responsable');
 ok(!/Bob BetaOrga/.test(r.data), 'aucun participant de l\'autre organisateur');
-ok(/Exporter les participants/.test(r.data), 'le responsable voit le bouton d\'export');
+ok(/Exporter \(CSV\)/.test(r.data), 'le responsable voit le bouton d\'export');
 const rs = await cust2.req(`/organisateur/evenements/${A}`);
-ok(rs.status === 404, `le staff n'a pas accès au tableau de bord (scan uniquement) → 404 (${rs.status})`);
+ok(rs.status === 200 && !/Billets vendus/.test(rs.data) && !/Exporter/.test(rs.data), `le staff d'organisation n'a que le scan : ni chiffres, ni participants (${rs.status})`);
 r = await staff.req(`/organisateur/evenements/${A}?q=zed`);
 ok(/=Zed/.test(r.data) && !/Élodie/.test(r.data), 'recherche par nom');
 r = await staff.req(`/organisateur/evenements/${A}?tier=${tiers.early}`);

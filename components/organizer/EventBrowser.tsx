@@ -63,10 +63,10 @@ function Card({ e, list, canManage }: { e: CardEvent; list: boolean; canManage: 
           {canManage ? (
             <>
               <a className="btn btn--amber" href={dash}>Tableau de bord</a>
-              <a className="btn btn--outline" href={`${dash}?onglet=tarifs`}>Tarifs</a>
+              <a className="btn btn--outline" href={`${dash}?onglet=tarifs#onglets`}>Tarifs</a>
             </>
           ) : (
-            <a className="btn btn--amber" href={`${dash}?onglet=scan`}><Icon name="scan" />Scanner</a>
+            <a className="btn btn--amber" href={`${dash}?onglet=scan#onglets`}><Icon name="scan" />Scanner</a>
           )}
         </div>
       </div>

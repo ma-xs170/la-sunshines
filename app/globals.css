@@ -3519,3 +3519,27 @@ nav .acct-links button.link{
 .org-settings__wide{grid-column:1/-1;}
 .org-settings__foot{display:flex;align-items:center;gap:var(--s-16);flex-wrap:wrap;}
 @media (max-width:640px){.org-settings__grid{grid-template-columns:1fr;}}
+
+/* ---------- Espace organisateur : tableau de bord d'un événement (onglets, tarifs) ---------- */
+.org-subnav{display:flex;gap:6px;margin:var(--s-24) 0 var(--s-16);padding:6px;border-radius:var(--r-pill);background:var(--panel);border:1px solid var(--panel-border);width:fit-content;max-width:100%;overflow-x:auto;scrollbar-width:none;}
+.org-subnav__link{padding:10px 22px;border-radius:var(--r-pill);font-size:14px;font-weight:700;color:var(--gray);white-space:nowrap;transition:background .18s var(--ease),color .18s var(--ease);}
+.org-subnav__link:hover{background:#EFE9DE;}
+.org-subnav__link.is-active{background:var(--amber);color:var(--ink);}
+.org-subnav__link:focus-visible{outline:2px solid var(--amber-ink);outline-offset:2px;}
+.org-part{margin-top:var(--s-16);}
+.org-part__head{display:flex;align-items:center;justify-content:space-between;gap:var(--s-16);flex-wrap:wrap;margin-bottom:var(--s-8);}
+.org-part__head h2{margin-bottom:0;}
+.org-tiers-panel{display:flex;flex-direction:column;gap:var(--s-16);}
+.org-tiers-panel__head{display:flex;align-items:center;justify-content:space-between;gap:var(--s-16);flex-wrap:wrap;}
+.org-tierform{padding:var(--s-24);display:flex;flex-direction:column;gap:var(--s-16);}
+.org-tierform h3{font-size:18px;}
+.org-tierlist{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:var(--s-16);}
+.org-tier{padding:var(--s-16) var(--s-24);display:flex;flex-direction:column;gap:var(--s-12);}
+.org-tier.is-archived{opacity:.6;}
+.org-tier__top{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--s-12);}
+.org-tier__top>div{display:flex;flex-direction:column;gap:6px;align-items:flex-start;}
+.org-tier__name{font-family:var(--font-display);font-weight:800;letter-spacing:-0.03em;font-size:17px;text-transform:uppercase;}
+.org-tier__price{font-family:var(--font-display);font-weight:800;font-size:20px;letter-spacing:-0.03em;white-space:nowrap;}
+.org-tier__actions{display:flex;gap:var(--s-8);flex-wrap:wrap;align-items:center;}
+.org-tier__actions .btn{padding:11px 18px;}
+@media (max-width:560px){.org-tierform{padding:var(--s-16);}.org-tier{padding:var(--s-16);}}

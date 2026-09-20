@@ -66,3 +66,10 @@ export function editorial(slug: string): { title: string; flyer: string | null; 
   const e = getAllEditions({ includeHidden: true }).find((x) => x.slug === slug);
   return { title: e?.name ?? slug, flyer: e?.flyer ?? null, dateLabel: e?.dateFull ?? '' };
 }
+
+export interface OrgTierFull {
+  id: string; name: string; description: string; price_cents: number; quantity_total: number; max_per_order: number;
+  sales_start: string | null; sales_end: string | null; is_active: boolean; archived: boolean; sort_order: number; sold: number; consumed: number;
+}
+export interface OrgTiers { capacity: number; consumed: number; tiers: OrgTierFull[] }
+export interface OrgBrief { id: string; slug: string; starts_at: string; venue_name: string; organizer_name: string; my_role: string }
