@@ -77,6 +77,10 @@ try {
   await q(`update public.artist_login_tokens set expires_at = now() - interval '1 minute', used = false where artist_slug = $1`, [SLUG]);
   r = await new L.Client().req(`/api/artist/login?token=${token}`);
   ok(/login=expire/.test(r.headers.get('location') ?? ''), 'jeton périmé → refusé');
+  r = await new L.Client().req('/artistes?login=expire');
+  ok(r.status === 200 && /expiré ou a déjà été utilisé/.test(r.data), 'la page où renvoie un lien refusé existe (plus de 404) et explique quoi faire');
+  r = await new L.Client().req('/artistes?login=invalide');
+  ok(r.status === 200 && /n’est pas valide/.test(r.data), 'idem pour un lien invalide');
   await L.resetMocks();
   await new L.Client().req('/api/artist/request-link', { method: 'POST', body: { slug: 'dega-youth' } });
   ok((await mails()).length === 0, 'artiste sans email / non vérifié : réponse identique, aucun email envoyé');
