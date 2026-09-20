@@ -7,7 +7,14 @@ import { resolveEmoji } from '@/lib/editionEmoji';
 import { heroGradient } from '@/lib/gradient';
 import { normalizeArtistName } from '@/lib/artists';
 import { formatEditionDate } from '@/lib/format';
-import { linkArtistText } from '@/lib/artistLinks';
+import {
+  linkArtistText,
+  effectiveRowKind,
+  planScheduleArtists,
+  type RowKind,
+  type SchedulePlan,
+} from '@/lib/artistLinks';
+import { isOrgName } from '@/lib/artists';
 import { groupSchedule, slotsFromEventTime, normalizeTime } from '@/lib/schedule';
 import Icon from '@/components/Icon';
 import ArtistCombobox from './ArtistCombobox';
@@ -435,11 +442,14 @@ function ScheduleLinks({
   row,
   artists,
   onChange,
+  onKind,
 }: {
   row: ScheduleEntry;
   artists: StoredArtist[];
   onChange: (slugs: string[] | undefined) => void;
+  onKind: (kind: RowKind) => void;
 }) {
+  const kind = effectiveRowKind(row.artistName, row.kind);
   const explicit = (row.artistSlugs ?? []).filter((s) => artists.some((a) => a.slug === s));
   const auto = linkArtistText(row.artistName, artists)
     .filter((seg) => seg.slug)
@@ -448,7 +458,15 @@ function ScheduleLinks({
   const available = artists.filter((a) => !explicit.includes(a.slug));
   return (
     <div className="sched__links">
-      {explicit.map((slug) => (
+      <select
+        aria-label="Type de ligne"
+        value={kind}
+        onChange={(e) => onKind(e.target.value as RowKind)}
+      >
+        <option value="artist">Artiste(s)</option>
+        <option value="info">Information (pas de lien)</option>
+      </select>
+      {kind === 'artist' && explicit.map((slug) => (
         <span className="sched__chip" key={slug}>
           {nameOf(slug)}
           <button
@@ -463,6 +481,7 @@ function ScheduleLinks({
           </button>
         </span>
       ))}
+      {kind === 'artist' && (
       <select
         aria-label="Lier cette ligne à un artiste"
         value=""
@@ -475,7 +494,8 @@ function ScheduleLinks({
           </option>
         ))}
       </select>
-      {explicit.length === 0 && (
+      )}
+      {kind === 'artist' && explicit.length === 0 && (
         <span className="sched__auto">
           {auto.length ? `Liaison auto : ${auto.join(', ')}` : 'Aucun lien (texte simple)'}
         </span>
@@ -602,6 +622,7 @@ function ScheduleEditor({ hook, artists }: { hook: Hook; artists: StoredArtist[]
                     onChange={(artistSlugs) =>
                       hook.patchSchedule(row.id, { artistSlugs })
                     }
+                    onKind={(kind) => hook.patchSchedule(row.id, { kind })}
                   />
                 </li>
               ))}
@@ -619,6 +640,122 @@ function ScheduleEditor({ hook, artists }: { hook: Hook; artists: StoredArtist[]
         <span>Nouveau créneau</span>
       </button>
     </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Confirmation avant enregistrement du programme                      */
+/* ------------------------------------------------------------------ */
+
+/** Liste ce qui va être créé / lié ; l'organisateur confirme ou corrige.
+ *  Les noms très proches d'un profil existant demandent un choix explicite. */
+function SchedulePlanPanel({
+  plan,
+  busy,
+  onCancel,
+  onConfirm,
+}: {
+  plan: SchedulePlan;
+  busy: boolean;
+  onCancel: () => void;
+  onConfirm: (creates: string[], aliases: { slug: string; alias: string }[]) => void;
+}) {
+  const [skip, setSkip] = useState<Set<string>>(new Set());
+  const [choice, setChoice] = useState<Record<string, 'link' | 'create'>>({});
+  const toggle = (key: string) =>
+    setSkip((s) => {
+      const n = new Set(s);
+      if (n.has(key)) n.delete(key);
+      else n.add(key);
+      return n;
+    });
+
+  function confirm() {
+    const creates = plan.creates.filter((c) => !skip.has(c.key)).map((c) => c.name);
+    const aliases: { slug: string; alias: string }[] = [];
+    for (const sg of plan.suggestions) {
+      if ((choice[sg.key] ?? 'link') === 'link') aliases.push({ slug: sg.candidate.slug, alias: sg.name });
+      else creates.push(sg.name);
+    }
+    onConfirm(creates, aliases);
+  }
+
+  return (
+    <section className="admin-panel glass sched-plan" role="dialog" aria-label="Confirmer le programme">
+      <h3>Avant d’enregistrer le programme</h3>
+
+      {plan.suggestions.length > 0 && (
+        <div className="sched-plan__block">
+          <h4>Noms très proches d’un artiste existant</h4>
+          {plan.suggestions.map((sg) => (
+            <fieldset className="sched-plan__choice" key={sg.key}>
+              <legend>« {sg.name} »</legend>
+              <label>
+                <input
+                  type="radio"
+                  name={`sg-${sg.key}`}
+                  checked={(choice[sg.key] ?? 'link') === 'link'}
+                  onChange={() => setChoice({ ...choice, [sg.key]: 'link' })}
+                />
+                Lier à {sg.candidate.name} <em>(« {sg.name} » devient un alias)</em>
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name={`sg-${sg.key}`}
+                  checked={choice[sg.key] === 'create'}
+                  onChange={() => setChoice({ ...choice, [sg.key]: 'create' })}
+                />
+                Créer un nouveau profil
+              </label>
+            </fieldset>
+          ))}
+        </div>
+      )}
+
+      {plan.creates.length > 0 && (
+        <div className="sched-plan__block">
+          <h4>Profils qui vont être créés (minimaux, à compléter ensuite)</h4>
+          <ul>
+            {plan.creates.map((c) => (
+              <li key={c.key}>
+                <label>
+                  <input type="checkbox" checked={!skip.has(c.key)} onChange={() => toggle(c.key)} />
+                  <strong>{c.name}</strong>
+                  {skip.has(c.key) && <em> — ne pas créer (texte simple)</em>}
+                </label>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {plan.links.length > 0 && (
+        <div className="sched-plan__block">
+          <h4>Liaisons avec des profils existants</h4>
+          <ul>
+            {plan.links.map((l) => (
+              <li key={`${l.name}-${l.slug}`}>
+                {l.name} → <strong>{l.profile}</strong>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <p className="admin-field__hint">
+        Une ligne de type « Information » (portes, pause, fin) ne crée jamais de profil.
+        Une erreur de saisie ? Corrige le programme puis réenregistre.
+      </p>
+      <div className="admin-form__actions">
+        <button type="button" className="btn btn--amber" disabled={busy} onClick={confirm}>
+          Confirmer et enregistrer
+        </button>
+        <button type="button" className="btn btn--outline" disabled={busy} onClick={onCancel}>
+          Corriger
+        </button>
+      </div>
+    </section>
   );
 }
 
@@ -951,20 +1088,50 @@ function EventEditForm({
   const artistNames = store.artists.map((a) => a.name);
   const isNewOverride = ed.isStatic && !ed.storeId;
 
-  async function submit(e: React.FormEvent) {
+  // Analyse du programme AVANT enregistrement : rien n'est créé sans confirmation.
+  const [plan, setPlan] = useState<SchedulePlan | null>(null);
+
+  function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!hook.form.name.trim()) return flash('Le titre est obligatoire.');
+    const p = planScheduleArtists(hook.schedule, store.artists, { ignore: isOrgName });
+    if (p.creates.length > 0 || p.suggestions.length > 0) return setPlan(p);
+    void persist([], []);
+  }
+
+  /** Crée les profils / alias confirmés (une seule écriture), puis enregistre l'événement. */
+  async function persist(creates: string[], aliases: { slug: string; alias: string }[]) {
+    setPlan(null);
     setBusy(true);
+    let artists = store.artists;
+    if (creates.length > 0 || aliases.length > 0) {
+      const r = await fetch('/api/admin/artists-auto', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ creates, aliases }),
+      });
+      const d = (await r.json().catch(() => ({}))) as { items?: StoredArtist[]; error?: string };
+      if (!r.ok) {
+        setBusy(false);
+        return flash(d.error ?? 'Création des profils artistes impossible.');
+      }
+      const items = d.items ?? [];
+      artists = [...items.filter((a) => !store.artists.some((x) => x.id === a.id)), ...store.artists.map((a) => items.find((i) => i.id === a.id) ?? a)];
+    }
     const body = hook.payload();
     if (isNewOverride) body.slug = ed.slug;
     const res = ed.storeId
       ? await api(`/api/admin/events/${ed.storeId}`, 'PATCH', body)
       : await api('/api/admin/events', 'POST', body);
     setBusy(false);
-    if (!res.ok || !res.item) return flash(res.error ?? 'Échec.');
+    if (!res.ok || !res.item) {
+      if (artists !== store.artists) setStore({ ...store, artists });
+      return flash(res.error ?? 'Échec de l’enregistrement du programme (les profils confirmés ont bien été créés).');
+    }
     const item = res.item;
     setStore({
       ...store,
+      artists,
       events: ed.storeId
         ? store.events.some((x) => x.id === item.id)
           ? store.events.map((x) => (x.id === item.id ? item : x))
@@ -972,7 +1139,8 @@ function EventEditForm({
         : [item, ...store.events],
     });
     flash(
-      isNewOverride ? 'Version personnalisée enregistrée.' : 'Événement enregistré.',
+      (isNewOverride ? 'Version personnalisée enregistrée.' : 'Événement enregistré.') +
+        (creates.length ? ` ${creates.length} profil(s) artiste créé(s) à compléter.` : ''),
       res.deployed,
     );
     onSaved(item);
@@ -993,6 +1161,14 @@ function EventEditForm({
 
   return (
     <div className="admin-tabpanel">
+      {plan && (
+        <SchedulePlanPanel
+          plan={plan}
+          busy={busy}
+          onCancel={() => setPlan(null)}
+          onConfirm={persist}
+        />
+      )}
       {newArtist && (
         <ArtistQuickForm
           store={store}

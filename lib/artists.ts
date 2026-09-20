@@ -2,19 +2,16 @@
 // entrées qui désignent l'ORGANISATION (« DJ La Sunshines », « DJ Sunshines »,
 // « DJ La Xploz »…) et non un vrai artiste. On les écarte partout.
 
+import { artistMatchKey } from './artistLinks';
+
 const ORG_NAME_RE = /^(dj\s+)?(la\s+)?(sunshines?|xploz)$/i;
 
 /**
  * Forme canonique d'un nom d'artiste pour comparaison / correspondance de profil
- * (casse, espaces multiples, préfixe « DJ »). « DJ Syxtee » et « syxtee » => « syxtee ».
+ * (casse, accents, espaces multiples, préfixes « DJ » / « MC »).
+ * « DJ Syxtee » et « syxtee » => « syxtee ».
  */
-export function normalizeArtistName(name: string): string {
-  return name
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, ' ')
-    .replace(/^dj\s+/, '');
-}
+export const normalizeArtistName = artistMatchKey;
 
 export function isOrgName(name: string): boolean {
   return ORG_NAME_RE.test(name.trim());

@@ -7,6 +7,7 @@
 import { cache } from 'react';
 import { readStoreSync, type StoredArtist } from './store';
 import { normalizeArtistName } from './artists';
+import { buildArtistIndex } from './artistLinks';
 import { getAllEditions } from './content';
 import { isEditionUpcoming, type Edition } from './editions';
 
@@ -15,13 +16,11 @@ export type { StoredArtist };
 /** Tous les profils artistes (normalisés). Mémoïsé par passe de rendu. */
 export const getArtistProfiles = cache((): StoredArtist[] => readStoreSync().artists);
 
-/** Index nom canonique -> profil. */
+/** Index clé (nom, slug, alias — sans casse ni accents, sans DJ/MC) -> slug. */
 const profileIndex = cache((): Map<string, StoredArtist> => {
+  const bySlug = new Map(getArtistProfiles().map((a) => [a.slug, a] as const));
   const m = new Map<string, StoredArtist>();
-  for (const a of getArtistProfiles()) {
-    const key = normalizeArtistName(a.name);
-    if (key && !m.has(key)) m.set(key, a);
-  }
+  for (const [key, slug] of buildArtistIndex(getArtistProfiles())) m.set(key, bySlug.get(slug)!);
   return m;
 });
 

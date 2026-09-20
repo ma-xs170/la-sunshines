@@ -1159,6 +1159,10 @@ footer{
 .lineup__pill .artist-name-link:hover{background:rgba(25,20,16,0.04);text-decoration:none;}
 .lineup__pill .artist-name-link:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
 
+/* Programme : nom d'artiste = même typographie que les pastilles du Line-up complet
+   (gras, majuscules, interlettrage). Purement visuel : le texte enregistré ne change pas. */
+.prog-artist{font-weight:700;text-transform:uppercase;letter-spacing:0.02em;}
+
 /* Programme (déroulé) : noms d'artistes cliquables. Lien discret — même encre que
    le texte, soulignement fin très léger au repos, accent de l'édition (--ev-accent)
    au survol / focus. Aucun impact sur la mise en page : pas de padding horizontal,
@@ -2939,6 +2943,17 @@ footer{
 }
 .sched__chip button:hover{background:rgba(25,20,16,0.1);}
 .sched__auto{font-size:11px;color:var(--gray);}
+.admin-todo{margin-top:var(--s-24);padding:var(--s-16);border-radius:var(--r-sm);border:1px dashed var(--amber-ink);}
+.admin-todo ul{list-style:none;display:flex;flex-direction:column;gap:var(--s-8);margin-top:var(--s-8);}
+.admin-todo li{display:flex;align-items:center;justify-content:space-between;gap:var(--s-12);}
+.sched-plan{margin-bottom:var(--s-16);border:2px solid var(--amber);}
+.sched-plan h3{margin-bottom:var(--s-12);}
+.sched-plan__block{margin-bottom:var(--s-16);}
+.sched-plan__block h4{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--amber-ink);margin-bottom:var(--s-8);}
+.sched-plan ul{list-style:none;display:flex;flex-direction:column;gap:6px;font-size:14px;}
+.sched-plan label{display:flex;align-items:center;gap:8px;font-size:14px;min-height:32px;}
+.sched-plan__choice{border:1px solid var(--panel-border-strong);border-radius:var(--r-sm);padding:var(--s-8) var(--s-12);margin-bottom:var(--s-8);}
+.sched-plan__choice legend{font-weight:800;font-size:14px;padding:0 6px;}
 .sched__acts{display:inline-flex;gap:4px;}
 .sched__acts button{
   width:30px;height:30px;border-radius:8px;cursor:pointer;
