@@ -9,7 +9,9 @@ export function supabaseUrl(): string {
 }
 
 export function supabaseAnonKey(): string {
-  return process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
+  // Ancien nom (« anon ») ou nouveau (« publishable ») : l'intégration Vercel ↔ Supabase peut fournir l'un ou l'autre.
+  // Références littérales : Next ne remplace que `process.env.NEXT_PUBLIC_…` écrit tel quel.
+  return process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
 }
 
 export function supabaseConfigured(): boolean {

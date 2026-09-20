@@ -18,7 +18,7 @@ export async function requireBilletterieAdmin(): Promise<
   if (!supabaseAdminConfigured()) {
     return {
       ok: false,
-      res: NextResponse.json({ error: 'SUPABASE_SERVICE_ROLE_KEY manquante.' }, { status: 503 }),
+      res: NextResponse.json({ error: 'SUPABASE_SERVICE_ROLE_KEY (ou SUPABASE_SECRET_KEY) manquante.' }, { status: 503 }),
     };
   }
   return { ok: true, actor: guard.session.userId };
