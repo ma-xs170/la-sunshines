@@ -44,3 +44,12 @@ test('slug explicite supprimé → ignoré, retour à l’automatique', () => {
   assert.deepEqual(links('Timalash', ['inconnu']), ['Timalash>timalash']);
   assert.deepEqual(links('Ouverture des portes', ['inconnu']), []);
 });
+test('tirets, libellé commençant par un artiste, lignes structurelles', () => {
+  assert.deepEqual(links('Timalash — Lil Scott'), ['Timalash>timalash', 'Lil Scott>lil-scott']);
+  assert.deepEqual(links('Timalash – Lil Scott / Zoé - Syxtee'),
+    ['Timalash>timalash', 'Lil Scott>lil-scott', 'Zoé>zoe', 'Syxtee>dj-syxtee']);
+  assert.equal(plain('Ayou — Tchambou'), 'Ayou — Tchambou');
+  assert.deepEqual(links('Timalash Keyboard Show'), ['Timalash Keyboard Show>timalash']);
+  assert.deepEqual(links('Ayou — Timalash Live'), ['Timalash Live>timalash']);
+  for (const t of ['Ouverture des portes', 'Fermeture des portes', 'Fin des festivités']) assert.deepEqual(links(t), [], t);
+});

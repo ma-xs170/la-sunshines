@@ -25,9 +25,23 @@ export function artistMatchKey(s: string): string {
     .replace(/^(dj|mc)\s+/, '');
 }
 
-// Séparateurs entre deux artistes. « x » et « feat/ft » exigent des espaces /
-// bordures de mot pour ne pas couper « Xploz » ou « Ft. Lauderdale ».
-const SEPARATOR_RE = /(\s*(?:·|&|,|\+|\/)\s*|\s+(?:x|feat\.?|ft\.?|featuring)\s+)/i;
+// Séparateurs entre deux artistes. Les tirets cadratin/demi-cadratin coupent
+// avec ou sans espaces ; le trait d'union simple seulement entouré d'espaces
+// (« Jeune-Aber » reste un nom). « x » et « feat/ft » exigent des espaces pour
+// ne pas couper « Xploz » ou « Ft. Lauderdale ».
+const SEPARATOR_RE =
+  /(\s*(?:·|&|,|\+|\/|—|–)\s*|\s+-\s+|\s+(?:x|feat\.?|ft\.?|featuring)\s+)/i;
+
+/** Nom d'artiste connu en TÊTE d'un libellé (« Dreezy Keyboard Show » → dreezy),
+ *  aux frontières de mots ; le plus long nom l'emporte. */
+function leadingArtist(key: string, index: Map<string, string>): string | undefined {
+  const words = key.split(' ');
+  for (let n = words.length - 1; n >= 1; n--) {
+    const slug = index.get(words.slice(0, n).join(' '));
+    if (slug) return slug;
+  }
+  return undefined;
+}
 
 /** Index clé → slug (nom ET slug de chaque profil ; le premier profil l'emporte). */
 export function buildArtistIndex(artists: LinkableArtist[]): Map<string, string> {
@@ -58,6 +72,7 @@ export function linkArtistText(
   const explicit = (explicitSlugs ?? []).filter((s) => bySlug.has(s));
 
   // Un nom qui contient lui-même un séparateur (« Nom & Nom ») reste un seul lien.
+  const lookup = (t: string) => index.get(artistMatchKey(t)) ?? leadingArtist(artistMatchKey(t), index);
   const whole = index.get(artistMatchKey(text));
   if (explicit.length === 0 && whole) return [{ text, slug: whole }];
 
@@ -70,11 +85,11 @@ export function linkArtistText(
     if (i % 2 === 1 || !p.trim()) return { text: p };
     let slug: string | undefined;
     if (explicit.length > 0) {
-      const auto = index.get(artistMatchKey(p));
+      const auto = lookup(p);
       if (explicit.length === nameIdx.length) slug = explicit[nameIdx.indexOf(i)];
       else if (auto && explicit.includes(auto)) slug = auto;
     } else {
-      slug = index.get(artistMatchKey(p));
+      slug = lookup(p);
     }
     return slug ? { text: p, slug } : { text: p };
   });
