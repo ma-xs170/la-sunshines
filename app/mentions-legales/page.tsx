@@ -2,6 +2,9 @@ import type { Metadata } from 'next';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import PageHero from '@/components/PageHero';
+import { getTicketingSettings } from '@/lib/ticketing/settings';
+
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: 'Mentions légales · LA SUNSHINES',
@@ -12,7 +15,9 @@ export const metadata: Metadata = {
 
 const CONTACT_EMAIL = 'themouv2.0971@gmail.com';
 
-export default function LegalNoticePage() {
+export default async function LegalNoticePage() {
+  // Le texte « Billetterie » suit le réglage : Bizouk tant que les ventes internes ne sont pas ouvertes.
+  const native = (await getTicketingSettings(false)).mode === 'native';
   return (
     <>
       <Nav />
@@ -30,15 +35,15 @@ export default function LegalNoticePage() {
               Adresse : Direction de Tabanon, 2476 Route de Bel Air Desrozières,
               97170 Petit-Bourg
             </li>
-            <li>Responsable de la publication : <strong>Mathis</strong></li>
+            <li>Responsable de la publication : <strong>{native ? 'Mathis [NOM DE FAMILLE — À COMPLÉTER]' : 'Mathis'}</strong></li>
             <li>Contact : <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></li>
           </ul>
 
           <h2>Organisateur des événements</h2>
           <p>
             Les soirées LA SUNSHINES sont organisées par l’association{' '}
-            <strong>THE MOUV</strong>. LAWCY MUSIC édite ce site vitrine&nbsp;;
-            l’organisation des événements et la billetterie relèvent de THE MOUV.
+            <strong>THE MOUV</strong>. LAWCY MUSIC édite ce site&nbsp;;
+            l’organisation des événements et la vente des billets relèvent de THE MOUV.
           </p>
           <ul>
             <li>Dénomination : <strong>THE MOUV</strong></li>
@@ -64,16 +69,41 @@ export default function LegalNoticePage() {
               </a>
             </li>
           </ul>
+          {native && (
+            <>
+              <p>
+                Les comptes utilisateurs, les commandes et les billets sont stockés dans une base de données
+                fournie par <strong>Supabase</strong> (région&nbsp;: [RÉGION DU PROJET SUPABASE — À COMPLÉTER]).
+                Le paiement est assuré par <strong>Stripe</strong> et l’envoi des emails transactionnels par{' '}
+                <strong>Resend</strong>. Le détail figure dans la{' '}
+                <a href="/politique-de-confidentialite">Politique de confidentialité</a>.
+              </p>
+            </>
+          )}
 
           <h2>Billetterie</h2>
-          <p>
-            La vente de billets est assurée par un prestataire tiers,{' '}
-            <a href="https://www.bizouk.com" target="_blank" rel="noopener noreferrer">
-              Bizouk
-            </a>
-            . Les conditions de vente et le traitement des données liés à l’achat
-            de billets relèvent de Bizouk.
-          </p>
+          {native ? (
+            <>
+              <p>
+                Les billets des soirées LA SUNSHINES sont vendus par l’association <strong>THE MOUV</strong> via la
+                billetterie en ligne de ce site (paiement sécurisé par Stripe). Les conditions de vente figurent dans
+                les <a href="/cgv">Conditions générales de vente</a> et la{' '}
+                <a href="/remboursement">politique de remboursement</a>. TVA non applicable, article 293&nbsp;B du CGI.
+              </p>
+              <p>
+                Médiateur de la consommation&nbsp;: [COORDONNÉES DU MÉDIATEUR — À COMPLÉTER].
+              </p>
+            </>
+          ) : (
+            <p>
+              La vente de billets est assurée par un prestataire tiers,{' '}
+              <a href="https://www.bizouk.com" target="_blank" rel="noopener noreferrer">
+                Bizouk
+              </a>
+              . Les conditions de vente et le traitement des données liés à l’achat
+              de billets relèvent de Bizouk.
+            </p>
+          )}
 
           <h2>Propriété intellectuelle</h2>
           <p>

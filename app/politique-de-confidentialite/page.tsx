@@ -2,18 +2,25 @@ import type { Metadata } from 'next';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import PageHero from '@/components/PageHero';
+import { getTicketingSettings } from '@/lib/ticketing/settings';
+import { supabaseConfigured } from '@/lib/supabase/config';
+
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: 'Politique de confidentialité · LA SUNSHINES',
   description:
-    'Comment LA SUNSHINES collecte et traite les données personnelles : formulaire de contact, cookies, billetterie Bizouk, durées de conservation et droits des personnes.',
+    'Comment LA SUNSHINES collecte et traite les données personnelles : formulaire de contact, cookies, comptes et billetterie, durées de conservation et droits des personnes.',
   robots: { index: true, follow: true },
 };
 
-const UPDATED = '28 août 2026';
+const UPDATED = '20 septembre 2026';
 const CONTACT_EMAIL = 'themouv2.0971@gmail.com';
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  const native = (await getTicketingSettings(false)).mode === 'native';
+  // Les comptes peuvent exister dès que Supabase est branché, même avant l’ouverture des ventes.
+  const accounts = native || supabaseConfigured();
   return (
     <>
       <Nav />
@@ -29,8 +36,10 @@ export default function PrivacyPage() {
           <p>
             La présente politique explique quelles données personnelles sont
             collectées sur le site LA SUNSHINES, dans quel but, combien de temps
-            elles sont conservées et comment exercer vos droits. Le site est un
-            site vitrine : il ne nécessite aucune création de compte.
+            elles sont conservées et comment exercer vos droits.{' '}
+            {accounts
+              ? 'La consultation du site ne nécessite aucun compte ; un compte est nécessaire pour acheter des billets en ligne.'
+              : 'Le site ne nécessite aucune création de compte.'}
           </p>
 
           <h2>1. Responsable du traitement</h2>
@@ -64,14 +73,37 @@ export default function PrivacyPage() {
               n’avez pas donné votre accord.
             </li>
           </ul>
+          {accounts && (
+            <ul>
+              <li>
+                <strong>Compte</strong> : adresse email, nom, prénom, numéro de téléphone, mot de passe
+                (jamais stocké en clair) ou identifiant de connexion Google si vous choisissez cette option.
+              </li>
+              <li>
+                <strong>Commandes et billets</strong> : contenu de la commande, montant, statut du paiement,
+                <strong> nom et prénom de chaque participant</strong> (qui peuvent être mineurs), code QR du billet,
+                date et heure du contrôle du billet à l’entrée, consentements donnés lors de l’achat (CGV, politique
+                de remboursement, « J’ai 18 ans ou l’autorisation de mon représentant légal »).
+              </li>
+            </ul>
+          )}
           <p>
-            Nous ne collectons aucune donnée sensible et ne vous demandons jamais
-            d’informations bancaires sur ce site.
+            Nous ne collectons aucune donnée sensible.{' '}
+            {accounts
+              ? 'Nous ne recevons jamais vos numéros de carte bancaire : le paiement est traité directement par Stripe.'
+              : 'Nous ne vous demandons jamais d’informations bancaires sur ce site.'}
           </p>
 
           <h2>3. Pourquoi nous utilisons ces données</h2>
           <ul>
             <li>Répondre aux demandes envoyées via le formulaire de contact.</li>
+            {accounts && (
+              <>
+                <li>Créer et gérer votre compte, traiter et confirmer vos commandes, émettre vos billets et vous les envoyer par email.</li>
+                <li>Contrôler les billets à l’entrée des événements et assurer la sécurité (un billet n’est valable qu’une fois).</li>
+                <li>Gérer les remboursements, prévenir la fraude, respecter nos obligations comptables et légales.</li>
+              </>
+            )}
             <li>Mémoriser votre choix concernant les cookies.</li>
             <li>
               Mesurer de façon agrégée la fréquentation du site pour l’améliorer
@@ -82,7 +114,10 @@ export default function PrivacyPage() {
           <h2>4. Base légale</h2>
           <p>
             Le traitement des messages de contact repose sur notre intérêt
-            légitime à répondre à vos sollicitations. Le dépôt de cookies non
+            légitime à répondre à vos sollicitations.{' '}
+            {accounts &&
+              'La gestion du compte, des commandes et des billets repose sur l’exécution du contrat conclu avec vous ; la conservation des pièces de vente, sur une obligation légale ; le contrôle à l’entrée et la lutte contre la fraude, sur notre intérêt légitime. '}
+            Le dépôt de cookies non
             strictement nécessaires et la mesure d’audience reposent sur votre
             consentement, que vous pouvez retirer à tout moment.
           </p>
@@ -96,27 +131,57 @@ export default function PrivacyPage() {
           </p>
           <ul>
             <li>
-              <strong>Envoi des emails du formulaire</strong> : service Resend
-              (resend.com), qui achemine le message jusqu’à notre boîte email.
+              <strong>Envoi des emails</strong> (formulaire de contact
+              {accounts ? ', confirmations de commande, billets, réinitialisation de mot de passe' : ''}) : service Resend
+              (resend.com).
             </li>
             <li>
-              <strong>Hébergement du site</strong> : voir la page{' '}
-              <a href="/mentions-legales">Mentions légales</a>.
+              <strong>Hébergement du site</strong> : Vercel (voir la page{' '}
+              <a href="/mentions-legales">Mentions légales</a>).
             </li>
+            {accounts && (
+              <>
+                <li>
+                  <strong>Base de données et authentification</strong> : Supabase (supabase.com){native ? ' — région : [RÉGION DU PROJET SUPABASE — À COMPLÉTER]' : ''}.
+                </li>
+                <li>
+                  <strong>Paiement</strong> : Stripe (stripe.com). Stripe traite vos données de paiement en tant que
+                  responsable de traitement pour ses propres obligations (lutte contre la fraude, obligations
+                  bancaires) ; nous ne recevons que la confirmation du paiement.
+                </li>
+              </>
+            )}
           </ul>
+          {accounts && (
+            <p>
+              Certains de ces prestataires sont établis hors de l’Union européenne (États-Unis notamment). Les
+              transferts reposent sur les mécanismes prévus par le RGPD (notamment les clauses contractuelles types
+              de la Commission européenne).
+            </p>
+          )}
 
-          <h2>6. Billetterie (Bizouk)</h2>
-          <p>
-            L’achat des billets est géré par un prestataire indépendant,{' '}
-            <a href="https://www.bizouk.com" target="_blank" rel="noopener noreferrer">
-              Bizouk
-            </a>
-            . Lorsque vous êtes redirigé·e vers Bizouk (ou qu’un module Bizouk est
-            affiché sur une page événement), les données que vous y saisissez sont
-            collectées et traitées par Bizouk selon sa propre politique de
-            confidentialité. LA SUNSHINES n’a pas accès à vos informations de
-            paiement.
-          </p>
+          <h2>6. Billetterie</h2>
+          {native ? (
+            <p>
+              Les billets sont vendus par l’association THE MOUV via la billetterie de ce site. Le paiement est
+              réalisé sur la page sécurisée de Stripe. Les conditions figurent dans les{' '}
+              <a href="/cgv">CGV</a> et la <a href="/remboursement">politique de remboursement</a>. Les achats
+              sont réalisés par une personne majeure ou avec l’autorisation de son représentant légal ; les
+              données des participants mineurs ne sont utilisées que pour la gestion et le contrôle de leurs billets.
+            </p>
+          ) : (
+            <p>
+              L’achat des billets est géré par un prestataire indépendant,{' '}
+              <a href="https://www.bizouk.com" target="_blank" rel="noopener noreferrer">
+                Bizouk
+              </a>
+              . Lorsque vous êtes redirigé·e vers Bizouk (ou qu’un module Bizouk est
+              affiché sur une page événement), les données que vous y saisissez sont
+              collectées et traitées par Bizouk selon sa propre politique de
+              confidentialité. LA SUNSHINES n’a pas accès à vos informations de
+              paiement.
+            </p>
+          )}
 
           <h2>7. Durée de conservation</h2>
           <ul>
@@ -125,6 +190,19 @@ export default function PrivacyPage() {
               traiter votre demande, puis jusqu’à 12 mois à des fins de suivi,
               avant suppression.
             </li>
+            {accounts && (
+              <>
+                <li>
+                  <strong>Compte</strong> : tant qu’il est actif, puis 3 ans après la dernière connexion, avant
+                  suppression.
+                </li>
+                <li>
+                  <strong>Commandes, billets et données des participants</strong> : conservés pendant la durée
+                  des obligations comptables (10 ans pour les pièces de vente), y compris l’historique de
+                  contrôle du billet à l’entrée.
+                </li>
+              </>
+            )}
             <li>
               <strong>Cookie de consentement</strong> : 6 mois, puis le bandeau
               vous est reproposé.

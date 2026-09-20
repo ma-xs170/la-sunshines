@@ -100,7 +100,7 @@ export const checkoutSchema = z
       .max(10),
     accept_terms: z.literal(true, { error: 'Tu dois accepter les CGV et la politique de remboursement.' }),
     guardian_consent: z.literal(true, {
-      error: 'Tu dois confirmer être le représentant légal du participant mineur ou avoir son autorisation parentale.',
+      error: 'Tu dois confirmer avoir 18 ans ou l’autorisation de ton représentant légal.',
     }),
   })
   .superRefine((v, ctx) => {

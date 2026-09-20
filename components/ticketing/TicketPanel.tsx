@@ -117,7 +117,7 @@ export default function TicketPanel({ slug, tiers: initial, feePercent, feeFixed
       return setError('Indique le prénom et le nom de chaque participant.');
     }
     if (!terms) return setError('Accepte les CGV et la politique de remboursement.');
-    if (!guardian) return setError('Confirme être le représentant légal du participant mineur ou avoir son autorisation parentale.');
+    if (!guardian) return setError('Confirme avoir 18 ans ou l’autorisation de ton représentant légal.');
     setBusy(true);
     try {
       // AUCUN prix envoyé : le serveur relit tout en base
@@ -208,7 +208,7 @@ export default function TicketPanel({ slug, tiers: initial, feePercent, feeFixed
               <label><input type="checkbox" checked={terms} onChange={(e) => setTerms(e.target.checked)} />
                 <span>J’accepte les <a href="/cgv" target="_blank" rel="noopener">CGV</a> et la <a href="/remboursement" target="_blank" rel="noopener">politique de remboursement</a>.</span></label>
               <label><input type="checkbox" checked={guardian} onChange={(e) => setGuardian(e.target.checked)} />
-                <span>Je suis le représentant légal du participant mineur, ou j’ai son autorisation parentale.</span></label>
+                <span>J’ai 18 ans ou l’autorisation de mon représentant légal.</span></label>
             </div>
           )}
           {error && <p className="tp__error" role="alert">{error}</p>}

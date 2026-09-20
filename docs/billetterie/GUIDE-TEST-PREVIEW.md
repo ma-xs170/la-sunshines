@@ -85,7 +85,7 @@ Stripe (mode test) → Développeurs → **Webhooks** → Ajouter un endpoint :
 
 | # | Scénario | Comment | Résultat attendu |
 |---|---|---|---|
-| 1 | **Achat réussi** | client1 : page événement → 2 × Standard, noms des participants, coche CGV + autorisation parentale → Payer. Carte `4242 4242 4242 4242`, date future, CVC quelconque | Retour sur `/commande/succes` (« Paiement confirmé »). Stripe → Paiements : 30,00 €. |
+| 1 | **Achat réussi** | client1 : page événement → 2 × Standard, noms des participants, coche CGV + « J’ai 18 ans ou l’autorisation de mon représentant légal » → Payer. Carte `4242 4242 4242 4242`, date future, CVC quelconque | Retour sur `/commande/succes` (« Paiement confirmé »). Stripe → Paiements : 30,00 €. |
 | 2 | **Webhook** | Stripe → Webhooks → ton endpoint → onglet *Tentatives* | `checkout.session.completed` répondu **200**. Rejouer l'événement (⋯ → Renvoyer) : **aucun** billet en plus. |
 | 3 | **Email reçu** | boîte de client1 (regarde les spams) | Email « Tes billets — … » avec 2 QR, mention « TVA non applicable, art. 293 B du CGI ». |
 | 4 | **Billet + QR** | client1 → menu compte → *Mes billets* → un billet | Page du billet : QR, événement, date, lieu, tarif, nom du participant ; bouton *Télécharger le billet* (PNG). |

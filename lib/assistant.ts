@@ -7,6 +7,7 @@ import { getAllEditions } from './content';
 import { isEditionUpcoming } from './editions';
 import { formatEditionDate } from './format';
 import { readStore, writeStore, newId, type StoredTicket } from './store';
+import { getTicketingSettings } from './ticketing/settings';
 
 const MODEL = 'mistral-small-latest';
 const TICKET_TO = 'themouv2.0971@gmail.com';
@@ -22,15 +23,15 @@ export type ChatMessage = { role: 'user' | 'assistant'; content: string };
 
 /* --------------------------- system prompt --------------------------- */
 
-const REFUND_POLICY = `POLITIQUE DE REMBOURSEMENT (à respecter STRICTEMENT) :
+const refundPolicy = (native: boolean) => `POLITIQUE DE REMBOURSEMENT (à respecter STRICTEMENT) :
 - Un billet est remboursable UNIQUEMENT si l'événement est officiellement annulé.
-- Toute demande de remboursement se fait DIRECTEMENT auprès de Bizouk (la billetterie), pas auprès de LA SUNSHINES.
+${native ? "- Billets vendus sur le site : la demande de remboursement se fait via la page Contact avec le numéro de commande (voir /remboursement). Sont aussi remboursées intégralement les commandes annulées faute de places pendant le paiement." : "- Toute demande de remboursement se fait DIRECTEMENT auprès de Bizouk (la billetterie), pas auprès de LA SUNSHINES."}
 - Ne promets JAMAIS un remboursement, ne dis jamais que LA SUNSHINES remboursera.
 - En cas de problème de billet (non reçu, erreur, remboursement pour annulation), propose de créer une demande de contact via l'outil create_support_ticket après avoir recueilli : nom, email, téléphone (optionnel), et le motif précis.`;
 
-const INFOS_BLOCK = `INFOS PRATIQUES :
+const infosBlock = (native: boolean) => `INFOS PRATIQUES :
 - Soirées réservées aux 12–17 ans, contrôle d'identité à l'entrée (une pièce justifiant l'âge est demandée).
-- Billetterie : préventes sur Bizouk et Kiwol, 100 % sécurisées. Pas de vente sur place garantie.
+- Billetterie : ${native ? 'en ligne sur ce site (compte requis, paiement sécurisé par Stripe, billet à QR code dans « Mes billets »)' : 'préventes sur Bizouk et Kiwol, 100 % sécurisées'}. Pas de vente sur place garantie.
 - Encadrement : sécurité et staff dédiés toute la soirée.
 - Tenue : un dresscode est communiqué pour chaque édition, il est obligatoire.
 - Accès : dépose et récupération encadrées ; un adulte responsable doit venir chercher le/la mineur·e à l'heure de fin.`;
@@ -55,7 +56,7 @@ function editionsBlock(): string {
   return `ÉDITIONS (source de vérité, ne rien inventer d'autre) :\n${lines.join('\n')}`;
 }
 
-export function buildSystemPrompt(): string {
+export function buildSystemPrompt(native = false): string {
   return [
     `Tu es l'assistant du site LA SUNSHINES, l'organisation de soirées pour les 12–17 ans en Guadeloupe.`,
     `Tu réponds en français, de façon brève, chaleureuse et claire. Tu tutoies.`,
@@ -64,11 +65,11 @@ export function buildSystemPrompt(): string {
     ``,
     editionsBlock(),
     ``,
-    INFOS_BLOCK,
+    infosBlock(native),
     ``,
     RULES_BLOCK,
     ``,
-    REFUND_POLICY,
+    refundPolicy(native),
     ``,
     `Quand un visiteur a un problème qui nécessite un suivi humain (remboursement pour annulation, billet non reçu, réclamation, demande spécifique), utilise l'outil create_support_ticket UNIQUEMENT après avoir obtenu son nom et un email valide. Confirme-lui ensuite que la demande a bien été transmise et qu'il recevra un email de confirmation.`,
   ].join('\n');
@@ -104,7 +105,7 @@ const TICKET_TOOL = {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-async function createTicket(args: Record<string, unknown>): Promise<{
+async function createTicket(args: Record<string, unknown>, native: boolean): Promise<{
   ok: boolean;
   detail: string;
   ticket?: StoredTicket;
@@ -167,7 +168,7 @@ async function createTicket(args: Record<string, unknown>): Promise<{
           `Salut ${name},\n\n` +
           `On a bien reçu ta demande : « ${subject} ».\n` +
           `L'équipe LA SUNSHINES revient vers toi rapidement par email.\n\n` +
-          `Rappel : pour un remboursement (uniquement en cas d'annulation), la demande se fait directement auprès de Bizouk.\n\n` +
+          `Rappel : pour un remboursement (uniquement en cas d'annulation), ${native ? 'écris-nous avec ton numéro de commande (voir la politique de remboursement du site)' : 'la demande se fait directement auprès de Bizouk'}.\n\n` +
           `À très vite,\nL'équipe LA SUNSHINES`,
       });
     } catch (e) {
@@ -196,9 +197,10 @@ export async function runAssistant(history: ChatMessage[]): Promise<{
   ticketCreated: boolean;
 }> {
   const client = new Mistral({ apiKey: process.env.MISTRAL_API_KEY });
+  const native = (await getTicketingSettings(false)).mode === 'native';
 
   const messages: MistralMsg[] = [
-    { role: 'system', content: buildSystemPrompt() },
+    { role: 'system', content: buildSystemPrompt(native) },
     ...history.slice(-MAX_TURNS).map((m) => ({
       role: m.role,
       content: String(m.content ?? '').slice(0, 2000),
@@ -240,7 +242,7 @@ export async function runAssistant(history: ChatMessage[]): Promise<{
       }
       let result: { ok: boolean; detail: string };
       if (tc.function?.name === 'create_support_ticket') {
-        const r = await createTicket(args);
+        const r = await createTicket(args, native);
         ticketCreated = r.ok;
         result = { ok: r.ok, detail: r.detail };
       } else {
