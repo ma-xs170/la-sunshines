@@ -36,6 +36,12 @@ export interface StoredArtist {
   /** Page réclamée + vérifiée par l'artiste (badge « Certifié »). Défaut false.
    *  Seul CE booléen persiste ; la pièce d'identité n'est jamais dans le Store. */
   verified: boolean;
+  /** graphies alternatives du nom (fautes fréquentes…) — utilisées pour lier le
+   *  Programme, le Headliner et le Line-up à cette fiche. [] par défaut. */
+  aliases: string[];
+  /** Profil minimal créé automatiquement depuis un programme : à compléter (photo,
+   *  bio, réseaux) depuis /admin. false pour toutes les fiches créées à la main. */
+  autoCreated: boolean;
   createdAt: string;
 }
 
@@ -55,6 +61,8 @@ export function normalizeArtist(raw: Partial<StoredArtist> & { name?: string }):
     soundcloud: typeof raw.soundcloud === 'string' ? raw.soundcloud : '',
     email: typeof raw.email === 'string' ? raw.email : '',
     verified: raw.verified === true,
+    aliases: cleanSlugs(raw.aliases) ?? [],
+    autoCreated: raw.autoCreated === true,
     createdAt:
       typeof raw.createdAt === 'string' && raw.createdAt
         ? raw.createdAt
@@ -100,6 +108,7 @@ export interface StoredEvent {
   createdAt: string;
 }
 
+/** Liste de textes non vides, dédoublonnée (slugs, alias). */
 export function cleanSlugs(v: unknown): string[] | undefined {
   if (!Array.isArray(v)) return undefined;
   const out = v.filter((x): x is string => typeof x === 'string' && x.trim() !== '').map((x) => x.trim());
@@ -120,6 +129,9 @@ export interface ScheduleEntry {
   /** Lien explicite vers un ou plusieurs profils artistes (slugs). Absent/vide →
    *  liaison automatique par nom. Prioritaire sur l'automatique quand renseigné. */
   artistSlugs?: string[];
+  /** Type de ligne choisi par l'organisateur. Absent → déduit du texte (portes,
+   *  fermeture, fin, pause = information). Une ligne « information » n'a ni lien ni profil. */
+  kind?: 'artist' | 'info';
 }
 
 export interface StoredAnnouncement {
@@ -249,6 +261,7 @@ function normalizeEvent(raw: Partial<StoredEvent>): StoredEvent {
             label: typeof s.label === 'string' ? s.label : '',
             headliner: s.headliner === true,
             ...(cleanSlugs(s.artistSlugs) ? { artistSlugs: cleanSlugs(s.artistSlugs) } : {}),
+            ...(s.kind === 'artist' || s.kind === 'info' ? { kind: s.kind } : {}),
           }))
       : [],
   };

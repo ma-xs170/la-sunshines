@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { findArtistProfile, getArtistProfiles } from '@/lib/artistProfiles';
-import { linkArtistText } from '@/lib/artistLinks';
+import { linkArtistText, type RowKind } from '@/lib/artistLinks';
 
 /**
  * Affiche un nom d'artiste. S'il existe un profil (fiche créée dans /admin), le
@@ -53,36 +53,41 @@ export function ArtistNameList({
 }
 
 /**
- * Texte libre de programme (« DJ Sosonne · DJ Dalton », « Timalash & Lil Scott ») :
- * chaque nom qui correspond à un profil devient un lien distinct ; séparateurs et
- * noms sans profil restent du texte simple (aucun lien mort). `slugs` = lien
- * explicite posé dans l'admin, prioritaire sur la liaison automatique.
+ * Texte libre de programme (« DJ Sosonne · DJ Dalton », « Ayou — Tchambou »,
+ * « Dreezy Keyboard Show ») : chaque NOM d'artiste est affiché en majuscules et en
+ * gras (CSS seulement — le texte enregistré n'est jamais modifié) et lié à son
+ * profil s'il existe. Séparateurs et mots descriptifs gardent le style courant.
+ * `kind="info"` (portes, pause, fin) : texte brut, ni style ni lien.
+ * `slugs` = lien explicite posé dans l'admin, prioritaire sur l'automatique.
  */
 export function ArtistText({
   text,
   slugs,
+  kind = 'artist',
   className,
 }: {
   text: string;
   slugs?: string[];
+  kind?: RowKind;
   className?: string;
 }) {
+  if (kind === 'info') return <>{text}</>;
   const segments = linkArtistText(text, getArtistProfiles(), slugs);
   return (
     <>
-      {segments.map((seg, i) =>
-        seg.slug ? (
+      {segments.map((seg, i) => {
+        if (seg.kind !== 'name') return <span key={i}>{seg.text}</span>;
+        if (!seg.slug) return <span key={i} className="prog-artist">{seg.text}</span>;
+        return (
           <Link
             key={i}
             href={`/artistes/${seg.slug}`}
-            className={className ? `${className} artist-name-link` : 'artist-name-link'}
+            className={`prog-artist artist-name-link${className ? ` ${className}` : ''}`}
           >
             {seg.text}
           </Link>
-        ) : (
-          <span key={i}>{seg.text}</span>
-        ),
-      )}
+        );
+      })}
     </>
   );
 }

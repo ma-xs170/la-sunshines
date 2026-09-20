@@ -1,4 +1,5 @@
 import { ArtistText } from '@/components/ArtistName';
+import { effectiveRowKind } from '@/lib/artistLinks';
 import {
   isTimetableGroup,
   type Timetable,
@@ -20,7 +21,7 @@ function Row({ row, sub = false }: { row: TimetableRow; sub?: boolean }) {
         <span className="tt-dot" aria-hidden="true">·</span>
       )}
       <span className="tt-label">
-        <ArtistText text={row.label} />
+        <ArtistText text={row.label} kind={effectiveRowKind(row.label, undefined, sub)} />
       </span>
     </li>
   );

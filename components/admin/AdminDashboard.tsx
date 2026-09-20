@@ -874,6 +874,7 @@ const emptyArtist = {
   tiktok: '',
   soundcloud: '',
   email: '',
+  aliases: '',
 };
 
 const ROLE_OPTIONS = ['DJ', 'Artiste', 'Musicien', 'Groupe'];
@@ -952,6 +953,7 @@ function ArtistPanel({
       tiktok: a.tiktok,
       soundcloud: a.soundcloud,
       email: a.email,
+      aliases: (a.aliases ?? []).join(', '),
     });
     setImage(a.image);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -980,6 +982,9 @@ function ArtistPanel({
         `${a.name} ${a.role}`.toLowerCase().includes(query.trim().toLowerCase()),
       )
     : store.artists;
+
+  const hasNet = (a: StoredArtist) => Boolean(a.instagram || a.tiktok || a.soundcloud);
+  const todo = store.artists.filter((a) => a.autoCreated && (!a.image || !a.bio || !hasNet(a)));
 
   const selectedArtist =
     store.artists.find((a) => a.id === selectedId) ?? null;
@@ -1022,6 +1027,18 @@ function ArtistPanel({
           </select>
         </label>
         <label className="admin-field">
+          <span>Alias (autres graphies du nom)</span>
+          <input
+            value={form.aliases}
+            onChange={set('aliases')}
+            placeholder="Wixx, Wiix — séparés par des virgules"
+          />
+          <small className="admin-field__hint">
+            Les noms saisis dans un programme, un headliner ou un line-up qui correspondent à
+            un alias sont liés à cette fiche.
+          </small>
+        </label>
+        <label className="admin-field">
           <span>Bio</span>
           <textarea value={form.bio} onChange={set('bio')} rows={4} />
         </label>
@@ -1054,6 +1071,31 @@ function ArtistPanel({
           )}
         </div>
       </form>
+
+      {todo.length > 0 && (
+        <div className="admin-todo">
+          <p className="admin-manage__title">
+            Profils créés automatiquement à compléter ({todo.length})
+          </p>
+          <ul>
+            {todo.map((a) => (
+              <li key={a.id}>
+                <span className="admin-list__name">
+                  {a.name}
+                  <small>
+                    manque : {[!a.image && 'photo', !a.bio && 'bio', !hasNet(a) && 'réseaux']
+                      .filter(Boolean)
+                      .join(', ')}
+                  </small>
+                </span>
+                <button className="admin-mini" type="button" onClick={() => edit(a)}>
+                  Compléter
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {store.artists.length === 0 ? (
         <p className="admin-list__empty" style={{ marginTop: 'var(--s-24)' }}>

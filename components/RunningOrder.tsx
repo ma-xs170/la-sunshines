@@ -1,5 +1,6 @@
 import type { ScheduleEntry } from '@/lib/store';
 import { ArtistText } from '@/components/ArtistName';
+import { effectiveRowKind } from '@/lib/artistLinks';
 import { groupSchedule } from '@/lib/schedule';
 
 /**
@@ -26,7 +27,11 @@ export default function RunningOrder({ schedule }: { schedule: ScheduleEntry[] }
                   {e.headliner && <span className="ro__tag">Tête d’affiche</span>}
                   {e.artistName && (
                     <span className="ro__name">
-                      <ArtistText text={e.artistName} slugs={e.artistSlugs} />
+                      <ArtistText
+                        text={e.artistName}
+                        slugs={e.artistSlugs}
+                        kind={effectiveRowKind(e.artistName, e.kind)}
+                      />
                     </span>
                   )}
                   {e.label && <span className="ro__label">{e.label}</span>}

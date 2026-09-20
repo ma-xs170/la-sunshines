@@ -24,6 +24,8 @@ export type ArtistInput = {
   tiktok?: unknown;
   soundcloud?: unknown;
   email?: unknown;
+  aliases?: unknown; // string[] ou « a, b »
+  autoCreated?: unknown; // booléen — profil minimal créé depuis un programme
   verified?: unknown; // booléen — badge « Certifié » (posé/retiré depuis /admin)
 };
 
@@ -79,6 +81,7 @@ function toSchedule(v: unknown): ScheduleEntry[] {
       label: typeof s.label === 'string' ? s.label.trim() : '',
       headliner: s.headliner === true,
       ...(cleanSlugs(s.artistSlugs) ? { artistSlugs: cleanSlugs(s.artistSlugs) } : {}),
+      ...(s.kind === 'info' ? { kind: 'info' as const } : s.kind === 'artist' ? { kind: 'artist' as const } : {}),
     }))
     .filter((s) => s.time || s.artistName || s.label);
 }
@@ -97,6 +100,13 @@ function toHex(v: unknown): string | null {
 }
 
 // ---------- Artistes ----------
+
+/** alias : tableau ou chaîne « a, b » → liste propre. */
+function toAliases(v: unknown): string[] {
+  const arr = typeof v === 'string' ? v.split(/[,\n]/) : v;
+  return cleanSlugs(Array.isArray(arr) ? arr.map((x) => (typeof x === 'string' ? x.trim() : '')) : undefined) ?? [];
+}
+
 
 export function buildArtist(
   input: ArtistInput,
@@ -120,6 +130,8 @@ export function buildArtist(
     soundcloud: str(input.soundcloud),
     email: str(input.email),
     verified: false,
+    aliases: toAliases(input.aliases),
+    autoCreated: input.autoCreated === true,
     createdAt: new Date().toISOString(),
   };
 }
@@ -143,6 +155,7 @@ export function applyArtistPatch(
     tiktok: pick('tiktok', current.tiktok),
     soundcloud: pick('soundcloud', current.soundcloud),
     email: pick('email', current.email),
+    aliases: input.aliases !== undefined ? toAliases(input.aliases) : current.aliases ?? [],
     // le badge « Certifié » n'est touché que si `verified` est explicitement fourni
     // (révocation depuis /admin) ; un patch classique du formulaire le préserve.
     verified:
