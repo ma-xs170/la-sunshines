@@ -10,8 +10,8 @@ import { AccountMenu, AccountLinks } from './auth/AccountMenu';
 const LINKS = [
   { href: '/#accueil', label: 'Accueil' },
   { href: '/editions', label: 'Éditions' },
-  { href: '/infos', label: 'Infos' },
   { href: '/interdits', label: 'Règlement' },
+  { href: '/infos', label: 'Infos' },
   { href: '/contact', label: 'Contact' },
 ];
 

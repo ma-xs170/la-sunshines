@@ -34,18 +34,16 @@ const infosBlock = (native: boolean) => `INFOS PRATIQUES :
 - Soirées réservées aux 12–17 ans, contrôle d'identité à l'entrée (une pièce justifiant l'âge est demandée).
 - Billetterie : ${native ? 'en ligne sur ce site (compte requis, paiement sécurisé par Stripe, billet à QR code dans « Mes billets »)' : 'préventes sur Bizouk et Kiwol, 100 % sécurisées'}. Pas de vente sur place garantie.
 - Encadrement : sécurité et staff dédiés toute la soirée.
-- Tenue : un dresscode est communiqué pour chaque édition, il est obligatoire ; short / bermuda interdit, chaussures fermées obligatoires.
+- Tenue : un dresscode est communiqué pour chaque édition ; short / bermuda interdit, chaussures fermées obligatoires.
 - Accès : dépose et récupération encadrées ; un parent doit obligatoirement venir chercher son enfant devant l'établissement à l'heure de fin.`;
 
-const RULES_BLOCK = `RÈGLEMENT (page /interdits, intitulée « Règlement ») :
-- Conditions d'accès : billet nominatif obligatoire (un billet = une entrée), soirée réservée aux 12–17 ans, pièce d'identité obligatoire, sortie uniquement à la fin de l'évènement (pas de sortie ni ré-entrée pendant la soirée). Un parent doit obligatoirement venir chercher son enfant devant l'établissement. Les portes ferment à l'heure indiquée au programme : aucun accès après la fermeture, sans remboursement.
-- Droit à l'image : photos et vidéos possibles pendant la soirée ; en achetant un billet, l'acheteur autorise (et son représentant légal pour un mineur) l'utilisation de l'image du participant par l'organisation.
-- Contrôle à l'entrée : billet (QR code, PDF ou depuis le compte) + pièce d'identité ; contrôle visuel des sacs ; palpation de sécurité possible avec l'accord de la personne (refus = accès refusé, sans remboursement). Objet retiré à l'entrée : remis à la fin de l'événement ; objets dangereux ou illicites non restitués, possiblement remis aux forces de l'ordre.
-- Tenue : short / bermuda interdit, chaussures fermées obligatoires, dress code de l'édition obligatoire (indiqué sur la page de la soirée), pas de torse nu. Les filles sont autorisées avec les sacs à main.
-- Interdits : alcool, tabac, cigarette électronique (vape), chicha, stupéfiants (aussi aux abords du lieu) ; armes, objets dangereux ou tranchants, bouteilles en verre, pétards, fumigènes, lasers, aérosols ; nourriture/boissons de l'extérieur ; sacs volumineux.
-- Comportement : respect des autres et du personnel, consignes de l'équipe à suivre ; aucune violence, insulte, moquerie, harcèlement ou discrimination. Tout manquement peut entraîner une exclusion immédiate sans remboursement. Dégradations : responsabilité de leur auteur.
-- Santé/sécurité : prévenir immédiatement l'équipe en cas de malaise ou de personne en difficulté. L'organisation n'est pas responsable des objets personnels perdus ou volés.
-- Aucun remboursement en cas de refus d'accès ou d'exclusion pour non-respect du règlement (voir CGV et /remboursement).`;
+const RULES_BLOCK = `RÈGLEMENT (page /interdits, intitulée « Règlement » — version courte, ne rien ajouter d'autre) :
+- À l'entrée : billet (QR code) et pièce d'identité obligatoires ; contrôle de sécurité à l'entrée, avec l'accord de la personne ; tout objet retiré à l'entrée est remis à la fin de l'événement ; aucune entrée après la fermeture des portes.
+- Tenue : short / bermuda interdit ; chaussures fermées obligatoires ; les filles sont autorisées avec les sacs à main.
+- Interdits : alcool, tabac, vape et drogues ; armes, objets dangereux et bouteilles en verre.
+- Respect : respecter les autres et l'équipe (toute violence ou tout harcèlement entraîne une exclusion) ; suivre les consignes de l'équipe.
+- Refus d'accès : l'organisation se réserve le droit de refuser l'accès à toute personne ne respectant pas le règlement, sans remboursement (voir CGV et /remboursement).
+- Droit à l'image (CGV) : en achetant un billet, l'acheteur autorise l'utilisation de l'image du participant (et de son représentant légal pour un mineur) pour des photos/vidéos de la soirée.`;
 
 function editionsBlock(): string {
   const eds = getAllEditions();

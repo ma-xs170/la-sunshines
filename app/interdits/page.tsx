@@ -8,91 +8,52 @@ import Icon, { type IconName } from '@/components/Icon';
 export const metadata: Metadata = {
   title: 'Règlement · LA SUNSHINES',
   description:
-    'Règlement LA SUNSHINES : conditions d’accès, contrôle à l’entrée, tenue, interdits, comportement et remboursement pour les soirées 12–17 ans.',
+    'Règlement LA SUNSHINES : à l’entrée, tenue, interdits, respect et refus d’accès pour les soirées 12–17 ans.',
 };
 
 type Section = { icon: IconName; title: string; rules: ReactNode[] };
 
 const SECTIONS: Section[] = [
   {
-    icon: 'ticket',
-    title: '1. Conditions d’accès',
-    rules: [
-      'Un billet nominatif est obligatoire. Un billet = une entrée.',
-      'La soirée est réservée aux 12–17 ans.',
-      'Une pièce d’identité est obligatoire.',
-      'Sortie uniquement à la fin de l’évènement : pas de sortie ni de ré-entrée pendant la soirée.',
-      'Les portes ferment à l’heure indiquée au programme de la soirée : aucun accès après la fermeture, sans remboursement.',
-      'Un parent (ou responsable légal) doit obligatoirement venir chercher son enfant devant l’établissement, à l’heure de fin indiquée.',
-      'L’organisation se réserve le droit de refuser l’accès à toute personne ne respectant pas le présent règlement, sans remboursement.',
-      'En achetant un billet, tu acceptes ce règlement.',
-      'Droit à l’image : des photos et vidéos peuvent être réalisées pendant la soirée. En achetant un billet, tu autorises (et ton représentant légal autorise) l’organisation à utiliser ton image dans le cadre de la communication de LA SUNSHINES.',
-    ],
-  },
-  {
     icon: 'shield',
-    title: '2. Contrôle à l’entrée',
+    title: 'À l’entrée',
     rules: [
-      'Présentation du billet (QR code, en PDF ou depuis ton compte) et d’une pièce d’identité.',
-      'Un contrôle visuel des sacs est effectué à l’entrée. Une palpation de sécurité peut être réalisée par un agent de sécurité, avec ton accord. En cas de refus, l’accès est refusé, sans remboursement.',
-      'Tout objet retiré à l’entrée est remis à la fin de l’événement. Les objets dangereux ou illicites ne sont pas restitués et peuvent être remis aux forces de l’ordre.',
+      'Billet (QR code) et pièce d’identité obligatoires.',
+      'Contrôle de sécurité à l’entrée, avec ton accord.',
+      'Tout objet retiré à l’entrée est remis à la fin de l’événement.',
+      'Aucune entrée après la fermeture des portes.',
     ],
   },
   {
     icon: 'shirt',
-    title: '3. Tenue',
+    title: 'Tenue',
     rules: [
       'Short / bermuda : interdit.',
       'Chaussures fermées : obligatoire.',
-      'Le dress code de chaque édition est indiqué sur la page de la soirée. Il est obligatoire : respecte les couleurs / le thème annoncés.',
-      'Tenue correcte exigée : pas de torse nu, pas de tenue à caractère offensant.',
-      'L’organisation peut refuser l’entrée en cas de non-respect du dress code.',
-      'Sacs : les filles sont autorisées avec les sacs à main.',
+      'Les filles sont autorisées avec les sacs à main.',
     ],
   },
   {
     icon: 'close',
-    title: '4. Interdits',
+    title: 'Interdits',
     rules: [
-      'Alcool, tabac, cigarette électronique (vape), chicha et produits stupéfiants, à l’intérieur comme aux abords du lieu.',
-      'Armes et objets dangereux ou tranchants, bouteilles en verre, pétards, fumigènes et lasers.',
-      'Objets contondants et aérosols.',
-      'Boissons et nourriture de l’extérieur.',
-      'Sacs volumineux (une consigne peut être prévue selon le lieu).',
+      'Alcool, tabac, vape et drogues.',
+      'Armes, objets dangereux et bouteilles en verre.',
     ],
   },
   {
     icon: 'sparkles',
-    title: '5. Comportement',
+    title: 'Respect',
     rules: [
-      'Respecte les autres et le personnel : aucune violence, insulte, moquerie, harcèlement ou discrimination ne sera toléré.',
-      'Suis les consignes de l’équipe d’organisation et de sécurité.',
-      'Tout comportement contraire au règlement peut entraîner une exclusion immédiate, sans remboursement, et le cas échéant un signalement aux forces de l’ordre et aux responsables légaux.',
-      'Les dégradations du lieu ou du matériel engagent la responsabilité de leur auteur.',
+      'Respecte les autres et l’équipe. Toute violence ou tout harcèlement entraîne une exclusion.',
+      'Suis les consignes de l’équipe.',
     ],
   },
   {
-    icon: 'bell',
-    title: '6. Santé et sécurité',
+    icon: 'ticket',
+    title: 'Refus d’accès',
     rules: [
-      'Si tu ne te sens pas bien, ou si tu vois quelqu’un en difficulté, préviens immédiatement l’équipe.',
-    ],
-  },
-  {
-    icon: 'archive',
-    title: '7. Objets personnels',
-    rules: [
-      'L’organisation n’est pas responsable des objets personnels perdus ou volés. Garde tes affaires avec toi.',
-    ],
-  },
-  {
-    icon: 'history',
-    title: '8. Remboursement',
-    rules: [
-      <>
-        Aucun remboursement en cas de refus d’accès ou d’exclusion pour non-respect du présent règlement. Voir aussi les{' '}
-        <a href="/cgv">CGV</a> et la page <a href="/remboursement">Remboursement</a>.
-      </>,
+      'L’organisation se réserve le droit de refuser l’accès à toute personne ne respectant pas le présent règlement, sans remboursement.',
     ],
   },
 ];
@@ -106,7 +67,7 @@ export default function InterditsPage() {
         <PageHero
           eyebrow="Le cadre"
           title="Règlement"
-          lead="Pour que la soirée reste une fête pour tout le monde, voici les règles à respecter."
+          lead="Quelques règles simples pour que la soirée soit top pour tout le monde."
         />
 
         <div className="rules-grid">
