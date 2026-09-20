@@ -28,6 +28,17 @@ delete from public.support_tickets where lower(email) = lower('adresse@exemple.f
 Vérifier que la purge tourne : `select jobname, schedule, active from cron.job;` puis `select * from cron.job_run_details order by start_time desc limit 5;`.
 La copie envoyée par email à l'association reste dans sa boîte : à supprimer à la main.
 
+## Abonnés aux artistes, emails d'artistes, certifications
+Tables privées (RLS, service_role uniquement) : `artist_subscriptions`, `artist_notifications`, `artist_emails`, `artist_login_tokens` (hash seul, purge `pg_cron` quotidienne),
+`artist_verifications`. Rien de tout cela ne doit se trouver dans `data/content.json` (dépôt public) : `stripPrivate()` (lib/store.ts) le vide à chaque lecture et écriture.
+```sql
+-- désabonner / effacer une personne (abonné)
+delete from public.artist_subscriptions where email = lower('adresse@exemple.fr');
+delete from public.artist_notifications where email = lower('adresse@exemple.fr');
+-- retirer l'email d'un artiste
+delete from public.artist_emails where artist_slug = 'slug-de-lartiste';
+```
+
 ## Contrôle périodique conseillé (une fois par an)
 - Comptes sans commande et sans connexion récente : `select id, email, last_sign_in_at from auth.users where last_sign_in_at < now() - interval '3 years';`
 - Commandes de plus de 10 ans : suppression manuelle possible, après export comptable.

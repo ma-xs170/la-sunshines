@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { isAuthed } from '@/lib/adminAuth';
-import { readStore } from '@/lib/store';
+import { getVerification } from '@/lib/privateData';
 import { getBlob } from '@/lib/blob';
 
 export const runtime = 'nodejs';
@@ -15,8 +15,7 @@ export async function GET(_req: Request, { params }: Ctx) {
     return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 });
   }
   const { id } = await params;
-  const store = await readStore();
-  const reqItem = store.verificationRequests.find((v) => v.id === id);
+  const reqItem = await getVerification(id);
   if (!reqItem) {
     return NextResponse.json({ error: 'Demande introuvable.' }, { status: 404 });
   }

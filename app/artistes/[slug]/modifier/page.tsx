@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
+import { getArtistEmail } from '@/lib/privateData';
 import ArtistSelfEdit from '@/components/ArtistSelfEdit';
 import { getArtistBySlug } from '@/lib/artistProfiles';
 import { getArtistSession } from '@/lib/artistAuth';
@@ -54,7 +55,7 @@ export default async function ArtistEditPage({
             instagram: artist.instagram,
             tiktok: artist.tiktok,
             soundcloud: artist.soundcloud,
-            email: artist.email,
+            email: await getArtistEmail(artist.slug),
           }}
         />
       </main>

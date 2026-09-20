@@ -1,11 +1,12 @@
 // Notifications d'abonnement : quand un événement (POST/PATCH) a un artiste
 // suivi dans son line-up, on prévient ses abonnés — une seule fois par
-// (événement, abonné), tracké dans store.notifiedSubscribers.
+// (événement, abonné). Abonnés et suivi des envois vivent dans Supabase (privé), jamais dans le dépôt public.
 
 import type { Store, StoredEvent } from './store';
 import { normalizeArtistName } from './artists';
 import { formatEditionDate } from './format';
 import { sendMail, mailLayout, mailConfigured, siteUrl } from './mail';
+import { getNotifiedEmails, listSubscribers, markNotified } from './privateData';
 
 const ISO_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -24,13 +25,9 @@ function eventArtistSlugs(store: Store, ev: StoredEvent): Set<string> {
   return out;
 }
 
-function notifyKey(evSlug: string, email: string): string {
-  return `${evSlug}::${email.toLowerCase()}`;
-}
-
 /**
- * Envoie les notifications dues pour cet événement. MUTE `store.notifiedSubscribers`
- * (le caller persiste ensuite le store). Retourne le nombre d'emails tentés.
+ * Envoie les notifications dues pour cet événement et les marque comme envoyées (Supabase).
+ * Retourne le nombre d'emails tentés.
  */
 export async function notifySubscribersForEvent(
   store: Store,
@@ -42,11 +39,8 @@ export async function notifySubscribersForEvent(
   const slugs = eventArtistSlugs(store, ev);
   if (slugs.size === 0) return 0;
 
-  const targets = store.subscriptions.filter(
-    (s) =>
-      slugs.has(s.artistSlug) &&
-      !store.notifiedSubscribers.includes(notifyKey(ev.slug, s.email)),
-  );
+  const already = await getNotifiedEmails(ev.slug);
+  const targets = (await listSubscribers([...slugs])).filter((s) => !already.has(s.email.toLowerCase()));
   if (targets.length === 0) return 0;
 
   const dateLabel = ISO_RE.test(ev.date)
@@ -77,12 +71,7 @@ export async function notifySubscribersForEvent(
   );
 
   // au-plus-une-fois : on marque comme notifié dès qu'on a TENTÉ (mail configuré)
-  if (mailConfigured()) {
-    for (const s of targets) {
-      const k = notifyKey(ev.slug, s.email);
-      if (!store.notifiedSubscribers.includes(k)) store.notifiedSubscribers.push(k);
-    }
-  }
+  if (mailConfigured()) await markNotified(ev.slug, targets.map((t) => t.email));
 
   return targets.length;
 }

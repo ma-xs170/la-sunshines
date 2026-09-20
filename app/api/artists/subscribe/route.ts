@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { readStore, newId, type Subscription } from '@/lib/store';
-import { persistStore } from '@/lib/persistStore';
+import { readStore } from '@/lib/store';
+import { addSubscription, privateStorageConfigured } from '@/lib/privateData';
 import { rateLimit, clientIp } from '@/lib/rateLimit';
 import { sendMail, mailLayout, siteUrl } from '@/lib/mail';
 
@@ -45,25 +45,16 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Artiste introuvable.' }, { status: 404 });
   }
 
-  // idempotent : déjà abonné → succès sans rien changer
-  const already = store.subscriptions.find(
-    (s) => s.artistSlug === slug && s.email === email,
-  );
-  if (already) {
-    return NextResponse.json({ ok: true, already: true });
+  if (!privateStorageConfigured()) {
+    return NextResponse.json({ error: 'Les abonnements sont momentanément indisponibles.' }, { status: 503 });
   }
-
-  const sub: Subscription = {
-    email,
-    artistSlug: slug,
-    token: `${newId()}${newId()}`,
-    createdAt: new Date().toISOString(),
-  };
-  store.subscriptions.push(sub);
-
-  const saved = await persistStore(store);
-  if (!saved.ok) {
-    return NextResponse.json({ error: saved.error }, { status: 502 });
+  // idempotent : déjà abonné → succès sans rien changer. Stocké dans Supabase (privé), jamais dans le dépôt public.
+  const sub = await addSubscription(slug, email);
+  if (!sub) {
+    return NextResponse.json({ error: 'Impossible d’enregistrer l’abonnement. Réessaie.' }, { status: 502 });
+  }
+  if (sub.already) {
+    return NextResponse.json({ ok: true, already: true });
   }
 
   const unsub = `${siteUrl()}/api/unsubscribe?token=${encodeURIComponent(sub.token)}`;

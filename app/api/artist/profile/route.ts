@@ -10,6 +10,7 @@ import { readStore } from '@/lib/store';
 import { persistStore } from '@/lib/persistStore';
 import { applyArtistPatch } from '@/lib/adminRecords';
 import { getArtistSession } from '@/lib/artistAuth';
+import { setArtistEmail } from '@/lib/privateData';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -80,10 +81,14 @@ export async function PATCH(req: Request) {
     ...(instagram !== undefined ? { instagram } : {}),
     ...(tiktok !== undefined ? { tiktok } : {}),
     ...(soundcloud !== undefined ? { soundcloud } : {}),
-    ...(email !== undefined ? { email } : {}),
     ...(typeof image === 'string' ? { image } : {}),
     ...(typeof banner === 'string' ? { banner } : {}),
   });
+
+  // l'email est PRIVÉ : Supabase, jamais le fichier de contenu (dépôt public)
+  if (email !== undefined && !(await setArtistEmail(slug, email))) {
+    return NextResponse.json({ error: 'Impossible d’enregistrer l’email pour l’instant.' }, { status: 503 });
+  }
 
   const saved = await persistStore(store);
   if (!saved.ok) {
@@ -91,7 +96,7 @@ export async function PATCH(req: Request) {
   }
   return NextResponse.json({
     ok: true,
-    item: store.artists[idx],
+    item: { ...store.artists[idx], email: email ?? '' },
     deployed: saved.deployed,
   });
 }

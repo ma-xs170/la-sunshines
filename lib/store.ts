@@ -292,17 +292,35 @@ function shape(parsed: Partial<Store>): Store {
   };
 }
 
+/**
+ * GARDE-FOU données personnelles : data/content.json est versionné dans un dépôt GitHub PUBLIC. Les emails d'artistes,
+ * abonnés, jetons de connexion, demandes de vérification et demandes de support vivent dans Supabase
+ * (lib/privateData.ts, lib/supportTickets.ts). Ces champs restent dans le type `Store` pour que les écrans admin
+ * les affichent, mais ils sont TOUJOURS vidés à la lecture ET à l'écriture du fichier.
+ */
+export function stripPrivate(store: Store): Store {
+  return {
+    ...store,
+    artists: store.artists.map((a) => ({ ...a, email: '' })),
+    tickets: [],
+    verificationRequests: [],
+    subscriptions: [],
+    notifiedSubscribers: [],
+    artistLoginTokens: [],
+  };
+}
+
 export async function readStore(): Promise<Store> {
   try {
     const raw = await fs.readFile(FILE, 'utf8');
-    return shape(JSON.parse(raw) as Partial<Store>);
+    return stripPrivate(shape(JSON.parse(raw) as Partial<Store>));
   } catch {
     return { ...EMPTY };
   }
 }
 
 export async function writeStore(store: Store): Promise<void> {
-  const json = `${JSON.stringify(store, null, 2)}\n`;
+  const json = `${JSON.stringify(stripPrivate(store), null, 2)}\n`;
 
   // PRODUCTION (GITHUB_TOKEN présent) : commit sur GitHub → auto-deploy Vercel.
   // Le FS de l'hébergeur étant en lecture seule, aucune écriture disque ici.
@@ -319,7 +337,7 @@ export async function writeStore(store: Store): Promise<void> {
 /** Version synchrone pour la lecture au rendu des pages publiques. */
 export function readStoreSync(): Store {
   try {
-    return shape(JSON.parse(readFileSync(FILE, 'utf8')) as Partial<Store>);
+    return stripPrivate(shape(JSON.parse(readFileSync(FILE, 'utf8')) as Partial<Store>));
   } catch {
     return { ...EMPTY };
   }

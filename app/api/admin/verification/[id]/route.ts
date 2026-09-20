@@ -4,7 +4,8 @@ import { readStore } from '@/lib/store';
 import { persistStore } from '@/lib/persistStore';
 import { deleteBlob } from '@/lib/blob';
 import { sendMail, mailLayout, siteUrl } from '@/lib/mail';
-import { issueArtistLoginToken, sendArtistMagicLink } from '@/lib/artistLogin';
+import { sendArtistMagicLink } from '@/lib/artistLogin';
+import { deleteVerification, getArtistEmail, getVerification, issueArtistLoginToken, setArtistEmail } from '@/lib/privateData';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -30,7 +31,7 @@ export async function POST(req: Request, { params }: Ctx) {
   }
 
   const store = await readStore();
-  const reqItem = store.verificationRequests.find((v) => v.id === id);
+  const reqItem = await getVerification(id);
   if (!reqItem) {
     return NextResponse.json({ error: 'Demande introuvable.' }, { status: 404 });
   }
@@ -42,15 +43,19 @@ export async function POST(req: Request, { params }: Ctx) {
   const artist = store.artists.find((a) => a.slug === reqItem.artistSlug);
   if (artist) {
     artist.verified = approve;
-    // on récupère l'email déclaré dans la demande s'il n'y en a pas encore sur
-    // la fiche — c'est l'adresse qui recevra les liens de connexion.
-    if (approve && !artist.email && reqItem.email) artist.email = reqItem.email;
   }
-  store.verificationRequests = store.verificationRequests.filter((v) => v.id !== id);
+
+  // l'email déclaré dans la demande devient (en privé, dans Supabase) l'adresse des liens de connexion
+  // s'il n'y en a pas encore ; il n'est JAMAIS écrit dans le fichier de contenu (dépôt public).
+  if (approve && artist && reqItem.email && !(await getArtistEmail(artist.slug))) {
+    await setArtistEmail(artist.slug, reqItem.email);
+  }
+  // la demande est supprimée dès que l'admin a statué
+  await deleteVerification(id);
 
   // 3) à l'approbation : premier lien magique vers l'espace artiste
   let magicToken: string | null = null;
-  if (approve && artist) magicToken = issueArtistLoginToken(store, artist.slug);
+  if (approve && artist) magicToken = await issueArtistLoginToken(artist.slug);
 
   const saved = await persistStore(store);
   if (!saved.ok) {
@@ -59,7 +64,7 @@ export async function POST(req: Request, { params }: Ctx) {
 
   // 4) notification de l'artiste (best-effort)
   if (approve && artist && magicToken) {
-    void sendArtistMagicLink(artist, magicToken);
+    void sendArtistMagicLink(artist, magicToken, reqItem.email);
     void sendMail({
       to: reqItem.email,
       subject: 'Ta page LA SUNSHINES est certifiée ✓',

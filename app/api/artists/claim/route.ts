@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { readStore, newId, type VerificationRequest } from '@/lib/store';
-import { persistStore } from '@/lib/persistStore';
-import { blobConfigured, isAllowedDoc, uploadVerificationDoc } from '@/lib/blob';
+import { readStore } from '@/lib/store';
+import { createVerification, hasVerificationFor, privateStorageConfigured } from '@/lib/privateData';
+import { blobConfigured, deleteBlob, isAllowedDoc, uploadVerificationDoc } from '@/lib/blob';
 import { rateLimit, clientIp } from '@/lib/rateLimit';
 import { sendMail, mailLayout, siteUrl } from '@/lib/mail';
 
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     );
   }
 
-  if (!blobConfigured()) {
+  if (!blobConfigured() || !privateStorageConfigured()) {
     return NextResponse.json(
       { error: 'Le service de vérification est momentanément indisponible.' },
       { status: 503 },
@@ -63,7 +63,7 @@ export async function POST(req: Request) {
       { status: 409 },
     );
   }
-  if (store.verificationRequests.some((v) => v.artistSlug === slug)) {
+  if (await hasVerificationFor(slug)) {
     return NextResponse.json(
       { error: 'Une demande est déjà en cours d’examen pour cette page.' },
       { status: 409 },
@@ -81,21 +81,18 @@ export async function POST(req: Request) {
     );
   }
 
-  const request: VerificationRequest = {
-    id: newId(),
+  // demande enregistrée dans Supabase (privé) ; si elle échoue, on retire le document déjà envoyé
+  const created = await createVerification({
     artistSlug: slug,
     name,
     email,
     blobUrl: up.url,
     blobPathname: up.pathname,
     fileType: up.fileType,
-    createdAt: new Date().toISOString(),
-  };
-  store.verificationRequests.unshift(request);
-
-  const saved = await persistStore(store);
-  if (!saved.ok) {
-    return NextResponse.json({ error: saved.error }, { status: 502 });
+  });
+  if (!created) {
+    await deleteBlob(up.pathname || up.url);
+    return NextResponse.json({ error: 'Impossible d’enregistrer la demande. Réessaie.' }, { status: 502 });
   }
 
   // accusé de réception (best-effort)
