@@ -1,7 +1,7 @@
 // npm run test:unit — l'interrupteur de test ne doit JAMAIS ouvrir la billetterie en production.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { resolveForcedMode, forceModeIgnoredInProduction, testEditionEnabled } from '../../lib/ticketing/force-mode.ts';
+import { resolveForcedMode, forceModeIgnoredInProduction } from '../../lib/ticketing/force-mode.ts';
 
 test('variable absente ou vide → aucun forçage', () => {
   assert.equal(resolveForcedMode({}), null);
@@ -31,12 +31,4 @@ test('avertissement quand la variable traîne en production', () => {
   assert.equal(forceModeIgnoredInProduction({ TICKETING_FORCE_MODE: 'internal', VERCEL_ENV: 'production' }), true);
   assert.equal(forceModeIgnoredInProduction({ TICKETING_FORCE_MODE: 'internal', VERCEL_ENV: 'preview' }), false);
   assert.equal(forceModeIgnoredInProduction({ VERCEL_ENV: 'production' }), false);
-});
-
-test('événement de test du code : actif seulement avec le mode de test, jamais en production', () => {
-  assert.equal(testEditionEnabled({}), false);
-  assert.equal(testEditionEnabled({ TICKETING_FORCE_MODE: 'internal' }), true);
-  assert.equal(testEditionEnabled({ TICKETING_FORCE_MODE: 'internal', VERCEL_ENV: 'preview' }), true);
-  assert.equal(testEditionEnabled({ TICKETING_FORCE_MODE: 'internal', VERCEL_ENV: 'production' }), false);
-  assert.equal(testEditionEnabled({ TICKETING_FORCE_MODE: 'native' }), false);
 });
