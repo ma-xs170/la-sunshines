@@ -6,7 +6,8 @@ import { Resend } from 'resend';
 import { getAllEditions } from './content';
 import { isEditionUpcoming } from './editions';
 import { formatEditionDate } from './format';
-import { readStore, writeStore, newId, type StoredTicket } from './store';
+import { newId, type StoredTicket } from './store';
+import { createSupportTicket } from './supportTickets';
 import { getTicketingSettings } from './ticketing/settings';
 
 const MODEL = 'mistral-small-latest';
@@ -131,15 +132,11 @@ async function createTicket(args: Record<string, unknown>, native: boolean): Pro
     createdAt: new Date().toISOString(),
   };
 
-  // Persistance best-effort : si le commit GitHub échoue (token, rate limit…),
-  // on n'annule pas la demande — l'email ci-dessous reste le canal de livraison.
-  try {
-    const store = await readStore();
-    store.tickets.unshift(ticket);
-    await writeStore(store);
-  } catch (e) {
-    console.error('[assistant] ticket non persisté (envoi email uniquement) :', e);
-  }
+  // Persistance dans Supabase (table privée, purgée à 12 mois). Best-effort : si elle échoue ou n'est pas
+  // configurée, la demande n'est PAS écrite ailleurs (surtout pas dans le dépôt public) : l'email
+  // ci-dessous reste le canal de livraison.
+  const saved = await createSupportTicket({ name, email, phone, subject, message });
+  if (saved) ticket.id = saved.id;
 
   // Emails (best-effort : un échec n'annule pas le ticket)
   const apiKey = process.env.RESEND_API_KEY;

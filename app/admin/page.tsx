@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { adminConfigured, isAuthed } from '@/lib/adminAuth';
 import { readStore } from '@/lib/store';
+import { listSupportTickets } from '@/lib/supportTickets';
 import { getAllEditions } from '@/lib/content';
 import { editions as staticEditions } from '@/lib/editions';
 import { getBizoukEmbed } from '@/lib/bizouk';
@@ -36,6 +37,8 @@ export default async function AdminPage() {
   }
 
   const store = await readStore();
+  // Les demandes de support vivent dans Supabase (privé), pas dans content.json.
+  store.tickets = await listSupportTickets();
   const staticSlugs = new Set(staticEditions.map((e) => e.slug));
   const eventBySlug = new Map(store.events.map((e) => [e.slug, e]));
 

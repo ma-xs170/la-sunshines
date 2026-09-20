@@ -10,17 +10,19 @@ export const revalidate = 60;
 export const metadata: Metadata = {
   title: 'Politique de confidentialité · LA SUNSHINES',
   description:
-    'Comment LA SUNSHINES collecte et traite les données personnelles : formulaire de contact, cookies, comptes et billetterie, durées de conservation et droits des personnes.',
+    'Comment LA SUNSHINES collecte et traite les données personnelles : formulaire de contact, cookies, comptes, billetterie, assistant du site, durées de conservation et droits des personnes.',
   robots: { index: true, follow: true },
 };
 
-const UPDATED = '20 septembre 2026';
+const UPDATED = '21 septembre 2026';
 const CONTACT_EMAIL = 'themouv2.0971@gmail.com';
 
 export default async function PrivacyPage() {
   const native = (await getTicketingSettings(false)).mode === 'native';
   // Les comptes peuvent exister dès que Supabase est branché, même avant l’ouverture des ventes.
   const accounts = native || supabaseConfigured();
+  // L'assistant n'existe que si la clé Mistral est configurée.
+  const assistant = Boolean(process.env.MISTRAL_API_KEY);
   return (
     <>
       <Nav />
@@ -73,6 +75,17 @@ export default async function PrivacyPage() {
               n’avez pas donné votre accord.
             </li>
           </ul>
+          {assistant && (
+            <ul>
+              <li>
+                <strong>Assistant du site</strong> : les messages que vous écrivez dans l’assistant sont envoyés à
+                notre prestataire d’intelligence artificielle, <strong>Mistral AI</strong> (France), pour
+                générer la réponse. Nous ne les enregistrons pas. N’y saisissez aucune donnée sensible. Si vous
+                demandez à être recontacté·e, l’assistant enregistre une <strong>demande de support</strong> :
+                nom, adresse email, numéro de téléphone (facultatif), motif et résumé de votre demande.
+              </li>
+            </ul>
+          )}
           {accounts && (
             <ul>
               <li>
@@ -96,7 +109,7 @@ export default async function PrivacyPage() {
 
           <h2>3. Pourquoi nous utilisons ces données</h2>
           <ul>
-            <li>Répondre aux demandes envoyées via le formulaire de contact.</li>
+            <li>Répondre aux demandes envoyées via le formulaire de contact{assistant ? ' ou enregistrées par l’assistant du site' : ''}.</li>
             {accounts && (
               <>
                 <li>Créer et gérer votre compte, traiter et confirmer vos commandes, émettre vos billets et vous les envoyer par email.</li>
@@ -132,6 +145,7 @@ export default async function PrivacyPage() {
           <ul>
             <li>
               <strong>Envoi des emails</strong> (formulaire de contact
+              {assistant ? ', demandes de support' : ''}
               {accounts ? ', confirmations de commande, billets, réinitialisation de mot de passe' : ''}) : service Resend
               (resend.com).
             </li>
@@ -139,6 +153,12 @@ export default async function PrivacyPage() {
               <strong>Hébergement du site</strong> : Vercel (voir la page{' '}
               <a href="/mentions-legales">Mentions légales</a>).
             </li>
+            {assistant && (
+              <li>
+                <strong>Assistant du site</strong> : Mistral AI (Paris, France), qui reçoit les messages saisis dans
+                l’assistant pour produire les réponses, selon ses propres conditions de traitement.
+              </li>
+            )}
             {accounts && (
               <>
                 <li>
@@ -190,6 +210,15 @@ export default async function PrivacyPage() {
               traiter votre demande. Vous pouvez en demander la suppression à
               tout moment.
             </li>
+            {assistant && (
+              <li>
+                <strong>Demandes de support de l’assistant</strong> :{' '}
+                {accounts
+                  ? '12 mois, puis suppression automatique (contrôle quotidien). Elles sont enregistrées dans une base privée, non accessible au public. Une copie est aussi envoyée par email à l’organisation ; cette copie est supprimée sur demande.'
+                  : 'transmises par email à l’organisation, conservées le temps de traiter votre demande ; suppression sur demande.'}{' '}
+                Les conversations avec l’assistant ne sont pas enregistrées par le site.
+              </li>
+            )}
             {accounts && (
               <>
                 <li>
