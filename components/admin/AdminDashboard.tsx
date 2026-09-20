@@ -113,13 +113,16 @@ export default function AdminDashboard({
   initialStore,
   editions,
   analytics,
+  initialEdit,
 }: {
+  /** slug d'un événement à ouvrir directement (lien /admin?edit=<slug>). */
+  initialEdit?: string;
   initialStore: Store;
   editions: EditionLite[];
   analytics: PageviewSummary | null;
 }) {
   const [store, setStore] = useState<Store>(initialStore);
-  const [tab, setTab] = useState<TabId>('dashboard');
+  const [tab, setTab] = useState<TabId>(initialEdit && editions.some((e) => e.slug === initialEdit) ? 'events' : 'dashboard');
   const [navOpen, setNavOpen] = useState(false);
   const [msg, setMsg] = useState<string>('');
   const msgTimer = useRef<number | undefined>(undefined);
@@ -286,6 +289,7 @@ export default function AdminDashboard({
             setStore={setStore}
             flash={flash}
             editions={editions}
+            initialEditSlug={initialEdit}
           />
         )}
 

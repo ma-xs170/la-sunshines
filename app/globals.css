@@ -3576,3 +3576,58 @@ nav .acct-links button.link{
 .admin-news__list{list-style:none;display:flex;flex-direction:column;gap:var(--s-12);}
 .admin-news__row{display:flex;justify-content:space-between;align-items:center;gap:var(--s-16);flex-wrap:wrap;}
 .admin-news__actions{display:flex;gap:var(--s-8);flex-wrap:wrap;}
+
+/* =========================================================
+   Admin > bloc « Billetterie » : visibilité (interrupteur, statut, bouton de test)
+   ========================================================= */
+.tb-status{border-radius:var(--r-md);padding:var(--s-16) var(--s-24);margin-bottom:var(--s-16);border:1px solid var(--panel-border-strong);}
+.tb-status--off{background:rgba(255,107,91,.10);border-color:rgba(255,107,91,.45);}
+.tb-status--ok{background:rgba(46,160,90,.12);border-color:rgba(46,160,90,.4);}
+.tb-status__title{font-family:var(--font-display);font-weight:800;text-transform:uppercase;letter-spacing:-0.03em;font-size:clamp(15px,1vw + 11px,19px);line-height:1.15;}
+.tb-status--off .tb-status__title{color:#b3261e;}
+.tb-status--ok .tb-status__title{color:#1f7a45;}
+.tb-status__list{list-style:none;display:flex;gap:var(--s-8) var(--s-24);flex-wrap:wrap;margin:var(--s-8) 0;font-size:14px;}
+.tb-status__why,.tb-status__mode{font-size:13px;line-height:1.55;color:var(--gray);font-weight:500;margin-top:4px;}
+.tb-status__mode code{font-size:12px;}
+.tb-switches{display:flex;flex-direction:column;gap:var(--s-12);margin-bottom:var(--s-16);}
+.tb-switch-row{display:flex;justify-content:space-between;align-items:center;gap:var(--s-16);flex-wrap:wrap;padding:var(--s-16) var(--s-24);border-radius:var(--r-md);background:var(--panel);border:1px solid var(--panel-border);}
+.tb-switch-row__label{font-weight:800;font-size:16px;}
+.tb-switch-row__hint{font-size:13px;color:var(--gray);font-weight:500;max-width:46ch;}
+.tb-switch{position:relative;display:inline-flex;align-items:center;justify-content:flex-end;min-width:96px;height:44px;padding:0 14px;border-radius:var(--r-pill);background:rgba(25,20,16,.14);border:2px solid transparent;transition:background .2s var(--ease);}
+.tb-switch.is-on{background:var(--amber);justify-content:flex-start;}
+.tb-switch__knob{position:absolute;top:4px;left:4px;width:32px;height:32px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(25,20,16,.25);transition:transform .2s var(--ease);}
+.tb-switch.is-on .tb-switch__knob{transform:translateX(52px);}
+.tb-switch__text{font-weight:800;font-size:13px;letter-spacing:.06em;}
+.tb-switch:not(.is-on) .tb-switch__text{margin-right:0;padding-left:34px;}
+.tb-switch.is-on .tb-switch__text{padding-left:0;margin-right:34px;margin-left:auto;padding-right:0;}
+.tb-switch:focus-visible,.tb-seg button:focus-visible{outline:2px solid var(--amber-ink);outline-offset:2px;}
+.tb-seg{display:inline-flex;padding:4px;border-radius:var(--r-pill);background:rgba(25,20,16,.08);gap:2px;align-items:center;}
+.tb-seg button{padding:11px 22px;border-radius:var(--r-pill);font-weight:800;font-size:14px;color:var(--gray);transition:background .18s var(--ease),color .18s var(--ease);}
+.tb-seg button.is-active{background:var(--amber);color:var(--ink);box-shadow:0 4px 12px rgba(255,178,56,.35);}
+.tb-seg__other{padding:0 14px;font-size:12px;font-weight:700;color:var(--gray);}
+.tb-quick{display:flex;flex-wrap:wrap;gap:var(--s-12);align-items:center;margin:var(--s-16) 0 var(--s-24);}
+.tb-quick .admin-hint{flex-basis:100%;}
+@media (max-width:560px){.tb-quick__go{width:100%;justify-content:center;}.tb-switch-row{padding:var(--s-16);}}
+
+/* liste « Événements en billetterie » : visibilité + lien */
+.tb-evt__head{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--s-16);flex-wrap:wrap;}
+.tb-evt__vis{display:inline-flex;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;padding:5px 12px;border-radius:var(--r-pill);}
+.tb-evt__vis--off{background:rgba(255,107,91,.16);color:#b3261e;}
+.tb-evt__vis--ok{background:rgba(46,160,90,.16);color:#1f7a45;}
+.tb-evt__why{margin:6px 0 0 18px;font-size:13px;color:var(--gray);font-weight:500;line-height:1.55;}
+.tb-evt__actions{display:flex;gap:var(--s-8);flex-wrap:wrap;margin-top:var(--s-8);}
+
+/* ---------- Paiements, Analyse, Aide ---------- */
+.org-stripe{display:flex;flex-direction:column;gap:var(--s-12);}
+.org-stripe__head{display:flex;align-items:center;justify-content:space-between;gap:var(--s-12);flex-wrap:wrap;}
+.org-stripe__head h2{margin:0;}
+.org-stripe__actions{display:flex;gap:var(--s-8);flex-wrap:wrap;}
+.org-table__bar{min-width:170px;}
+.org-faq{display:flex;flex-direction:column;gap:var(--s-12);margin-bottom:var(--s-24);}
+.org-faq__item{padding:0;}
+.org-faq__item summary{cursor:pointer;padding:var(--s-16) var(--s-24);font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:var(--s-16);}
+.org-faq__item summary::-webkit-details-marker{display:none;}
+.org-faq__item summary::after{content:"+";font-size:20px;line-height:1;color:var(--amber-ink);}
+.org-faq__item[open] summary::after{content:"–";}
+.org-faq__item summary:focus-visible{outline:2px solid var(--amber-ink);outline-offset:-2px;border-radius:var(--r-lg);}
+.org-faq__item p{padding:0 var(--s-24) var(--s-16);color:var(--gray);font-size:15px;line-height:1.65;}

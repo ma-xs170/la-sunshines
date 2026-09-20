@@ -36,12 +36,23 @@ const read = (req) => new Promise((r) => { const c = []; req.on('data', (d) => c
 const json = (res, code, body) => { res.writeHead(code, { 'content-type': 'application/json' }); res.end(body === undefined ? '' : JSON.stringify(body)); };
 
 // ---------- faux Stripe
-export const stripeState = { sessions: {}, refunds: [], idem: {}, failRefund: false, n: 0 };
+export const stripeState = { sessions: {}, refunds: [], idem: {}, failRefund: false, n: 0, accounts: {}, links: [] };
 function parseForm(s) { const o = {}; for (const [k, v] of new URLSearchParams(s)) o[k] = v; return o; }
 const stripeSrv = http.createServer(async (req, res) => {
   const body = (await read(req)).toString(); const u = new URL(req.url, 'http://x'); const f = parseForm(body);
   if (u.pathname === '/__state') return json(res, 200, stripeState);
-  if (u.pathname === '/__reset') { Object.assign(stripeState, { sessions: {}, refunds: [], idem: {}, failRefund: false }); return json(res, 200, {}); }
+  if (u.pathname === '/__reset') { Object.assign(stripeState, { sessions: {}, refunds: [], idem: {}, failRefund: false, accounts: {}, links: [] }); return json(res, 200, {}); }
+  // comptes connectés (Connect Express) : création, lecture, liens d'inscription et de tableau de bord ; /__account?id=&ready=1 simule la validation par Stripe
+  if (u.pathname === '/__account') { const a = stripeState.accounts[u.searchParams.get('id')]; if (a) { const on = u.searchParams.get('ready') === '1'; Object.assign(a, { charges_enabled: on, payouts_enabled: on, details_submitted: on }); } return json(res, 200, a ?? {}); }
+  if (u.pathname === '/v1/accounts' && req.method === 'POST') {
+    const key = req.headers['idempotency-key'];
+    if (key && stripeState.idem[key]) return json(res, 200, stripeState.idem[key]);
+    const a = { id: 'acct_test' + (++stripeState.n) + crypto.randomBytes(3).toString('hex'), object: 'account', type: f.type, country: f.country, email: f.email, charges_enabled: false, payouts_enabled: false, details_submitted: false, params: f };
+    stripeState.accounts[a.id] = a; if (key) stripeState.idem[key] = a; return json(res, 200, a);
+  }
+  let am = u.pathname.match(/^\/v1\/accounts\/([^/]+)$/); if (am && req.method === 'GET') { const a = stripeState.accounts[am[1]]; return a ? json(res, 200, a) : json(res, 404, { error: { message: 'No such account' } }); }
+  if (u.pathname === '/v1/account_links' && req.method === 'POST') { stripeState.links.push(f); return json(res, 200, { object: 'account_link', url: `http://stripe.mock/onboard/${f.account}` }); }
+  am = u.pathname.match(/^\/v1\/accounts\/([^/]+)\/login_links$/); if (am && req.method === 'POST') return json(res, 200, { object: 'login_link', url: `http://stripe.mock/dashboard/${am[1]}` });
   if (u.pathname === '/__fail') { stripeState.failRefund = u.searchParams.get('on') === '1'; return json(res, 200, {}); }
   if (u.pathname === '/v1/checkout/sessions' && req.method === 'POST') {
     const lines = []; for (const [k, v] of Object.entries(f)) { const m = k.match(/^line_items\[(\d+)\]\[(price_data\]\[unit_amount|quantity|price_data\]\[product_data\]\[name)\]?$/); if (m) { const i = +m[1]; lines[i] ||= {}; if (k.endsWith('[unit_amount]')) lines[i].unit = +v; else if (k.endsWith('[quantity]')) lines[i].qty = +v; else lines[i].name = v; } }

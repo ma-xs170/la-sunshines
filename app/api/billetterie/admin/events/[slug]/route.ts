@@ -3,6 +3,7 @@ import { fail, parseBody } from '@/lib/auth/http';
 import { eventSaveSchema } from '@/lib/ticketing/schemas';
 import { adminGetEvent, adminSaveEvent } from '@/lib/ticketing/admin';
 import { editionForSlug, requireBilletterieAdmin, revalidateTicketing } from '@/lib/ticketing/guard';
+import { getTicketingSettings } from '@/lib/ticketing/settings';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -18,7 +19,10 @@ export async function GET(_req: Request, { params }: Ctx) {
   if (!edition) return fail('Événement introuvable.', 404);
 
   const view = await adminGetEvent(slug);
+  const s = await getTicketingSettings(true);
   return NextResponse.json({
+    // mode RÉEL (base, partagé avec la production) et mode effectif ici (forcé en local / Preview par TICKETING_FORCE_MODE)
+    settings: { mode: s.mode, dbMode: s.dbMode, forced: s.forced },
     edition: { slug, name: edition.name, dateISO: edition.dateISO ?? null, timeLabel: edition.timeLabel ?? null, venue: edition.venue ?? '' },
     ...view,
   });

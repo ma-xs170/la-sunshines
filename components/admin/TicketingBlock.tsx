@@ -5,7 +5,8 @@ import type { AdminEventView, AdminTier } from '@/lib/ticketing/admin';
 import { euroToCents, formatEuro, gpLocalToIso, isoToGpLocal } from '@/lib/ticketing/time';
 
 type Edition = { slug: string; name: string; dateISO: string | null; timeLabel: string | null; venue: string };
-type Loaded = AdminEventView & { edition: Edition };
+type Settings = { mode: 'bizouk' | 'native'; dbMode: 'bizouk' | 'native'; forced: boolean };
+type Loaded = AdminEventView & { edition: Edition; settings: Settings };
 type Phase = 'loading' | 'unauth' | 'forbidden' | 'unavailable' | 'error' | 'ready';
 
 const STATUS_LABEL: Record<string, string> = {
@@ -85,6 +86,47 @@ export default function TicketingBlock({ slug }: { slug: string }) {
 }
 
 /* ------------------------------------------------------------------ */
+/** Ce que voit le public, et pourquoi pas. Le public voit les tarifs seulement si : mode réel = interne ET billetterie activée
+ *  ET statut Publié ET au moins un tarif actif. */
+function visibility(data: Loaded) {
+  const ev = data.event;
+  const activeTiers = data.tiers.filter((t) => t.is_active && !t.archived_at).length;
+  const reasons: string[] = [];
+  if (!ev) reasons.push('la configuration billetterie n’est pas encore créée');
+  else {
+    if (ev.status !== 'published') reasons.push(`le statut est « ${STATUS_SHORT[ev.status] ?? ev.status} » (il faut « Publié »)`);
+    if (!ev.ticketing_enabled) reasons.push('la billetterie est désactivée pour cet événement');
+  }
+  if (activeTiers === 0) reasons.push('aucun tarif actif');
+  const configOk = reasons.length === 0;
+  const { dbMode, forced } = data.settings;
+  return { activeTiers, reasons, configOk, publicReal: configOk && dbMode === 'native', hereOk: configOk && (dbMode === 'native' || forced) };
+}
+const STATUS_SHORT: Record<string, string> = { draft: 'Brouillon', published: 'Publié', closed: 'Clos', cancelled: 'Annulé' };
+
+function StatusBanner({ data }: { data: Loaded }) {
+  const v = visibility(data);
+  const { dbMode, forced } = data.settings;
+  return (
+    <div className={'tb-status ' + (v.configOk ? 'tb-status--ok' : 'tb-status--off')} role="status">
+      <p className="tb-status__title">
+        {v.configOk ? '✔ Configuration prête : les tarifs peuvent s’afficher' : '✖ Non visible du public'}
+      </p>
+      <ul className="tb-status__list">
+        <li>Billetterie activée : <strong>{data.event?.ticketing_enabled ? 'OUI' : 'NON'}</strong></li>
+        <li>Statut : <strong>{data.event ? STATUS_SHORT[data.event.status] ?? data.event.status : '—'}</strong></li>
+        <li>Tarifs actifs : <strong>{v.activeTiers}</strong></li>
+      </ul>
+      {!v.configOk && <p className="tb-status__why">Pourquoi : {v.reasons.join(' ; ')}.</p>}
+      <p className="tb-status__mode">
+        Mode public réel : <strong>{dbMode === 'native' ? 'billetterie interne (VENTES OUVERTES AU PUBLIC)' : 'Bizouk (rien n’est visible du public)'}</strong>.
+        {forced && <> Sur cet ordinateur / Preview : <strong>billetterie interne forcée</strong> pour tes tests (<code>TICKETING_FORCE_MODE</code>) — {v.hereOk ? 'les tarifs s’affichent ici.' : 'mais la configuration ci-dessus les bloque.'}</>}
+        {!forced && dbMode !== 'native' && v.configOk && <> Les tarifs ne s’afficheront pas tant que le mode reste Bizouk.</>}
+      </p>
+    </div>
+  );
+}
+
 function EventForm({ data, slug, onSaved, setMsg }: { data: Loaded; slug: string; onSaved: () => void; setMsg: (m: string) => void }) {
   const ev = data.event;
   const [f, setF] = useState({
@@ -103,11 +145,14 @@ function EventForm({ data, slug, onSaved, setMsg }: { data: Loaded; slug: string
   const [err, setErr] = useState('');
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setF((s) => ({ ...s, [k]: e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value }));
+  const dirty = f.enabled !== (ev?.ticketing_enabled ?? false) || f.status !== (ev?.status ?? 'draft');
 
-  async function save(e: React.FormEvent) {
-    e.preventDefault();
+  /** Enregistre la configuration ; `over` remplace l'interrupteur / le statut (boutons rapides). */
+  async function save(over?: { enabled?: boolean; status?: string }, okMsg = 'Configuration enregistrée.') {
     setErr('');
     setMsg('');
+    const enabled = over?.enabled ?? f.enabled;
+    const status = over?.status ?? f.status;
     const starts = gpLocalToIso(f.starts);
     if (!starts) return setErr('Indique la date et l’heure de début.');
     const capacity = Number(f.capacity);
@@ -122,31 +167,66 @@ function EventForm({ data, slug, onSaved, setMsg }: { data: Loaded; slug: string
       capacity,
       sales_open_at: gpLocalToIso(f.open),
       sales_close_at: gpLocalToIso(f.close),
-      ticketing_enabled: f.enabled,
-      status: f.status,
+      ticketing_enabled: enabled,
+      status,
     });
     setBusy(false);
     if (!r.ok) return setErr(r.data.error ?? 'Enregistrement impossible.');
-    setMsg('Configuration enregistrée.');
+    setF((s) => ({ ...s, enabled, status }));
+    setMsg(okMsg);
     onSaved();
   }
 
+  const noTier = data.tiers.filter((t) => t.is_active && !t.archived_at).length === 0;
   return (
-    <form onSubmit={save} className="tb-form">
+    <form onSubmit={(e) => { e.preventDefault(); void save(); }} className="tb-form">
+      <StatusBanner data={data} />
+
+      <div className="tb-switches" role="group" aria-label="Visibilité">
+        <div className="tb-switch-row">
+          <div>
+            <p className="tb-switch-row__label">Billetterie activée</p>
+            <p className="tb-switch-row__hint">Interrupteur : sans lui, aucun tarif n’est affiché pour cet événement.</p>
+          </div>
+          <button type="button" role="switch" aria-checked={f.enabled} className={'tb-switch' + (f.enabled ? ' is-on' : '')} onClick={() => setF((s) => ({ ...s, enabled: !s.enabled }))}>
+            <span className="tb-switch__knob" />
+            <span className="tb-switch__text">{f.enabled ? 'OUI' : 'NON'}</span>
+          </button>
+        </div>
+        <div className="tb-switch-row">
+          <div>
+            <p className="tb-switch-row__label">Statut</p>
+            <p className="tb-switch-row__hint">« Brouillon » = invisible. « Publié » = les ventes s’ouvrent selon les dates.</p>
+          </div>
+          <div className="tb-seg" role="radiogroup" aria-label="Statut">
+            {(['draft', 'published'] as const).map((k) => (
+              <button key={k} type="button" role="radio" aria-checked={f.status === k} className={f.status === k ? 'is-active' : ''} onClick={() => setF((s) => ({ ...s, status: k }))}>{STATUS_SHORT[k]}</button>
+            ))}
+            {(f.status === 'closed' || f.status === 'cancelled') && <span className="tb-seg__other">{STATUS_SHORT[f.status]}</span>}
+          </div>
+        </div>
+        {dirty && <p className="admin-note" role="status">Modifications non enregistrées : clique sur « Enregistrer la configuration » ou sur le bouton ci-dessous.</p>}
+      </div>
+
+      <div className="tb-quick">
+        <button type="button" className="btn btn--amber btn--lg tb-quick__go" disabled={busy} onClick={() => void save({ enabled: true, status: 'published' }, 'Activée et publiée pour le test.')}>
+          Activer et publier pour le test
+        </button>
+        <button type="button" className="btn btn--outline" disabled={busy || (!ev?.ticketing_enabled && ev?.status !== 'published' && !f.enabled)} onClick={() => void save({ enabled: false, status: 'draft' }, 'Remise en brouillon (invisible).')}>
+          Remettre en brouillon
+        </button>
+        <p className="admin-hint">
+          {noTier ? 'Ajoute d’abord au moins un tarif actif (plus bas). ' : ''}
+          Ce bouton active la billetterie de CET événement et le passe en « Publié ». Il n’ouvre PAS les ventes au public : tant que le mode réel reste sur Bizouk, rien n’est visible en production.
+        </p>
+      </div>
+
       <p className="admin-hint">
         Toutes les heures sont en <strong>heure de Guadeloupe</strong>. Ces réglages sont enregistrés dans la base
         billetterie : aucun redéploiement.
         {ev && <> Places vendues ou réservées : <strong>{ev.consumed}</strong> / {ev.capacity}.</>}
       </p>
       <div className="tb-grid">
-        <label className="admin-field tb-check"><span>Billetterie activée pour cet événement</span>
-          <input type="checkbox" checked={f.enabled} onChange={set('enabled')} />
-        </label>
-        <label className="admin-field"><span>Statut</span>
-          <select value={f.status} onChange={set('status')}>
-            {Object.entries(STATUS_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-          </select>
-        </label>
         <label className="admin-field"><span>Début</span><input type="datetime-local" value={f.starts} onChange={set('starts')} required /></label>
         <label className="admin-field"><span>Ouverture des portes</span><input type="datetime-local" value={f.doors} onChange={set('doors')} /></label>
         <label className="admin-field"><span>Fin</span><input type="datetime-local" value={f.ends} onChange={set('ends')} /></label>
@@ -158,7 +238,7 @@ function EventForm({ data, slug, onSaved, setMsg }: { data: Loaded; slug: string
       </div>
       {err && <p className="admin-error" role="alert">{err}</p>}
       <div className="admin-form__actions">
-        <button className="btn btn--amber" type="submit" disabled={busy}>{busy ? '…' : ev ? 'Enregistrer la configuration' : 'Créer la configuration'}</button>
+        <button className="btn btn--outline" type="submit" disabled={busy}>{busy ? '…' : ev ? 'Enregistrer la configuration' : 'Créer la configuration'}</button>
       </div>
     </form>
   );

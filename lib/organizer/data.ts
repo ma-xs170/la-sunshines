@@ -21,6 +21,7 @@ const MESSAGES: Record<string, OrgFailure> = {
   RATE_LIMIT: { status: 429, message: 'Limite atteinte : 3 messages maximum par événement et par 24 heures.' },
   ORG_NAME_REQUIRED: { status: 400, message: 'Le nom de la structure est obligatoire.' },
   BAD_SIRET: { status: 400, message: 'Le SIRET doit comporter 14 chiffres.' },
+  STRIPE_ACCOUNT_LOCKED: { status: 409, message: 'Un compte Stripe est déjà lié à cette organisation.' },
   BAD_EMAIL: { status: 400, message: 'Adresse email invalide.' },
   REPLY_TO_MISSING: { status: 409, message: 'L’organisateur n’a pas d’adresse de réponse : [À COMPLÉTER] dans les informations de l’organisateur.' },
 };
