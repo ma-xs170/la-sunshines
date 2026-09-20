@@ -135,6 +135,22 @@ r = await crew.req(`/api/scan/stats?event_id=${evA}`); ok(r.status === 200 && r.
 r = await crew.req(`/api/scan/stats?event_id=${(await one(`select id from public.ticketed_events where event_slug = $1`, [B])).id}`); ok(r.status === 403, `compteur d’un autre événement → 403 (${r.status})`);
 r = await mgr.req('/api/scan', { method: 'POST', body: { code: tk[1].code, event_id: evA } }); ok(r.status === 200 && r.data.result === 'valid', 'gestionnaire : peut aussi scanner');
 
+section('Page Participants (barre du haut)');
+r = await anon.req('/organisateur/participants'); ok(r.status >= 300 && r.status < 400 && /connexion/.test(r.headers.get('location') ?? ''), `sans connexion → connexion (${r.status})`);
+r = await crew.req('/organisateur/participants'); ok(r.status >= 300 && r.status < 400, `staff → refusé (${r.status})`);
+r = await orgb.req('/organisateur/participants');
+ok(r.status === 200 && /Bob|Welcome to Dominica/.test(r.data) && !/Élodie|la-nuit-des-ombres/.test(r.data), 'autre organisation : ne voit que ses propres événements dans le sélecteur');
+await q(`delete from public.audit_log where action = 'organizer.participants_view'`);
+r = await mgr.req('/organisateur/participants');
+ok(r.status === 200 && /La Nuit Des Ombres/.test(r.data) && /Participants/.test(r.data) && /Exporter \(CSV\)/.test(r.data) && /name="evenement" value="la-nuit-des-ombres"/.test(r.data), 'gestionnaire : événement à venir choisi par défaut, export disponible');
+ok((await one(`select count(*)::int n from public.audit_log where action = 'organizer.participants_view' and actor_id = $1`, [USERS.cust.id])).n === 1, 'consultation journalisée');
+r = await mgr.req(`/organisateur/participants?evenement=${B}`);
+ok(r.status === 200 && !/Bob|BetaOrga/.test(r.data) && /La Nuit Des Ombres/.test(r.data), 'un événement d’une autre organisation dans l’URL est ignoré');
+r = await mgr.req('/organisateur/participants?evenement=../../etc');
+ok(r.status === 200, 'paramètre d’événement invalide : sans effet');
+r = await mgr.req(`/organisateur/participants?evenement=${A}&q=inexistant&status=piege&sort=DROP`);
+ok(r.status === 200 && /Aucun participant/.test(r.data), 'filtres invalides ou sans résultat : page saine');
+
 section('Sélecteur d’organisation');
 await q(`insert into public.organizer_members (organizer_id, user_id, role) values ($1, $2, 'manager')`, [orgB, USERS.staff.id]);
 r = await owner.req('/organisateur'); ok(cards(r.data).join() === 'La Nuit Des Ombres' && /THE MOUV/.test(r.data), 'organisation courante par défaut : THE MOUV');
