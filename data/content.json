@@ -1,6 +1,23 @@
 {
   "artists": [
     {
+      "id": "mua7n88m029hgv",
+      "slug": "debut",
+      "name": "DÉBUT",
+      "role": "",
+      "bio": "",
+      "image": "",
+      "banner": "",
+      "instagram": "",
+      "tiktok": "",
+      "soundcloud": "",
+      "email": "",
+      "verified": false,
+      "aliases": [],
+      "autoCreated": true,
+      "createdAt": "2026-09-20T19:29:43.030Z"
+    },
+    {
       "id": "mtdgvyqndzamfc",
       "slug": "dreezy",
       "name": "DJ DREEZY",
@@ -13,6 +30,8 @@
       "soundcloud": "",
       "email": "",
       "verified": true,
+      "aliases": [],
+      "autoCreated": false,
       "createdAt": "2026-08-28T21:32:03.359Z"
     },
     {
@@ -28,6 +47,8 @@
       "soundcloud": "https://soundcloud.com/deejay-syxtee",
       "email": "",
       "verified": false,
+      "aliases": [],
+      "autoCreated": false,
       "createdAt": "2026-08-28T21:32:03.360Z"
     },
     {
@@ -43,6 +64,8 @@
       "soundcloud": "",
       "email": "",
       "verified": false,
+      "aliases": [],
+      "autoCreated": false,
       "createdAt": "2026-08-28T21:32:03.360Z"
     },
     {
@@ -58,6 +81,8 @@
       "soundcloud": "",
       "email": "",
       "verified": false,
+      "aliases": [],
+      "autoCreated": false,
       "createdAt": "2026-08-28T21:32:03.360Z"
     },
     {
@@ -73,6 +98,8 @@
       "soundcloud": "",
       "email": "",
       "verified": false,
+      "aliases": [],
+      "autoCreated": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -88,6 +115,8 @@
       "soundcloud": "",
       "email": "",
       "verified": false,
+      "aliases": [],
+      "autoCreated": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -103,6 +132,8 @@
       "soundcloud": "",
       "email": "",
       "verified": false,
+      "aliases": [],
+      "autoCreated": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -118,6 +149,8 @@
       "soundcloud": "",
       "email": "",
       "verified": false,
+      "aliases": [],
+      "autoCreated": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -133,6 +166,8 @@
       "soundcloud": "",
       "email": "",
       "verified": false,
+      "aliases": [],
+      "autoCreated": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -148,6 +183,8 @@
       "soundcloud": "",
       "email": "",
       "verified": false,
+      "aliases": [],
+      "autoCreated": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -163,6 +200,8 @@
       "soundcloud": "",
       "email": "",
       "verified": false,
+      "aliases": [],
+      "autoCreated": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -178,6 +217,8 @@
       "soundcloud": "",
       "email": "",
       "verified": false,
+      "aliases": [],
+      "autoCreated": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -193,6 +234,8 @@
       "soundcloud": "",
       "email": "",
       "verified": false,
+      "aliases": [],
+      "autoCreated": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -208,6 +251,8 @@
       "soundcloud": "",
       "email": "",
       "verified": false,
+      "aliases": [],
+      "autoCreated": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -223,6 +268,8 @@
       "soundcloud": "",
       "email": "",
       "verified": false,
+      "aliases": [],
+      "autoCreated": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -238,6 +285,8 @@
       "soundcloud": "",
       "email": "",
       "verified": false,
+      "aliases": [],
+      "autoCreated": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -253,6 +302,8 @@
       "soundcloud": "",
       "email": "",
       "verified": false,
+      "aliases": [],
+      "autoCreated": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -268,6 +319,8 @@
       "soundcloud": "",
       "email": "",
       "verified": false,
+      "aliases": [],
+      "autoCreated": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -283,6 +336,8 @@
       "soundcloud": "",
       "email": "",
       "verified": false,
+      "aliases": [],
+      "autoCreated": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -298,6 +353,8 @@
       "soundcloud": "",
       "email": "",
       "verified": false,
+      "aliases": [],
+      "autoCreated": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -313,6 +370,8 @@
       "soundcloud": "",
       "email": "",
       "verified": false,
+      "aliases": [],
+      "autoCreated": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -328,6 +387,8 @@
       "soundcloud": "",
       "email": "",
       "verified": false,
+      "aliases": [],
+      "autoCreated": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -343,6 +404,8 @@
       "soundcloud": "",
       "email": "",
       "verified": false,
+      "aliases": [],
+      "autoCreated": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     },
     {
@@ -358,6 +421,8 @@
       "soundcloud": "",
       "email": "",
       "verified": false,
+      "aliases": [],
+      "autoCreated": false,
       "createdAt": "2026-08-28T21:32:03.361Z"
     }
   ],
