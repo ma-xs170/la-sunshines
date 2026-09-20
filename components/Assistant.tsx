@@ -228,7 +228,8 @@ export default function Assistant() {
 
           <p className="asst-foot">
             Réponses indicatives · {turns}/{Math.floor(MAX_TURNS / 2)} messages ·
-            besoin d’un humain ? <a href="/contact">Contact</a>
+            besoin d’un humain ? <a href="/contact">Contact</a> ·{' '}
+            <a href="/politique-de-confidentialite">Confidentialité</a>
           </p>
         </div>
       )}
