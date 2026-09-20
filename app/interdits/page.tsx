@@ -1,74 +1,98 @@
 import type { Metadata } from 'next';
+import type { ReactNode } from 'react';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import PageHero from '@/components/PageHero';
 import Icon, { type IconName } from '@/components/Icon';
 
 export const metadata: Metadata = {
-  title: 'Interdits & conditions d’accès · LA SUNSHINES',
+  title: 'Règlement · LA SUNSHINES',
   description:
-    'Règlement LA SUNSHINES : tenue obligatoire, objets interdits, contrôle à l’entrée, comportement et conditions d’accès pour les soirées 12–17 ans.',
+    'Règlement LA SUNSHINES : conditions d’accès, contrôle à l’entrée, tenue, interdits, comportement et remboursement pour les soirées 12–17 ans.',
 };
 
-type Section = { icon: IconName; title: string; intro?: string; rules: string[] };
+type Section = { icon: IconName; title: string; rules: ReactNode[] };
 
-// NOTE : texte réglementaire de base — à relire / ajuster avec l'organisation
-// avant mise en ligne définitive.
 const SECTIONS: Section[] = [
   {
-    icon: 'shirt',
-    title: 'Tenue obligatoire',
-    intro: 'Un dresscode est communiqué pour chaque édition. Il est obligatoire.',
+    icon: 'ticket',
+    title: '1. Conditions d’accès',
     rules: [
-      'Respecter les couleurs / le thème annoncés pour la soirée.',
-      'Tenue correcte exigée : pas de torse nu, pas de tenue à caractère offensant.',
-      'Chaussures fermées recommandées.',
-      'L’organisation peut refuser l’entrée en cas de non-respect du dresscode.',
-    ],
-  },
-  {
-    icon: 'close',
-    title: 'Objets interdits',
-    intro: 'Tout objet dangereux ou illicite est strictement interdit dans l’enceinte.',
-    rules: [
-      'Alcool, cigarettes, chicha et toute substance illicite.',
-      'Objets tranchants, contondants ou dangereux, aérosols, pétards.',
-      'Boissons et nourriture de l’extérieur.',
-      'Sacs volumineux (une consigne peut être prévue selon le lieu).',
-      'Tout objet retiré à l’entrée n’est pas restitué.',
+      'Un billet nominatif est obligatoire. Un billet = une entrée.',
+      'La soirée est réservée aux 12–17 ans.',
+      'Une pièce d’identité est obligatoire.',
+      'Sortie uniquement à la fin de l’évènement : pas de sortie ni de ré-entrée pendant la soirée.',
+      'Les portes ferment à l’heure indiquée au programme de la soirée : aucun accès après la fermeture, sans remboursement.',
+      'Un parent (ou responsable légal) doit obligatoirement venir chercher son enfant devant l’établissement, à l’heure de fin indiquée.',
+      'L’organisation se réserve le droit de refuser l’accès à toute personne ne respectant pas le présent règlement, sans remboursement.',
+      'En achetant un billet, tu acceptes ce règlement.',
+      'Droit à l’image : des photos et vidéos peuvent être réalisées pendant la soirée. En achetant un billet, tu autorises (et ton représentant légal autorise) l’organisation à utiliser ton image dans le cadre de la communication de LA SUNSHINES.',
     ],
   },
   {
     icon: 'shield',
-    title: 'Contrôle à l’entrée',
-    intro: 'L’accès est encadré et systématiquement contrôlé.',
+    title: '2. Contrôle à l’entrée',
     rules: [
-      'Palpation de sécurité et contrôle visuel des sacs par un agent.',
-      'Présentation du billet (Bizouk / Kiwol) et d’une pièce d’identité.',
-      'Vérification de l’âge : la soirée est réservée aux 12–17 ans.',
-      'Le refus du contrôle entraîne le refus d’accès, sans remboursement.',
+      'Présentation du billet (QR code, en PDF ou depuis ton compte) et d’une pièce d’identité.',
+      'Un contrôle visuel des sacs est effectué à l’entrée. Une palpation de sécurité peut être réalisée par un agent de sécurité, avec ton accord. En cas de refus, l’accès est refusé, sans remboursement.',
+      'Tout objet retiré à l’entrée est remis à la fin de l’événement. Les objets dangereux ou illicites ne sont pas restitués et peuvent être remis aux forces de l’ordre.',
+    ],
+  },
+  {
+    icon: 'shirt',
+    title: '3. Tenue',
+    rules: [
+      'Short / bermuda : interdit.',
+      'Chaussures fermées : obligatoire.',
+      'Le dress code de chaque édition est indiqué sur la page de la soirée. Il est obligatoire : respecte les couleurs / le thème annoncés.',
+      'Tenue correcte exigée : pas de torse nu, pas de tenue à caractère offensant.',
+      'L’organisation peut refuser l’entrée en cas de non-respect du dress code.',
+      'Sacs : les filles sont autorisées avec les sacs à main.',
+    ],
+  },
+  {
+    icon: 'close',
+    title: '4. Interdits',
+    rules: [
+      'Alcool, tabac, cigarette électronique (vape), chicha et produits stupéfiants, à l’intérieur comme aux abords du lieu.',
+      'Armes et objets dangereux ou tranchants, bouteilles en verre, pétards, fumigènes et lasers.',
+      'Objets contondants et aérosols.',
+      'Boissons et nourriture de l’extérieur.',
+      'Sacs volumineux (une consigne peut être prévue selon le lieu).',
     ],
   },
   {
     icon: 'sparkles',
-    title: 'Comportement',
-    intro: 'On vient pour faire la fête dans le respect de chacun.',
+    title: '5. Comportement',
     rules: [
-      'Aucune violence physique ou verbale, aucun harcèlement.',
-      'Respect du staff, des agents de sécurité et des autres participants.',
-      'Respect du lieu et du matériel.',
-      'Tout comportement dangereux entraîne une exclusion immédiate, sans remboursement, et le cas échéant un signalement aux forces de l’ordre et aux responsables légaux.',
+      'Respecte les autres et le personnel : aucune violence, insulte, moquerie, harcèlement ou discrimination ne sera toléré.',
+      'Suis les consignes de l’équipe d’organisation et de sécurité.',
+      'Tout comportement contraire au règlement peut entraîner une exclusion immédiate, sans remboursement, et le cas échéant un signalement aux forces de l’ordre et aux responsables légaux.',
+      'Les dégradations du lieu ou du matériel engagent la responsabilité de leur auteur.',
     ],
   },
   {
-    icon: 'cake',
-    title: 'Conditions d’accès',
-    intro: 'Quelques règles pour que la soirée reste sûre pour tout le monde.',
+    icon: 'bell',
+    title: '6. Santé et sécurité',
     rules: [
-      'Entrée réservée aux 12–17 ans, sur présentation d’un justificatif d’âge.',
-      'Billet nominatif : une entrée par billet, pas de ré-entrée après sortie.',
-      'Dépose et récupération encadrées : un adulte responsable doit venir chercher le/la mineur·e à l’heure de fin indiquée.',
-      'L’organisation se réserve le droit de refuser l’accès à toute personne ne respectant pas le présent règlement.',
+      'Si tu ne te sens pas bien, ou si tu vois quelqu’un en difficulté, préviens immédiatement l’équipe.',
+    ],
+  },
+  {
+    icon: 'archive',
+    title: '7. Objets personnels',
+    rules: [
+      'L’organisation n’est pas responsable des objets personnels perdus ou volés. Garde tes affaires avec toi.',
+    ],
+  },
+  {
+    icon: 'history',
+    title: '8. Remboursement',
+    rules: [
+      <>
+        Aucun remboursement en cas de refus d’accès ou d’exclusion pour non-respect du présent règlement. Voir aussi les{' '}
+        <a href="/cgv">CGV</a> et la page <a href="/remboursement">Remboursement</a>.
+      </>,
     ],
   },
 ];
@@ -81,8 +105,8 @@ export default function InterditsPage() {
       <main className="rules content-page">
         <PageHero
           eyebrow="Le cadre"
-          title="Interdits & accès"
-          lead="Pour que LA SUNSHINES reste une soirée sûre et encadrée pour les 12–17 ans, voici ce qu’il faut savoir avant de venir. En achetant un billet, tu acceptes ce règlement."
+          title="Règlement"
+          lead="Pour que la soirée reste une fête pour tout le monde, voici les règles à respecter."
         />
 
         <div className="rules-grid">
@@ -92,10 +116,9 @@ export default function InterditsPage() {
                 <Icon name={s.icon} />
               </span>
               <h2>{s.title}</h2>
-              {s.intro && <p className="rule-card__intro">{s.intro}</p>}
               <ul className="rule-card__list">
-                {s.rules.map((r) => (
-                  <li key={r}>{r}</li>
+                {s.rules.map((r, i) => (
+                  <li key={i}>{r}</li>
                 ))}
               </ul>
             </section>

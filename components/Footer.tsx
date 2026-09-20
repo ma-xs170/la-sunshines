@@ -14,7 +14,7 @@ export default function Footer() {
             <span className="foot-col__cat">Nos events</span>
             <div className="foot-col__links">
               <a href="/editions">Agenda événements</a>
-              <a href="/interdits">Interdits &amp; accès</a>
+              <a href="/interdits">Règlement</a>
             </div>
           </div>
           <div className="foot-col">

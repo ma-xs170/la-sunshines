@@ -18,6 +18,7 @@ export default async function RemboursementPage() {
         <section className="legal__body">
           <h2>Billets non remboursables</h2>
           <p>Sauf cas prévus ci-dessous, un billet acheté n’est ni remboursable ni échangeable.</p>
+          <p>Aucun remboursement non plus en cas de refus d’accès (y compris arrivée après la fermeture des portes) ou d’exclusion pour non-respect du <a href="/interdits">règlement</a>.</p>
           <h2>Remboursement intégral</h2>
           <ul>
             <li>Annulation de l’événement par l’organisateur : remboursement du prix des billets <strong>et des frais de service</strong>.</li>
