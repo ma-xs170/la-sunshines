@@ -12,6 +12,6 @@ export async function GET(req: Request) {
   if (!/^[0-9a-f-]{36}$/i.test(id)) return NextResponse.json({ error: 'Introuvable.' }, { status: 404 });
   const r = await adminRpc<{ path: string; name: string; mime: string }>('admin_org_document', { p_actor: a.s.userId, p_doc: id });
   if (!r.ok) return NextResponse.json({ error: 'Introuvable.' }, { status: 404 });
-  const b = await getBlob(r.data.path); if (!b) return NextResponse.json({ error: 'Fichier introuvable.' }, { status: 404 });
+  const b = await getBlob(r.data.path).catch(() => null); if (!b) return NextResponse.json({ error: 'Fichier introuvable.' }, { status: 404 });
   return new Response(b.stream, { headers: { 'Content-Type': r.data.mime, 'Content-Disposition': `inline; filename="${encodeURIComponent(r.data.name)}"`, 'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff' } });
 }

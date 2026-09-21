@@ -159,7 +159,7 @@ export default function SignupWizard({ email, firstName }: { email: string; firs
         <div className="wiz__nav">
           {step > 0 ? <button type="button" className="btn btn--outline" onClick={() => { setErrs({}); setStep((n) => n - 1); }}>← Retour</button> : <a className="btn btn--outline" href="/organisateur">Annuler</a>}
           <span className="wiz__saved" aria-live="polite">{saved}</span>
-          {step < 4 ? <button type="button" className="btn btn--amber" onClick={next}>Continuer</button> : <button type="button" className="btn btn--amber" onClick={submit} disabled={busy}>{busy ? 'Envoi…' : 'Envoyer mon dossier'}</button>}
+          {step < 4 ? <button type="button" className="btn btn--amber" onMouseDown={(e) => e.preventDefault()} onClick={next}>Continuer</button> : <button type="button" className="btn btn--amber" onMouseDown={(e) => e.preventDefault()} onClick={submit} disabled={busy}>{busy ? 'Envoi…' : 'Envoyer mon dossier'}</button>}
         </div>
       </section>
     </div>

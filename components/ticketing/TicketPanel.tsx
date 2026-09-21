@@ -29,6 +29,7 @@ export default function TicketPanel({ slug, tiers: initial, feePercent, feeFixed
   const [people, setPeople] = useState<Record<string, { first_name: string; last_name: string }[]>>({});
   const [terms, setTerms] = useState(false);
   const [guardian, setGuardian] = useState(false);
+  const [promo, setPromo] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
@@ -127,7 +128,7 @@ export default function TicketPanel({ slug, tiers: initial, feePercent, feeFixed
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug, items, accept_terms: terms, guardian_consent: guardian }),
+        body: JSON.stringify({ slug, items, accept_terms: terms, guardian_consent: guardian, ...(promo.trim() ? { promo_code: promo.trim() } : {}) }),
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.free && data.redirect) {
@@ -211,6 +212,13 @@ export default function TicketPanel({ slug, tiers: initial, feePercent, feeFixed
             {fee > 0 && <div><dt>Frais de service</dt><dd>{formatEuro(fee)}</dd></div>}
             <div className="tp__grand"><dt>Total</dt><dd>{subtotal + fee === 0 ? <FreeBadge /> : formatEuro(subtotal + fee)}</dd></div>
           </dl>
+          {count > 0 && !isFreeOrder && (
+            <div className="tp__promo">
+              <label htmlFor="tp-promo">Code promo</label>
+              <input id="tp-promo" type="text" value={promo} onChange={(e) => setPromo(e.target.value.toUpperCase())} maxLength={24} autoComplete="off" placeholder="Facultatif" />
+              <span className="tp__hint">La remise est calculée et vérifiée au paiement.</span>
+            </div>
+          )}
           {count > 0 && (
             <div className="tp__consent">
               <label><input type="checkbox" checked={terms} onChange={(e) => setTerms(e.target.checked)} />

@@ -51,7 +51,7 @@ try {
   ok(r.status === 200, `PATCH email → 200 (${r.status})`);
   ok((await one(`select email from public.artist_emails where artist_slug = $1`, [SLUG]))?.email === 'dreezy@test.local', 'email enregistré en base (minuscules)');
   ok(!hasAt(fs.readFileSync(FILE, 'utf8')), 'content.json toujours sans email après modification admin');
-  r = await admin.req('/admin');
+  r = await admin.req('/admin/contenu');
   ok(r.status === 200 && r.data.includes('dreezy@test.local'), 'l’admin voit l’email (superposé depuis Supabase)');
   r = await anon.req(`/artistes/${SLUG}`);
   ok(r.status === 200 && !r.data.includes('dreezy@test.local') && !/mailto:dreezy/.test(r.data), 'le profil public n’affiche PAS l’email');

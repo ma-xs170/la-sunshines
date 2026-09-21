@@ -1,3 +1,4 @@
+import { parseBizoukCode } from './bizoukEmbed';
 // Helpers texte partagés admin / rendu.
 
 /** "La Xploz · Tropical Island" -> "la-xploz-tropical-island" */
@@ -23,9 +24,9 @@ export function uniqueSlug(base: string, taken: string[]): string {
   return `${base}-${i}`;
 }
 
-/** Extrait la 1re URL Bizouk d'un code d'intégration brut (iframe/script/lien). */
+/** URL de la page de réservation Bizouk d'un code d'intégration : uniquement une adresse bizouk.com validée (jamais une adresse arbitraire). */
 export function bizoukUrlFromEmbed(embed: string | null | undefined): string | null {
   if (!embed) return null;
-  const m = embed.match(/https?:\/\/[^\s"'<>]*bizouk[^\s"'<>]*/i);
-  return m ? m[0] : null;
+  const p = parseBizoukCode(embed);
+  return p.ok ? p.pageUrl : null;
 }

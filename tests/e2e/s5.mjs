@@ -92,9 +92,9 @@ r = await staff.req(`/api/scan/stats?event_id=${evId}`); ok(r.data.entered === 3
 section('Page /admin/scan');
 r = await staff.req('/admin/scan'); ok(r.status === 200 && /Nuit Des Ombres/i.test(r.data), 'staff : page de scan avec l\'événement');
 r = await admin.req('/admin/scan'); ok(r.status === 200, 'admin : page de scan');
-r = await cust.req('/admin/scan'); ok(r.status === 200 && /Accès refusé/.test(r.data) && !/scan__video|scan__bar/.test(r.data), 'client : « Accès refusé », écran de scan absent');
+r = await cust.req('/admin/scan'); ok(r.status === 403 && /Accès refusé/.test(r.data) && !/scan__video|scan__bar/.test(r.data), 'client : « Accès refusé », écran de scan absent');
 r = await anon.req('/admin/scan'); ok(r.status === 307, 'anonyme : redirection connexion');
-r = await staff.req('/admin/billetterie'); ok(r.status === 200 && /Accès refusé/.test(r.data), 'staff n\'accède PAS à l\'admin billetterie');
+r = await staff.req('/admin/billetterie'); ok(r.status === 403 && /Accès refusé/.test(r.data), 'staff n\'accède PAS à l\'admin billetterie');
 
 section('Annulation d\'un billet');
 const oC = await buyAndPay(cust, 'std', 2);
@@ -203,7 +203,7 @@ ok((await q('select 1 from public.audit_log where actor_id is null and action li
 section('Pages admin de billetterie');
 for (const p of ['/admin/billetterie', '/admin/billetterie/commandes', `/admin/billetterie/commandes/${oA.id}`, '/admin/billetterie/invitations']) {
   const a = await admin.req(p), c = await cust.req(p), n = await anon.req(p);
-  ok(a.status === 200 && !/Accès refusé/.test(a.data) && c.status === 200 && /Accès refusé/.test(c.data) && n.status === 307, `${p} : admin OK · client « Accès refusé » · anonyme → connexion`);
+  ok(a.status === 200 && !/Accès refusé/.test(a.data) && c.status === 403 && /Accès refusé/.test(c.data) && n.status === 307, `${p} : admin OK · client « Accès refusé » · anonyme → connexion (admin ${a.status}, client ${c.status}, anonyme ${n.status})`);
 }
 
 section('RLS à travers le vrai PostgREST (JWT clients, sans passer par l\'application)');

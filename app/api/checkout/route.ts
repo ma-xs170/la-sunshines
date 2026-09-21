@@ -7,7 +7,7 @@ import { stripeConfigured } from '@/lib/stripe';
 import { checkoutSchema } from '@/lib/ticketing/schemas';
 import { getTicketingSettings } from '@/lib/ticketing/settings';
 import { editionForSlug } from '@/lib/ticketing/guard';
-import { checkoutKind, createCheckoutSession, expireSessions, reserveFreeOrder, reserveOrder } from '@/lib/ticketing/checkout';
+import { applyPromo, checkoutKind, createCheckoutSession, expireSessions, reserveFreeOrder, reserveOrder } from '@/lib/ticketing/checkout';
 import { afterOrderPaid } from '@/lib/ticketing/order-mail';
 
 export const runtime = 'nodejs';
@@ -78,7 +78,17 @@ export async function POST(req: Request) {
     settings,
   });
   if (!reserved.ok) return fail(reserved.message, reserved.status);
-  const { order } = reserved;
+  let order = reserved.order;
+
+  // code promo (facultatif) : appliqué juste après la réservation, avant tout paiement ; refus = commande libérée, rien n'est facturé
+  if (input.promo_code) {
+    const promo = await applyPromo(db, { orderId: order.order_id, userId: session.userId, code: input.promo_code, settings });
+    if (!promo.ok) {
+      await db.from('orders').update({ status: 'expired' }).eq('id', order.order_id).eq('status', 'pending');
+      return fail(promo.message, promo.status);
+    }
+    order = { ...order, ...promo.totals };
+  }
 
   // un tarif est devenu gratuit entre-temps : jamais de session Stripe à 0 €
   if (order.total_cents <= 0) {

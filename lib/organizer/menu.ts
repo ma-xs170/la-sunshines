@@ -54,7 +54,7 @@ export function eventMenu(slug: string): MenuGroup[] {
       { label: 'Conditions générales', href: `${base}/conditions`, cap: 'manage' }, { label: 'Consentements RGPD', href: `${base}/consentements`, cap: 'manage' },
     ] },
     { id: 'ev-tickets', label: 'Billetterie', icon: 'ticket', items: [
-      { label: 'Tarifs', href: tab('tarifs'), cap: 'manage' }, { label: 'Codes de réduction', href: `${base}/promos`, cap: 'manage' }, { label: 'Remboursements', href: `${base}/remboursements`, cap: 'manage' }, { label: 'Frais et paiement', cap: 'manage' },
+      { label: 'Méthode de billetterie', href: `${base}/billetterie`, cap: 'manage' }, { label: 'Tarifs', href: tab('tarifs'), cap: 'manage' }, { label: 'Codes de réduction', href: `${base}/promos`, cap: 'manage' }, { label: 'Remboursements', href: `${base}/remboursements`, cap: 'manage' }, { label: 'Frais et paiement', cap: 'manage' },
     ] },
     { id: 'ev-sales', label: 'Ventes', icon: 'list', sub: { after: 2, label: 'Distribuer' }, items: [
       { label: 'Participants', href: tab('participants'), cap: 'manage' }, { label: 'Commandes', href: `${base}/commandes`, cap: 'manage' },
@@ -112,7 +112,7 @@ export function activeGroupId(groups: MenuGroup[], pathname: string, onglet: str
 const CRUMB: Record<string, string> = {
   evenements: 'Mes évènements', nouveau: 'Nouvel évènement', participants: 'Participants', analyse: 'Analyse', paiements: 'Paiements',
   parametres: 'Informations légales', actualites: 'Actualités', aide: 'Centre d’aide',
-  finance: 'Finance', versements: 'Versements', stats: 'Ventes', notifications: 'Notifications', commandes: 'Commandes', remboursements: 'Remboursements', scans: 'Historique des scans', invitations: 'Invitations', suivi: 'Suivi', promos: 'Codes de réduction', description: 'Description', flyer: 'Décliner le flyer', lieux: 'Lieux', sessions: 'Sessions', formulaires: 'Formulaires', conditions: 'Conditions générales', consentements: 'Consentements RGPD',
+  finance: 'Finance', versements: 'Versements', billetterie: 'Méthode de billetterie', stats: 'Ventes', notifications: 'Notifications', commandes: 'Commandes', remboursements: 'Remboursements', scans: 'Historique des scans', invitations: 'Invitations', suivi: 'Suivi', promos: 'Codes de réduction', description: 'Description', flyer: 'Décliner le flyer', lieux: 'Lieux', sessions: 'Sessions', formulaires: 'Formulaires', conditions: 'Conditions générales', consentements: 'Consentements RGPD',
 };
 
 /** Fil d'Ariane à partir du chemin (l'évènement s'affiche « Évènement » : son titre est dans l'en-tête de la page). */

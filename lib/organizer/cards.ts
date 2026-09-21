@@ -1,7 +1,7 @@
 // Cartes d'évènements de l'organisation courante (accueil et page « Mes évènements »).
 import 'server-only';
 import type { CardEvent } from './browse';
-import { editorial, orgRpc, type OrgEventRow } from './data';
+import { createdTitles, editorial, orgRpc, type OrgEventRow } from './data';
 import { eventState } from './status';
 import { formatGp } from '@/lib/ticketing/time';
 import { linkedEditionsOf } from '@/lib/eventLinks';
@@ -10,10 +10,11 @@ import { linkedEditionsOf } from '@/lib/eventLinks';
 export async function loadCardEvents(userId: string, orgId: string, orgName = ''): Promise<{ ok: boolean; events: CardEvent[] }> {
   const r = await orgRpc<OrgEventRow[]>('org_events', { p_actor: userId });
   const rows = (r.ok ? r.data : []).filter((e) => e.organizer_id === orgId);
+  const made = await createdTitles(rows.map((e) => e.slug));
   const events: CardEvent[] = rows.map((e) => {
     const ed = editorial(e.slug);
     return {
-      slug: e.slug, title: ed.title, startsAt: e.starts_at, dateLabel: formatGp(e.starts_at), venue: e.venue_name, state: eventState(e), archived: e.archived,
+      slug: e.slug, title: made.get(e.slug) ?? ed.title, startsAt: e.starts_at, dateLabel: formatGp(e.starts_at), venue: e.venue_name, state: eventState(e), archived: e.archived,
       sold: e.sold, reserved: e.reserved, capacity: e.capacity, entered: e.entered, revenueCents: e.revenue_cents, hasFlyer: Boolean(ed.flyer), organizerName: e.organizer_name,
     };
   });

@@ -106,6 +106,8 @@ export const checkoutSchema = z
       )
       .min(1, 'Choisis au moins un billet.')
       .max(10),
+    // code promo facultatif : validé et appliqué côté serveur (apply_promo) ; le navigateur n'envoie jamais de montant
+    promo_code: z.string().trim().toUpperCase().regex(/^[A-Z0-9_-]{3,24}$/, 'Code promo invalide.').optional(),
     accept_terms: z.literal(true, { error: 'Tu dois accepter les CGV et la politique de remboursement.' }),
     guardian_consent: z.literal(true, {
       error: 'Tu dois confirmer avoir 18 ans ou l’autorisation de ton représentant légal.',

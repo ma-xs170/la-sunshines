@@ -2,7 +2,7 @@
 import 'server-only';
 import { forbidden, notFound, redirect } from 'next/navigation';
 import { getOrgSession } from './access';
-import { editorial, orgRpc } from './data';
+import { editorial, eventTitle, orgRpc } from './data';
 import { SLUG_RE } from '@/lib/ticketing/schemas';
 import { getAllEditions } from '@/lib/content';
 import type { DetailsData } from '@/components/organizer/event/DescriptionForm';
@@ -24,7 +24,7 @@ export async function loadEventPage(slug: string, next: string) {
   const r = await orgRpc<EventPageData>('org_event_details', { p_actor: s.userId, p_slug: slug });
   if (!r.ok) notFound();   // FORBIDDEN (autre organisation, staff) et introuvable : même réponse
   const ed = getAllEditions({ includeHidden: true }).find((e) => e.slug === slug);
-  return { s, data: r.data, title: editorial(slug).title, flyer: editorial(slug).flyer, legacyDresscode: ed?.dresscode ?? '' };
+  return { s, data: r.data, title: await eventTitle(slug), flyer: editorial(slug).flyer, legacyDresscode: ed?.dresscode ?? '' };
 }
 
 export const emptyDetails = (): DetailsData => ({
