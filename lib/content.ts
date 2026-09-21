@@ -23,7 +23,7 @@ import { formatEditionDate } from './format';
 import { withTestEvent } from './testEdition';
 import { testEditionEnabled } from './ticketing/force-mode';
 
-function storedEventToEdition(ev: StoredEvent): Edition {
+export function storedEventToEdition(ev: StoredEvent): Edition {
   const parsedDate = Date.parse(ev.date);
   const hasDate = Number.isFinite(parsedDate);
   const isFuture = hasDate && parsedDate > Date.now();

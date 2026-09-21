@@ -12,7 +12,7 @@ const ERR: Record<string, [number, string]> = {
   DEST_NOT_FOUND: [404, 'Aucune organisation avec cette référence.'], DEST_NOT_APPROVED: [409, 'L’organisation de destination n’est pas approuvée.'], SAME_ORGANIZER: [409, 'L’évènement appartient déjà à cette organisation.'],
   CONFIRMATION_MISMATCH: [400, 'La référence saisie ne correspond pas à l’organisation de destination.'], SELF_FORBIDDEN: [409, 'Tu ne peux pas modifier ton propre accès.'],
   LAST_SUPER: [409, 'Impossible : ce serait le dernier super-administrateur.'], BAD_LEVEL: [400, 'Niveau invalide.'], BAD_STATUS: [400, 'Statut invalide.'], BAD_TRANSITION: [409, 'Transition impossible depuis le statut actuel.'],
-  ORG_NAME_REQUIRED: [400, 'Le nom de la structure est obligatoire.'], BAD_SIRET: [400, 'Le SIRET doit comporter 14 chiffres.'], BAD_FILTER: [400, 'Filtre invalide.'],
+  ORG_NAME_REQUIRED: [400, 'Le nom de la structure est obligatoire.'], BAD_SIRET: [400, 'Le SIRET doit comporter 14 chiffres.'], BAD_FILTER: [400, 'Filtre invalide.'], REQUEST_NOT_FOUND: [404, 'Demande introuvable.'], NOT_PENDING: [409, 'Cette demande a déjà été traitée.'], REASON_REQUIRED: [400, 'Le motif du refus est obligatoire (5 caractères minimum).'], ORG_NOT_APPROVED: [409, 'L’organisation n’est pas approuvée.'], CHECKLIST_INCOMPLETE: [409, 'La checklist de l’évènement n’est plus complète.'],
 };
 export const adminError = (m?: string): { status: number; message: string } => ({ status: ERR[m ?? '']?.[0] ?? 500, message: ERR[m ?? '']?.[1] ?? 'Erreur inattendue. Réessaie.' });
 

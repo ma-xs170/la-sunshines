@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next';
 import { getAllEditions } from '@/lib/content';
 import { getArtistProfiles } from '@/lib/artistProfiles';
 import { listPublicOrganizerSlugs } from '@/lib/publicOrganizer';
+import { listDbEditionSlugs } from '@/lib/dbEvents';
 
 const BASE = (
   process.env.NEXT_PUBLIC_SITE_URL || 'https://la-sunshines.vercel.app'
@@ -27,6 +28,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: now,
   }));
 
+  const dbEditions = (await listDbEditionSlugs()).map((slug) => ({ url: `${BASE}/editions/${slug}`, lastModified: now }));
+
   const artists = getArtistProfiles().map((a) => ({
     url: `${BASE}/artistes/${a.slug}`,
     lastModified: now,
@@ -37,6 +40,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...STATIC_ROUTES.map((r) => ({ url: `${BASE}${r}`, lastModified: now })),
     ...editions,
+    ...dbEditions,
     ...artists,
     ...organizers,
   ];

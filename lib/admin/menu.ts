@@ -1,7 +1,7 @@
 // Menu de l'espace admin (mêmes principes que lib/organizer/menu.ts : PUR, testable). Le contrôle réel reste côté serveur.
 import type { IconName } from '@/components/Icon';
 
-export interface AdminLeaf { label: string; href: string; superOnly?: boolean; badge?: 'support' | 'pending'; external?: boolean }
+export interface AdminLeaf { label: string; href: string; superOnly?: boolean; badge?: 'support' | 'pending' | 'publications'; external?: boolean }
 export interface AdminGroup { id: string; label: string; icon: IconName; items: AdminLeaf[] }
 
 const SUP = '/admin/gestion/support';
@@ -12,7 +12,7 @@ export function adminMenu(): AdminGroup[] {
     { id: 'dashboard', label: 'Tableau de bord', icon: 'grid', items: [{ label: 'Tableau de bord', href: '/admin' }] },
     { id: 'orgs', label: 'Organisateurs', icon: 'shield', items: [{ label: 'Organisateurs', href: '/admin/gestion/organisateurs', badge: 'pending' }] },
     { id: 'events', label: 'Évènements', icon: 'ticket', items: [
-      { label: 'Tous les évènements', href: '/admin/gestion/evenements' }, { label: 'Transférer un évènement', href: '/admin/gestion/transfert' },
+      { label: 'Tous les évènements', href: '/admin/gestion/evenements' }, { label: 'Publications à valider', href: '/admin/gestion/publications', badge: 'publications' }, { label: 'Transférer un évènement', href: '/admin/gestion/transfert' },
     ] },
     { id: 'admins', label: 'Administrateurs', icon: 'phone', items: [{ label: 'Administrateurs', href: '/admin/gestion/administrateurs', superOnly: true }] },
     { id: 'support', label: 'Support', icon: 'help', items: [
@@ -52,7 +52,7 @@ export function activeAdminGroup(groups: AdminGroup[], pathname: string, params:
   return groups.find((g) => g.items.some((i) => isAdminActive(i.href, pathname, params)))?.id ?? null;
 }
 
-const CRUMB: Record<string, string> = { gestion: 'Gestion', organisateurs: 'Organisateurs', evenements: 'Évènements', transfert: 'Transfert', administrateurs: 'Administrateurs', support: 'Support', calendrier: 'Calendrier', audit: 'Journal d’audit', reglages: 'Réglages', billetterie: 'Billetterie', commandes: 'Commandes', invitations: 'Invitations', aide: 'Aide', contenu: 'Contenu du site', actualites: 'Actualités', scan: 'Scan' };
+const CRUMB: Record<string, string> = { gestion: 'Gestion', organisateurs: 'Organisateurs', evenements: 'Évènements', transfert: 'Transfert', publications: 'Publications à valider', administrateurs: 'Administrateurs', support: 'Support', calendrier: 'Calendrier', audit: 'Journal d’audit', reglages: 'Réglages', billetterie: 'Billetterie', commandes: 'Commandes', invitations: 'Invitations', aide: 'Aide', contenu: 'Contenu du site', actualites: 'Actualités', scan: 'Scan' };
 export function adminCrumbs(pathname: string): { label: string; href?: string }[] {
   const parts = pathname.replace(/^\/admin\/?/, '').split('/').filter((p) => p && p !== 'gestion');
   const out: { label: string; href?: string }[] = [{ label: 'Administration', href: '/admin' }];
