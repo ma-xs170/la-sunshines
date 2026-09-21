@@ -41,6 +41,10 @@ export default async function BilletterieAdminPage() {
   const { data: events } = await db.from('ticketed_events').select('id, event_slug, status, ticketing_enabled, capacity, starts_at').order('starts_at', { ascending: false });
   const { data: orgs } = await db.from('organizers').select('id, name, legal_form, siret, responsible_name, address, contact_email').order('created_at');
   const names = new Map(getAllEditions({ includeHidden: true }).map((e) => [e.slug, e.name]));
+  // tarifs actifs par événement (pour dire clairement pourquoi un événement n'est pas visible du public)
+  const { data: tierRows } = await db.from('ticket_tiers').select('ticketed_event_id, is_active, archived_at');
+  const activeTiers = new Map<string, number>();
+  for (const t of tierRows ?? []) if (t.is_active && !t.archived_at) activeTiers.set(t.ticketed_event_id as string, (activeTiers.get(t.ticketed_event_id as string) ?? 0) + 1);
 
   const rows = await Promise.all(
     (events ?? []).map(async (e) => {
@@ -64,18 +68,48 @@ export default async function BilletterieAdminPage() {
         <p className="admin-hint">Pour configurer les dates, tarifs et stocks : ouvre l’événement dans l’admin, bloc « Billetterie ».</p>
         {rows.length === 0 && <p className="admin-hint">Aucun événement configuré pour l’instant.</p>}
         <ul className="admin-list">
-          {rows.map((r) => (
-            <li key={r.id} className="admin-list__item">
-              <div>
-                <strong>{names.get(r.event_slug) ?? r.event_slug}</strong>
-                {!names.has(r.event_slug) && <span className="admin-error"> — événement éditorial introuvable (slug modifié ?)</span>}
-                <p className="admin-hint">
-                  {formatGp(r.starts_at)} · {STATUS[r.status] ?? r.status} · billetterie {r.ticketing_enabled ? 'activée' : 'désactivée'} · {r.consumed} / {r.capacity} places
-                </p>
-                <EventStats slug={r.event_slug} />
-              </div>
-            </li>
-          ))}
+          {rows.map((r) => {
+            const known = names.has(r.event_slug);
+            const tiers = activeTiers.get(r.id) ?? 0;
+            // Pourquoi le public ne voit pas (encore) cet événement — dans l'ordre où l'admin peut agir.
+            const why: string[] = [];
+            if (!known) why.push('Aucun événement éditorial avec ce nom (slug) sur ce site : il n’a pas de page publique. (Un événement de test créé sur ton ordinateur n’existe pas en production.)');
+            if (r.status === 'draft') why.push('Statut « Brouillon » : passe-le en « Publié ».');
+            else if (r.status === 'closed') why.push('Statut « Clos » : les ventes sont arrêtées.');
+            else if (r.status === 'cancelled') why.push('Statut « Annulé ».');
+            if (!r.ticketing_enabled) why.push('Billetterie désactivée : active l’interrupteur « Billetterie activée ».');
+            if (tiers === 0) why.push('Aucun tarif actif : ajoute un tarif.');
+            const configOk = why.length === 0;
+            const visible = configOk && settings.dbMode === 'native';
+            return (
+              <li key={r.id} className="admin-list__item">
+                <div>
+                  <div className="tb-evt__head">
+                    <strong>{names.get(r.event_slug) ?? r.event_slug}</strong>
+                    <span className={'tb-evt__vis ' + (visible ? 'tb-evt__vis--ok' : 'tb-evt__vis--off')}>
+                      {visible ? 'Visible du public' : 'Non visible du public'}
+                    </span>
+                  </div>
+                  <p className="admin-hint">
+                    {formatGp(r.starts_at)} · {STATUS[r.status] ?? r.status} · billetterie {r.ticketing_enabled ? 'activée' : 'désactivée'} · {tiers} tarif{tiers > 1 ? 's' : ''} actif{tiers > 1 ? 's' : ''} · {r.consumed} / {r.capacity} places
+                  </p>
+                  {(!visible) && (
+                    <ul className="tb-evt__why">
+                      {why.map((w) => <li key={w}>{w}</li>)}
+                      {configOk && settings.dbMode !== 'native' && <li>Configuration prête, mais le mode public réel est <strong>Bizouk</strong> : les tarifs ne s’affichent pas au public (voulu tant que tu n’ouvres pas les ventes).{settings.forced ? ' Sur cet ordinateur, le mode de test forcé les affiche.' : ''}</li>}
+                    </ul>
+                  )}
+                  <div className="tb-evt__actions">
+                    {known
+                      ? <a className="btn btn--outline" href={`/admin?edit=${encodeURIComponent(r.event_slug)}`}>Ouvrir l’évènement dans l’admin</a>
+                      : <span className="admin-hint">Lien indisponible : l’événement éditorial est introuvable sur ce site.</span>}
+                    {known && <a className="btn btn--outline" href={`/editions/${encodeURIComponent(r.event_slug)}`} target="_blank" rel="noopener noreferrer">Voir la page publique</a>}
+                  </div>
+                  <EventStats slug={r.event_slug} />
+                </div>
+              </li>
+            );
+          })}
         </ul>
       </section>
     </>,

@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function AdminPage() {
+export default async function AdminPage({ searchParams }: { searchParams: Promise<{ edit?: string | string[] }> }) {
   if (!adminConfigured()) {
     return (
       <main className="admin-shell">
@@ -85,9 +85,13 @@ export default async function AdminPage() {
     };
   });
   const analytics = await pageviewSummary(7, 10);
+  // lien profond : /admin?edit=<slug> ouvre directement l'événement dans l'onglet Événements
+  const editParam = (await searchParams).edit;
+  const edit = (Array.isArray(editParam) ? editParam[0] : editParam) ?? '';
 
   return (
     <AdminDashboard
+      initialEdit={/^[a-z0-9][a-z0-9-]{0,98}$/.test(edit) ? edit : undefined}
       initialStore={store}
       editions={editions}
       analytics={analytics}

@@ -1,8 +1,12 @@
 node_modules
 .next
+.next-build
 out
 dist
 .DS_Store
 .env
 .env*.local
 next-env.d.ts
+
+# Captures de référence (données réelles, dont un IBAN) : ne jamais commiter
+docs/inspiration/

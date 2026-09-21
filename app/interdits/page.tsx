@@ -4,6 +4,7 @@ import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import PageHero from '@/components/PageHero';
 import Icon, { type IconName } from '@/components/Icon';
+import { RULES } from '@/lib/rulesText';
 
 export const metadata: Metadata = {
   title: 'Règlement · LA SUNSHINES',
@@ -13,50 +14,8 @@ export const metadata: Metadata = {
 
 type Section = { icon: IconName; title: string; rules: ReactNode[] };
 
-const SECTIONS: Section[] = [
-  {
-    icon: 'shield',
-    title: 'À l’entrée',
-    rules: [
-      'Billet (QR code) et pièce d’identité obligatoires.',
-      'Contrôle de sécurité à l’entrée, avec ton accord.',
-      'Tout objet retiré à l’entrée est remis à la fin de l’événement.',
-      'Aucune entrée après la fermeture des portes.',
-    ],
-  },
-  {
-    icon: 'shirt',
-    title: 'Tenue',
-    rules: [
-      'Short / bermuda : interdit.',
-      'Chaussures fermées : obligatoire.',
-      'Les filles sont autorisées avec les sacs à main.',
-    ],
-  },
-  {
-    icon: 'close',
-    title: 'Interdits',
-    rules: [
-      'Alcool, tabac, vape et drogues.',
-      'Armes, objets dangereux et bouteilles en verre.',
-    ],
-  },
-  {
-    icon: 'sparkles',
-    title: 'Respect',
-    rules: [
-      'Respecte les autres et l’équipe. Toute violence ou tout harcèlement entraîne une exclusion.',
-      'Suis les consignes de l’équipe.',
-    ],
-  },
-  {
-    icon: 'ticket',
-    title: 'Refus d’accès',
-    rules: [
-      'L’organisation se réserve le droit de refuser l’accès à toute personne ne respectant pas le présent règlement, sans remboursement.',
-    ],
-  },
-];
+const ICONS: Record<string, IconName> = { 'À l’entrée': 'shield', Tenue: 'shirt', Interdits: 'close', Respect: 'sparkles', 'Refus d’accès': 'ticket' };
+const SECTIONS: Section[] = RULES.map((r) => ({ icon: ICONS[r.title] ?? 'shield', title: r.title, rules: r.rules }));
 
 export default function InterditsPage() {
   return (

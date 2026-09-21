@@ -49,14 +49,14 @@ export default function TicketPanel({ slug, tiers: initial, feePercent, feeFixed
   }, [slug]);
 
   useEffect(() => {
-    refresh();
-    const id = window.setInterval(refresh, 15000);
-    const onVisible = () => document.visibilityState === 'visible' && refresh();
+    // stock à la seconde près (2 s), en pause quand l'onglet est masqué, immédiat au retour
+    let id: number | undefined;
+    const start = () => { if (id === undefined) id = window.setInterval(refresh, 2000); };
+    const stop = () => { if (id !== undefined) { window.clearInterval(id); id = undefined; } };
+    const onVisible = () => { if (document.visibilityState === 'visible') { refresh(); start(); } else stop(); };
+    onVisible();
     document.addEventListener('visibilitychange', onVisible);
-    return () => {
-      window.clearInterval(id);
-      document.removeEventListener('visibilitychange', onVisible);
-    };
+    return () => { stop(); document.removeEventListener('visibilitychange', onVisible); };
   }, [refresh]);
 
   // une quantité choisie ne doit jamais dépasser ce qui reste

@@ -9,7 +9,9 @@ import { supabaseConfigured } from '@/lib/supabase/config';
 import { supabaseAdminConfigured } from '@/lib/supabase/admin';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
-export type OrgRole = 'owner' | 'manager' | 'viewer';
+import { can, type OrgRole as EffectiveRole } from './roles';
+
+export type OrgRole = 'owner' | 'manager' | 'staff';
 
 export interface OrgSession {
   userId: string;
@@ -19,7 +21,9 @@ export interface OrgSession {
   memberships: { organizerId: string; role: OrgRole }[];
 }
 
-export const canManage = (s: OrgSession, role?: string | null) => s.isAdmin || role === 'owner' || role === 'manager' || role === 'admin';
+export const canManage = (s: OrgSession, role?: string | null) => s.isAdmin || can(role, 'manage');
+export const canOwn = (s: OrgSession, role?: string | null) => s.isAdmin || can(role, 'owner');
+export type { EffectiveRole };
 
 /** Session organisateur, ou null si non connecté. `hasAccess` = admin ou membre. */
 export async function getOrgSession(): Promise<(OrgSession & { hasAccess: boolean }) | null> {

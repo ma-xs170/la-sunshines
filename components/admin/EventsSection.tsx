@@ -1361,16 +1361,23 @@ export default function EventsSection({
   flash,
   editions,
   startInCreate = false,
+  initialEditSlug,
 }: {
   store: Store;
   setStore: (s: Store) => void;
   flash: (t: string, saved?: boolean) => void;
   editions: EditionLite[];
   startInCreate?: boolean;
+  /** ouvre directement l'édition de cet événement (lien /admin?edit=<slug>) s'il existe. */
+  initialEditSlug?: string;
 }) {
   const [eds, setEds] = useState<EditionLite[]>(editions);
   const [view, setView] = useState<View>(
-    startInCreate ? { mode: 'create' } : { mode: 'list' },
+    startInCreate
+      ? { mode: 'create' }
+      : initialEditSlug && editions.some((e) => e.slug === initialEditSlug)
+        ? { mode: 'edit', slug: initialEditSlug }
+        : { mode: 'list' },
   );
   const [filter, setFilter] = useState<Filter>('upcoming');
 

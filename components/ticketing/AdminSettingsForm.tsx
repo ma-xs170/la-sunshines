@@ -23,7 +23,12 @@ export default function AdminSettingsForm({ initial }: { initial: TicketingSetti
 
   async function switchMode(next: 'bizouk' | 'native') {
     if (next === mode) return;
-    if (next === 'native' && !window.confirm('Activer la billetterie interne ? Les événements dont la billetterie est activée n’afficheront plus Bizouk.')) return;
+    if (next === 'native') {
+      // Ce réglage est PARTAGÉ avec la production : il ouvre les ventes au PUBLIC. Pour tester, utilise plutôt
+      // TICKETING_FORCE_MODE (local / Preview) et le bouton « Activer et publier pour le test » de l'événement.
+      const typed = window.prompt('ATTENTION : ce bouton OUVRE LES VENTES AU PUBLIC, aussi en production (réglage partagé). Pour tester seulement, n’utilise pas ce bouton.\n\nPour ouvrir les ventes au public, tape OUVRIR :');
+      if (typed?.trim() !== 'OUVRIR') return;
+    }
     setBusy(true);
     const err = await patch('ticketing_mode', next);
     setBusy(false);
@@ -49,6 +54,11 @@ export default function AdminSettingsForm({ initial }: { initial: TicketingSetti
   return (
     <div className="admin-panel glass">
       <h2>Mode de billetterie</h2>
+      {mode === 'native' && (
+        <p className="admin-error" role="alert" style={{ marginBottom: 12 }}>
+          ⚠ Les ventes sont OUVERTES AU PUBLIC (mode réel = billetterie interne, partagé avec la production). Les pages /cgv et /remboursement sont visibles.
+        </p>
+      )}
       {initial.forced && (
         <p className="admin-note" role="status">
           <strong>Mode de test forcé sur cet environnement</strong> (<code>TICKETING_FORCE_MODE=internal</code>) : la

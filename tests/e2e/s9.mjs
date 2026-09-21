@@ -14,7 +14,7 @@ const { ok, section, as, q, one, webhook, sessionCompleted, mailState, USERS } =
 const A = 'la-nuit-des-ombres', B = 'welcome-to-dominica';
 const waitMail = async (pred) => { for (let i = 0; i < 40; i++) { const m = (await mailState()).sent.find(pred); if (m) return m; await new Promise((r) => setTimeout(r, 150)); } return undefined; };
 const to = (m) => [].concat(m.to);
-const cards = (html) => [...html.matchAll(/org-card__title">([^<]*)</g)].map((m) => m[1]);
+const cards = (html) => [...html.matchAll(/org-card__title"><a[^>]*>([^<]*)</g)].map((m) => m[1]);
 const attBuf = (a) => Buffer.from(a.content?.data ?? a.content, 'base64');
 const hasPoppler = (() => { try { execFileSync('pdftoppm', ['-v'], { stdio: 'ignore' }); return true; } catch { return false; } })();
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'sun-pdf-'));
@@ -28,11 +28,11 @@ const admin = await as(USERS.admin), staff = await as(USERS.staff), cust = await
 const tiers = await L.setupEvent(admin);
 const tiersB = await L.setupEvent(admin, { slug: B, tiers: [{ key: 's', name: 'Standard B', price_cents: 1200, quantity_total: 5, max_per_order: 5 }] });
 
-// Organisateur A = THE MOUV (par défaut) : staff = responsable (owner), cust2 = lecteur. Organisateur B (sans adresse de réponse) : orgb = owner.
+// Organisateur A = THE MOUV (par défaut) : staff = responsable (owner), cust2 = staff de l'organisation (scan uniquement). Organisateur B (sans adresse de réponse) : orgb = owner.
 const orgA = (await one(`select id from public.organizers where is_default`)).id;
 const [{ id: orgB }] = await q(`insert into public.organizers (name, siret, responsible_name, contact_email) values ('Autre Orga', '', 'Dupont Olivia', '') returning id`);
 await q(`update public.ticketed_events set organizer_id = $1 where event_slug = $2`, [orgB, B]);
-await q(`insert into public.organizer_members (organizer_id, user_id, role) values ($1, $2, 'owner'), ($1, $3, 'viewer'), ($4, $5, 'owner')`, [orgA, USERS.staff.id, USERS.cust2.id, orgB, USERS.orgb.id]);
+await q(`insert into public.organizer_members (organizer_id, user_id, role) values ($1, $2, 'owner'), ($1, $3, 'staff'), ($4, $5, 'owner')`, [orgA, USERS.staff.id, USERS.cust2.id, orgB, USERS.orgb.id]);
 
 async function buy(client, slug, key, tierIds, qty, names) {
   const body = L.checkoutBody(slug, [[tierIds[key], qty]]);
@@ -137,7 +137,7 @@ ok(r.status === 200 && /Accès réservé/.test(r.data), 'un simple client voit �
 r = await cust.req(`/organisateur/evenements/${A}`);
 ok(r.status === 404, `un simple client n'accède pas à une fiche événement → 404 (${r.status})`);
 r = await staff.req('/organisateur');
-ok(r.status === 200 && /Mes événements/.test(r.data) && /THE MOUV/.test(r.data), 'responsable de THE MOUV : espace organisateur');
+ok(r.status === 200 && /Bienvenue/.test(r.data) && /THE MOUV/.test(r.data), 'responsable de THE MOUV : espace organisateur');
 ok(cards(r.data).join('|') === 'La Nuit Des Ombres', `il voit SES événements et pas ceux de l'autre organisateur (${cards(r.data)})`);
 r = await staff.req(`/organisateur/evenements/${B}`);
 ok(r.status === 404, `fiche d'un événement d'un autre organisateur → 404 (${r.status})`);
@@ -146,7 +146,16 @@ ok(r.status === 200 && cards(r.data).join('|') === 'Welcome to Dominica', `l'aut
 r = await orgb.req(`/organisateur/evenements/${A}`);
 ok(r.status === 404, `… et pas la fiche de THE MOUV → 404 (${r.status})`);
 r = await admin.req('/organisateur');
-ok(r.status === 200 && cards(r.data).length === 2, `admin : voit tous les organisateurs (${cards(r.data)})`);
+ok(r.status === 200 && cards(r.data).join('|') === 'La Nuit Des Ombres', `admin : voit l'organisation courante (THE MOUV) (${cards(r.data)})`);
+r = await admin.req('/api/organisateur/org', { method: 'POST', body: `id=${orgB}&next=/organisateur`, raw: true, headers: { 'content-type': 'application/x-www-form-urlencoded' } });
+ok(r.status === 303, `sélecteur d'organisation : redirection (${r.status})`);
+r = await admin.req('/organisateur');
+ok(cards(r.data).join('|') === 'Welcome to Dominica', `admin : après changement d'organisation, voit l'autre (${cards(r.data)})`);
+r = await admin.req('/api/organisateur/org', { method: 'POST', body: `id=${orgA}&next=//evil.example`, raw: true, headers: { 'content-type': 'application/x-www-form-urlencoded' } });
+ok(r.status === 303 && new URL(r.headers.get('location')).origin === L.BASE, `redirection ouverte refusée (${r.headers.get('location')})`);
+r = await orgb.req('/api/organisateur/org', { method: 'POST', body: `id=${orgA}&next=/organisateur`, raw: true, headers: { 'content-type': 'application/x-www-form-urlencoded' } });
+r = await orgb.req('/organisateur');
+ok(cards(r.data).join('|') === 'Welcome to Dominica', `on ne peut pas choisir une organisation dont on n'est pas membre (${cards(r.data)})`);
 
 section('Organisateur : fiche événement');
 r = await staff.req(`/organisateur/evenements/${A}`);
@@ -156,9 +165,9 @@ ok(/role="progressbar"/.test(r.data) && /Évolution des ventes/.test(r.data), 'b
 ok(/Élodie Dupont-Martin/.test(r.data) && /Denis Autre/.test(r.data), 'liste des participants');
 ok(/cust@test\.local/.test(r.data), 'email des participants (acheteur) visible du responsable');
 ok(!/Bob BetaOrga/.test(r.data), 'aucun participant de l\'autre organisateur');
-ok(/Exporter les participants/.test(r.data), 'le responsable voit le bouton d\'export');
+ok(/Exporter \(CSV\)/.test(r.data), 'le responsable voit le bouton d\'export');
 const rs = await cust2.req(`/organisateur/evenements/${A}`);
-ok(rs.status === 200 && !/Exporter les participants/.test(rs.data) && /lecture seule/.test(rs.data), 'le lecteur consulte, sans export ni envoi');
+ok(rs.status === 200 && !/Billets vendus/.test(rs.data) && !/Exporter/.test(rs.data), `le staff d'organisation n'a que le scan : ni chiffres, ni participants (${rs.status})`);
 r = await staff.req(`/organisateur/evenements/${A}?q=zed`);
 ok(/=Zed/.test(r.data) && !/Élodie/.test(r.data), 'recherche par nom');
 r = await staff.req(`/organisateur/evenements/${A}?tier=${tiers.early}`);
@@ -182,7 +191,7 @@ ok(r.status === 401, `sans connexion → 401 (${r.status})`);
 r = await cust.req(`/api/organisateur/events/${A}/export`);
 ok(r.status === 403, `simple client → 403 (${r.status})`);
 r = await cust2.req(`/api/organisateur/events/${A}/export`);
-ok(r.status === 403, `lecteur → 403 (${r.status})`);
+ok(r.status === 403, `staff → 403 (${r.status})`);
 r = await orgb.req(`/api/organisateur/events/${A}/export`);
 ok(r.status === 403, `autre organisateur → 403 (${r.status})`);
 r = await staff.req(`/api/organisateur/events/${A}/export`);
@@ -199,7 +208,7 @@ ok(r.status === 400, `filtre invalide → 400 (${r.status})`);
 section('Organisateur : renvoyer le billet PDF');
 await L.resetMocks();
 r = await cust2.req(`/api/organisateur/events/${A}/resend`, { method: 'POST', body: { ticketId: tk1[0].id } });
-ok(r.status === 403, `lecteur → 403 (${r.status})`);
+ok(r.status === 403, `staff → 403 (${r.status})`);
 r = await orgb.req(`/api/organisateur/events/${A}/resend`, { method: 'POST', body: { ticketId: tk1[0].id } });
 ok(r.status === 403, `autre organisateur → 403 (${r.status})`);
 r = await staff.req(`/api/organisateur/events/${A}/resend`, { method: 'POST', body: { ticketId: tkB.id } });
@@ -222,7 +231,7 @@ const url = `/api/organisateur/events/${A}/messages`;
 const msg = { subject: 'Ouverture des portes', body: 'Les portes ouvrent à 19 h. <b>Pense</b> à ta pièce d\'identité.', scope: 'all', noPromo: true };
 r = await anon.req(url, { method: 'POST', body: { ...msg, action: 'preview' } });
 ok(r.status === 401, `sans connexion → 401 (${r.status})`);
-for (const [who, c] of [['simple client', cust], ['lecteur', cust2], ['autre organisateur', orgb]]) {
+for (const [who, c] of [['simple client', cust], ['staff', cust2], ['autre organisateur', orgb]]) {
   r = await c.req(url, { method: 'POST', body: { ...msg, action: 'preview' } });
   ok(r.status === 403, `${who} → 403 (${r.status})`);
 }

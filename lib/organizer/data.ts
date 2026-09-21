@@ -19,6 +19,19 @@ const MESSAGES: Record<string, OrgFailure> = {
   NO_RECIPIENTS: { status: 400, message: 'Aucun destinataire pour ce choix.' },
   TOO_MANY_RECIPIENTS: { status: 400, message: 'Trop de destinataires (500 maximum par message).' },
   RATE_LIMIT: { status: 429, message: 'Limite atteinte : 3 messages maximum par événement et par 24 heures.' },
+  ORG_NAME_REQUIRED: { status: 400, message: 'Le nom de la structure est obligatoire.' },
+  BAD_SIRET: { status: 400, message: 'Le SIRET doit comporter 14 chiffres.' },
+  STRIPE_ACCOUNT_LOCKED: { status: 409, message: 'Un compte Stripe est déjà lié à cette organisation.' },
+  BAD_EMAIL: { status: 400, message: 'Adresse email invalide.' },
+  BAD_FIELD: { status: 400, message: 'Champ non modifiable.' },
+  BAD_PATCH: { status: 400, message: 'Requête invalide.' },
+  BAD_VISIBILITY: { status: 400, message: 'Visibilité invalide.' },
+  BAD_PUBLISH: { status: 400, message: 'Mode de publication invalide.' },
+  BAD_URL: { status: 400, message: 'Adresse de fichier invalide.' },
+  BAD_STATUS: { status: 400, message: 'Statut invalide.' },
+  VENUE_NOT_FOUND: { status: 404, message: 'Lieu introuvable.' },
+  SESSION_NOT_FOUND: { status: 404, message: 'Session introuvable.' },
+  CONFIRM_DATE_CHANGE: { status: 409, message: 'Les ventes sont ouvertes : confirme le changement de date (les acheteurs verront la nouvelle date).' },
   REPLY_TO_MISSING: { status: 409, message: 'L’organisateur n’a pas d’adresse de réponse : [À COMPLÉTER] dans les informations de l’organisateur.' },
 };
 
@@ -39,6 +52,13 @@ export async function orgRpc<T>(fn: string, args: Record<string, unknown>): Prom
 export interface OrgEventRow {
   slug: string; status: string; ticketing_enabled: boolean; starts_at: string; venue_name: string; capacity: number;
   sold: number; reserved: number; entered: number; organizer_id: string; organizer_name: string;
+  my_role: string; archived: boolean; revenue_cents: number | null;
+}
+export interface OrgAccountRow {
+  id: string; name: string; my_role: 'admin' | 'owner' | 'manager' | 'staff';
+  reference: string | null; account_status: 'pending' | 'approved' | 'suspended';
+  legal_form: string | null; siret: string | null; responsible_name: string | null; address: string | null; contact_email: string | null;
+  stripe_connected: boolean | null; stripe_ready: boolean | null;
 }
 export interface OrgTierStat { tier_id: string; name: string; price_cents: number; quantity_total: number; archived: boolean; sold: number; reserved: number; revenue_cents: number }
 export interface OrgStats {
@@ -57,3 +77,10 @@ export function editorial(slug: string): { title: string; flyer: string | null; 
   const e = getAllEditions({ includeHidden: true }).find((x) => x.slug === slug);
   return { title: e?.name ?? slug, flyer: e?.flyer ?? null, dateLabel: e?.dateFull ?? '' };
 }
+
+export interface OrgTierFull {
+  id: string; name: string; description: string; price_cents: number; quantity_total: number; max_per_order: number;
+  sales_start: string | null; sales_end: string | null; is_active: boolean; archived: boolean; sort_order: number; sold: number; consumed: number;
+}
+export interface OrgTiers { capacity: number; consumed: number; tiers: OrgTierFull[] }
+export interface OrgBrief { id: string; slug: string; starts_at: string; venue_name: string; organizer_name: string; my_role: string }

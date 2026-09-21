@@ -18,3 +18,11 @@ export function resolveForcedMode(env: ForceEnv): 'native' | null {
 export function forceModeIgnoredInProduction(env: ForceEnv): boolean {
   return (env.TICKETING_FORCE_MODE ?? '').trim() !== '' && (env.VERCEL_ENV ?? '').trim().toLowerCase() === 'production';
 }
+
+/**
+ * Événement éditorial de TEST (lib/testEdition.ts) : défini dans le CODE, présent seulement quand le mode de test est actif
+ * (local / Preview avec TICKETING_FORCE_MODE=internal), jamais en production.
+ */
+export function testEditionEnabled(env: ForceEnv): boolean {
+  return resolveForcedMode(env) === 'native';
+}

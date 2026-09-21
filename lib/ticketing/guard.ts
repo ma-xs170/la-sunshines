@@ -3,11 +3,10 @@
 // ne suffit pas), la service role configurée, et un slug d'événement connu.
 
 import { NextResponse } from 'next/server';
-import { revalidatePath, revalidateTag } from 'next/cache';
 import { requireApiRole } from '@/lib/auth/roles';
 import { supabaseAdminConfigured } from '@/lib/supabase/admin';
 import { getAllEditions } from '@/lib/content';
-import { TICKETING_CACHE_TAG } from '@/lib/supabase/public';
+import { revalidatePublicSite } from '@/lib/revalidate';
 import { SLUG_RE } from './schemas';
 
 export async function requireBilletterieAdmin(): Promise<
@@ -32,6 +31,5 @@ export function editionForSlug(slug: string) {
 
 /** Après une modification : les pages publiques relisent la config (sans redéploiement). */
 export function revalidateTicketing() {
-  revalidateTag(TICKETING_CACHE_TAG);
-  revalidatePath('/editions/[slug]', 'page');
+  revalidatePublicSite();
 }
