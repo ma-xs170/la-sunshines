@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { formatEuro, formatGp } from '@/lib/ticketing/time';
+import { formatEuro, formatGp, formatPrice } from '@/lib/ticketing/time';
 
 interface Detail {
   order: { id: string; order_number: string; status: string; source: string; buyer_email: string; buyer_first_name: string; buyer_last_name: string; buyer_phone: string;
@@ -62,11 +62,11 @@ export default function OrderDetail({ id }: { id: string }) {
       <section className="admin-panel glass">
         <h2>{o.order_number} <span className={`tk__badge tk__badge--${o.status}`}>{o.status}</span></h2>
         <p>{o.buyer_first_name} {o.buyer_last_name} — {o.buyer_email} {o.buyer_phone && `— ${o.buyer_phone}`}</p>
-        <p className="admin-hint">{o.source === 'manual' ? 'Invitation (sans paiement)' : `Payée le ${o.paid_at ? formatGp(o.paid_at) : '—'}`} · {o.order_items[0]?.event_title} · {formatGp(o.order_items[0]?.event_starts_at)}</p>
+        <p className="admin-hint">{o.source === 'manual' ? 'Invitation (sans paiement)' : o.total_cents === 0 ? `Commande gratuite (aucun paiement, aucun remboursement) du ${o.paid_at ? formatGp(o.paid_at) : '—'}` : `Payée le ${o.paid_at ? formatGp(o.paid_at) : '—'}`} · {o.order_items[0]?.event_title} · {formatGp(o.order_items[0]?.event_starts_at)}</p>
         <table className="ord"><tbody>
-          {o.order_items.map((i) => <tr key={i.id}><td>{i.tier_name} × {i.quantity}</td><td>{formatEuro(i.unit_price_cents * i.quantity)}</td></tr>)}
+          {o.order_items.map((i) => <tr key={i.id}><td>{i.tier_name} × {i.quantity}</td><td>{formatPrice(i.unit_price_cents * i.quantity)}</td></tr>)}
           {o.fee_cents > 0 && <tr><td>Frais de service</td><td>{formatEuro(o.fee_cents)}</td></tr>}
-          <tr><td><strong>Total</strong></td><td><strong>{formatEuro(o.total_cents)}</strong></td></tr>
+          <tr><td><strong>Total</strong></td><td><strong>{formatPrice(o.total_cents)}</strong></td></tr>
           {o.refunded_cents > 0 && <tr><td>Remboursé</td><td>{formatEuro(o.refunded_cents)}</td></tr>}
         </tbody></table>
       </section>

@@ -32,6 +32,16 @@ const MESSAGES: Record<string, OrgFailure> = {
   VENUE_NOT_FOUND: { status: 404, message: 'Lieu introuvable.' },
   SESSION_NOT_FOUND: { status: 404, message: 'Session introuvable.' },
   CONFIRM_DATE_CHANGE: { status: 409, message: 'Les ventes sont ouvertes : confirme le changement de date (les acheteurs verront la nouvelle date).' },
+  ORG_NOT_APPROVED: { status: 409, message: 'Cette organisation n’est pas encore approuvée : la création d’évènements est bloquée.' },
+  TITLE_REQUIRED: { status: 400, message: 'Le titre doit faire au moins 3 caractères.' },
+  BAD_SLUG: { status: 400, message: 'Adresse de l’évènement invalide.' },
+  BAD_MODE: { status: 400, message: 'Méthode de billetterie invalide.' },
+  BAD_BIZOUK: { status: 400, message: 'Code Bizouk invalide.' },
+  BAD_REGION: { status: 400, message: 'Région invalide.' },
+  BAD_DATE: { status: 400, message: 'Date ou heure invalide.' },
+  VENUE_REQUIRED: { status: 400, message: 'Le lieu est obligatoire.' },
+  SLUG_TAKEN: { status: 409, message: 'Cette adresse d’évènement existe déjà.' },
+  HAS_SALES: { status: 409, message: 'Des billets ont déjà été vendus : le mode de billetterie ne peut plus être changé.' },
   REPLY_TO_MISSING: { status: 409, message: 'L’organisateur n’a pas d’adresse de réponse : [À COMPLÉTER] dans les informations de l’organisateur.' },
 };
 
@@ -73,6 +83,24 @@ export interface OrgParticipant {
 }
 
 /** Titre, flyer et lieu éditoriaux d'un événement (getAllEditions, masqués inclus). */
+/** Titre d'un évènement : édition du site (code / content.json), sinon titre saisi à la création (event_details.title). */
+export async function eventTitle(slug: string): Promise<string> {
+  const ed = getAllEditions({ includeHidden: true }).find((x) => x.slug === slug);
+  if (ed) return ed.name;
+  const { data } = await createSupabaseAdminClient().from('ticketed_events').select('event_details(title)').eq('event_slug', slug).maybeSingle();
+  const d = data?.event_details as { title: string } | { title: string }[] | null | undefined;
+  const t = Array.isArray(d) ? d[0]?.title : d?.title;
+  return t || slug;
+}
+/** Titres saisis à la création, pour une liste de slugs (une seule requête). */
+export async function createdTitles(slugs: string[]): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  if (!slugs.length) return out;
+  const { data } = await createSupabaseAdminClient().from('ticketed_events').select('event_slug, event_details(title)').in('event_slug', slugs);
+  for (const r of data ?? []) { const d = r.event_details as { title: string } | { title: string }[] | null; const t = Array.isArray(d) ? d[0]?.title : d?.title; if (t) out.set(r.event_slug as string, t); }
+  return out;
+}
+
 export function editorial(slug: string): { title: string; flyer: string | null; dateLabel: string } {
   const e = getAllEditions({ includeHidden: true }).find((x) => x.slug === slug);
   return { title: e?.name ?? slug, flyer: e?.flyer ?? null, dateLabel: e?.dateFull ?? '' };

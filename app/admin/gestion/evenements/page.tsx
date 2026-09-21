@@ -1,3 +1,4 @@
+import LinkedEventsList from '@/components/organizer/LinkedEventsList';
 import type { Metadata } from 'next';
 import { adminRpc, requireAdminPage } from '@/lib/adminSpace';
 import { one } from '@/lib/organizer/event-data';
@@ -25,6 +26,7 @@ export default async function AllEventsPage({ searchParams }: { searchParams: Pr
           <tbody>{rows.map((e) => <tr key={e.slug}><td data-label="Évènement">{names.get(e.slug) ?? e.slug}<br /><span className="org-muted">{e.slug}</span></td><td data-label="Date">{formatGp(e.starts_at)}</td>
             <td data-label="Organisateur"><a href={`/admin/gestion/organisateurs/${e.organizer_id}`}>{e.organizer}</a><br /><code>{e.organizer_reference ?? ''}</code></td><td data-label="Statut">{ST[e.status]}</td><td data-label="Vendus">{e.sold} / {e.capacity}</td>
             <td><a className="btn btn--outline" href={`/admin/gestion/transfert?slug=${e.slug}`}>Transférer</a></td></tr>)}</tbody></table></div>)}
+      <LinkedEventsList />
     </>
   );
 }

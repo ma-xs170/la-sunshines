@@ -26,6 +26,12 @@ export const CHECKOUT_ERRORS: Record<string, { status: number; message: string }
   SOLD_OUT_EVENT: { status: 409, message: 'Plus assez de places pour cet événement.' },
   EMAIL_NOT_CONFIRMED: { status: 403, message: 'Confirme l’adresse e-mail de ton compte (lien reçu à l’inscription) pour réserver des billets gratuits.' },
   ACCOUNT_LIMIT: { status: 409, message: 'Tu as atteint le nombre maximum de billets gratuits autorisés par compte pour ce tarif.' },
+  PROMO_INVALID: { status: 400, message: 'Ce code promo n’existe pas ou n’est plus actif.' },
+  PROMO_EXPIRED: { status: 400, message: 'Ce code promo n’est plus valable (période dépassée).' },
+  PROMO_EXHAUSTED: { status: 409, message: 'Ce code promo a atteint son nombre maximum d’utilisations.' },
+  PROMO_NOT_APPLICABLE: { status: 400, message: 'Ce code promo ne s’applique pas aux billets choisis.' },
+  PROMO_FREE: { status: 400, message: 'Ce code rendrait la commande gratuite : il ne peut pas être utilisé pour un paiement.' },
+  PROMO_ALREADY: { status: 409, message: 'Un code promo est déjà appliqué à cette commande.' },
   PRICE_CHANGED: { status: 409, message: 'Les tarifs ont changé. Actualise la page et recommence.' },
 };
 
@@ -69,6 +75,22 @@ export async function reserveOrder(
   const row = (Array.isArray(data) ? data[0] : data) as ReservedOrder | undefined;
   if (!row) return { ok: false, status: 500, message: 'Réservation impossible pour le moment. Réessaie.' };
   return { ok: true, order: row };
+}
+
+/** Applique un code promo à la commande qui vient d'être réservée (avant la session Stripe). Tout ou rien : en cas de refus la commande n'est pas modifiée. */
+export async function applyPromo(
+  db: SupabaseClient,
+  args: { orderId: string; userId: string; code: string; settings: TicketingSettings },
+): Promise<{ ok: true; totals: { subtotal_cents: number; fee_cents: number; total_cents: number; discount_cents: number } } | { ok: false; status: number; message: string }> {
+  const { data, error } = await db.rpc('apply_promo', { p_user: args.userId, p_order: args.orderId, p_code: args.code, p_fee_percent: args.settings.feePercent, p_fee_fixed_cents: args.settings.feeFixedCents });
+  if (error) {
+    const known = CHECKOUT_ERRORS[error.message];
+    if (known) return { ok: false, ...known };
+    console.error('[checkout] apply_promo a échoué :', error);
+    return { ok: false, status: 500, message: 'Le code promo n’a pas pu être appliqué. Réessaie.' };
+  }
+  const row = (Array.isArray(data) ? data[0] : data) as { subtotal_cents: number; fee_cents: number; total_cents: number; discount_cents: number } | undefined;
+  return row ? { ok: true, totals: row } : { ok: false, status: 500, message: 'Le code promo n’a pas pu être appliqué. Réessaie.' };
 }
 
 /** Tarifs demandés : 'free' si TOUS sont à 0 €, sinon 'paid' (panier payant ou mixte). Lecture seule, sans verrou :

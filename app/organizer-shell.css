@@ -172,3 +172,10 @@ body.is-scroll-locked{overflow:hidden;}
 .cal-ev--region{border-color:#d9822b;box-shadow:0 0 0 1px #d9822b;} .cal-ev--venue{border-color:#b32020;box-shadow:0 0 0 1px #b32020;background:rgba(190,40,40,.12);} .cal-ev--off{opacity:.65;border-style:dashed;}
 .cal-week{display:flex;flex-wrap:wrap;gap:6px;}
 @media (max-width:640px){.cal-c{min-height:64px;} .cal-ev b{display:none;}}
+
+/* ---- espace admin : même cadre que l'organisateur ; le panneau « Contenu du site » y est intégré sans son propre menu ---- */
+.oshell--admin .otop .gsearch{flex:1;max-width:420px;margin-left:auto;}
+.admin-layout--embedded{display:block;min-height:0;}
+.admin-layout--embedded .admin-shell{margin-left:0;padding:0;max-width:none;}
+.admin-layout--embedded .admin-shell > *{max-width:none;}
+.oshell__main .admin-layout--embedded{padding:0 var(--gutter) var(--s-64);}

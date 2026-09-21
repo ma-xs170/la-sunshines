@@ -46,7 +46,7 @@ async function HelpBody() {
         <h2>1. Préparer un événement</h2>
         <ol className="admin-hint">
           <li>Ouvre l’événement dans <a href="/admin">/admin</a> &gt; Événements, bloc « Billetterie ».</li>
-          <li>Renseigne la capacité, la fenêtre de vente, puis crée les <strong>tarifs</strong> (prix minimum 0,50 €, capacité par tarif).</li>
+          <li>Renseigne la capacité, la fenêtre de vente, puis crée les <strong>tarifs</strong> (prix à 0 € pour un tarif gratuit, sinon au moins 0,50 € : minimum Stripe ; capacité par tarif).</li>
           <li>Coche « Billetterie activée pour cet événement » quand tout est prêt. Un tarif déjà vendu ne se supprime pas : il s’archive.</li>
           <li>Les stocks sont calculés en direct : capacité − billets payés − réservations en cours (15 minutes). Pas de tâche planifiée à surveiller.</li>
         </ol>

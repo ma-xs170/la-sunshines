@@ -15,7 +15,7 @@ export default async function OrganizerEventsPage() {
   if (!s) redirect('/connexion?next=/organisateur/evenements');
   if (!s.hasAccess || !current) redirect('/organisateur');
   const manage = can(current.my_role, 'manage');
-  const { ok, events } = await loadCardEvents(s.userId, current.id);
+  const { ok, events } = await loadCardEvents(s.userId, current.id, current.name);
   return (
     <main className="org org-home">
       <div className="org-head">

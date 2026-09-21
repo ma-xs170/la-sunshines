@@ -8,10 +8,11 @@ import ParticipantsSection from '@/components/organizer/ParticipantsSection';
 import TiersPanel from '@/components/organizer/TiersPanel';
 import Scanner from '@/components/ticketing/Scanner';
 import { canManage, getOrgSession } from '@/lib/organizer/access';
-import { editorial, orgRpc, type OrgBrief, type OrgStats, type OrgTiers } from '@/lib/organizer/data';
+import NextSteps from '@/components/organizer/NextSteps';
+import { editorial, eventTitle, orgRpc, type OrgBrief, type OrgStats, type OrgTiers } from '@/lib/organizer/data';
 import { eventState, STATE_LABEL } from '@/lib/organizer/status';
 import { SLUG_RE } from '@/lib/ticketing/schemas';
-import { formatEuro, formatGp } from '@/lib/ticketing/time';
+import { formatEuro, formatGp, formatPrice } from '@/lib/ticketing/time';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Événement · Espace organisateur', robots: { index: false, follow: false } };
@@ -53,7 +54,7 @@ export default async function OrganizerEventPage({ params, searchParams }: { par
     tab === 'tarifs' ? orgRpc<OrgTiers>('org_tiers', { p_actor: s.userId, p_slug: slug }) : null,
     tab === 'scan' ? orgRpc<OrgBrief>('org_event_brief', { p_actor: s.userId, p_slug: slug }) : null,
   ]);
-  const ed = editorial(slug);
+  const ed = { ...editorial(slug), title: await eventTitle(slug) };
   const state = eventState(stats);
   return (
     <>
@@ -64,6 +65,7 @@ export default async function OrganizerEventPage({ params, searchParams }: { par
           <span className={`org-state org-state--${state}`}>{STATE_LABEL[state]}</span>
         </div>
 
+        {manage && state === 'draft' && <NextSteps slug={slug} userId={s.userId} hasTiers={stats.tiers.length > 0} published={stats.status === 'published'} fresh={one(sp.nouveau) === '1'} hasFlyer={Boolean(ed.flyer)} />}
         <LiveRefresh slug={slug} />
         <section className="org-kpis" aria-label="Chiffres clés">
           <div className="glass org-kpi"><span className="kicker">Billets vendus</span><strong>{stats.sold}</strong><span>sur {stats.capacity} places</span></div>
@@ -77,7 +79,7 @@ export default async function OrganizerEventPage({ params, searchParams }: { par
           <ProgressBar sold={stats.sold} reserved={stats.reserved} capacity={stats.capacity} label="Événement" />
           {stats.tiers.length > 0 && (
             <div className="org-tiers">
-              {stats.tiers.map((t) => <ProgressBar key={t.tier_id} sold={t.sold} reserved={t.reserved} capacity={t.quantity_total} label={`${t.name} · ${formatEuro(t.price_cents)}${t.archived ? ' (archivé)' : ''}`} compact />)}
+              {stats.tiers.map((t) => <ProgressBar key={t.tier_id} sold={t.sold} reserved={t.reserved} capacity={t.quantity_total} label={`${t.name} · ${formatPrice(t.price_cents)}${t.archived ? ' (archivé)' : ''}`} compact />)}
             </div>
           )}
         </section>

@@ -21,8 +21,8 @@ section('Panneau admin + purge');
 const admin = new L.Client();
 r = await admin.req('/api/admin/login', { method: 'POST', body: { password: 'e2e-admin' } });
 ok(r.status === 200, `connexion admin (${r.status})`);
-r = await admin.req('/admin');
-ok(r.status === 200 && r.data.includes('camille.support@test.local'), 'la demande récente est listée dans /admin');
+r = await admin.req('/admin/contenu');
+ok(r.status === 200 && r.data.includes('camille.support@test.local'), 'la demande récente est listée dans /admin/contenu');
 ok(!r.data.includes('vieux@test.local'), 'la demande de plus de 12 mois n’est pas listée');
 ok((await one(`select count(*)::int as n from public.support_tickets where id = $1`, [old.id])).n === 0, 'la demande de plus de 12 mois est SUPPRIMÉE de la base à l’ouverture du panneau');
 

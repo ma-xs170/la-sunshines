@@ -17,7 +17,7 @@ import EventsSection from './EventsSection';
 
 const VERCEL_ANALYTICS_URL = 'https://vercel.com/dashboard/analytics';
 
-type TabId =
+export type TabId =
   | 'dashboard'
   | 'events'
   | 'events-create'
@@ -114,7 +114,12 @@ export default function AdminDashboard({
   editions,
   analytics,
   initialEdit,
+  embedded = false,
+  initialTab,
 }: {
+  /** true : affiché dans le cadre /admin (menu latéral commun) → pas de menu ni d'en-tête propres. */
+  embedded?: boolean;
+  initialTab?: TabId;
   /** slug d'un événement à ouvrir directement (lien /admin?edit=<slug>). */
   initialEdit?: string;
   initialStore: Store;
@@ -122,7 +127,7 @@ export default function AdminDashboard({
   analytics: PageviewSummary | null;
 }) {
   const [store, setStore] = useState<Store>(initialStore);
-  const [tab, setTab] = useState<TabId>(initialEdit && editions.some((e) => e.slug === initialEdit) ? 'events' : 'dashboard');
+  const [tab, setTab] = useState<TabId>(initialEdit && editions.some((e) => e.slug === initialEdit) ? 'events' : initialTab ?? 'dashboard');
   const [navOpen, setNavOpen] = useState(false);
   const [msg, setMsg] = useState<string>('');
   const msgTimer = useRef<number | undefined>(undefined);
@@ -156,8 +161,8 @@ export default function AdminDashboard({
     NAV.flatMap((g) => g.items).find((i) => i.id === tab)?.label ?? 'Administration';
 
   return (
-    <div className={navOpen ? 'admin-layout is-nav-open' : 'admin-layout'}>
-      <aside className="admin-sidebar" aria-label="Navigation de l’administration">
+    <div className={(navOpen ? 'admin-layout is-nav-open' : 'admin-layout') + (embedded ? ' admin-layout--embedded' : '')}>
+      {!embedded && <aside className="admin-sidebar" aria-label="Navigation de l’administration">
         <a
           className="admin-sidebar__brand"
           href="/"
@@ -244,17 +249,17 @@ export default function AdminDashboard({
             <span>Se déconnecter</span>
           </button>
         </div>
-      </aside>
+      </aside>}
 
-      <button
+      {!embedded && <button
         type="button"
         className="admin-sidebar__scrim"
         aria-label="Fermer le menu"
         onClick={() => setNavOpen(false)}
-      />
+      />}
 
       <main className="admin-shell admin-shell--wide">
-        <header className="admin-top">
+        {embedded ? <h1 className="org-head__title">{currentLabel}</h1> : <header className="admin-top">
           <button
             type="button"
             className="admin-burger"
@@ -265,7 +270,7 @@ export default function AdminDashboard({
             <Icon name="menu" className="icon" />
           </button>
           <h1>{currentLabel}</h1>
-        </header>
+        </header>}
 
         {msg && <p className="admin-flash">{msg}</p>}
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { formatEuro } from '@/lib/ticketing/time';
+import { formatEuro, formatPrice } from '@/lib/ticketing/time';
 
 interface Row {
   id: string; order_number: string; status: string; source: string; buyer_email: string;
@@ -53,7 +53,7 @@ export default function OrdersList({ events }: { events: { slug: string; name: s
                 <td><a className="admin-link" href={`/admin/billetterie/commandes/${o.id}`}>{o.order_number}</a><br /><small>{new Date(o.created_at).toLocaleString('fr-FR', { timeZone: 'America/Guadeloupe' })}</small></td>
                 <td>{o.buyer_first_name} {o.buyer_last_name}<br /><small>{o.buyer_email}</small></td>
                 <td>{o.order_items.map((i) => `${i.quantity} × ${i.tier_name}`).join(', ')}{o.source === 'manual' && <><br /><small>Invitation</small></>}</td>
-                <td>{formatEuro(o.total_cents)}{o.refunded_cents > 0 && <><br /><small>remb. {formatEuro(o.refunded_cents)}</small></>}</td>
+                <td>{formatPrice(o.total_cents)}{o.refunded_cents > 0 && <><br /><small>remb. {formatEuro(o.refunded_cents)}</small></>}</td>
                 <td><span className={`tk__badge tk__badge--${o.status}`}>{STATUS[o.status] ?? o.status}</span></td>
                 <td><small>{o.email_status === 'sent' ? 'envoyé' : o.email_status === 'failed' ? 'ÉCHEC' : 'en attente'}</small></td>
               </tr>

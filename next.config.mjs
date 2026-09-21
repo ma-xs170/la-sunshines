@@ -2,6 +2,9 @@
 const nextConfig = {
   reactStrictMode: true,
 
+  // forbidden() + app/forbidden.tsx : page « Accès refusé » (403) au lieu d'un 404 quand le rôle ne suffit pas.
+  experimental: { authInterrupts: true },
+
   // Dossier de sortie séparé pour les builds lancés à la main (NEXT_DIST_DIR=.next-build),
   // afin de ne jamais corrompre le .next du serveur de dev. Par défaut (Vercel) : .next.
   distDir: process.env.NEXT_DIST_DIR || '.next',

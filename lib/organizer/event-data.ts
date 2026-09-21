@@ -2,7 +2,7 @@
 import 'server-only';
 import { forbidden, notFound, redirect } from 'next/navigation';
 import { getOrgSession } from './access';
-import { editorial, orgRpc } from './data';
+import { eventTitle, orgRpc } from './data';
 import { SLUG_RE } from '@/lib/ticketing/schemas';
 
 export async function orgEventRpc<T>(slug: string, next: string, fn: string, extra: Record<string, unknown> = {}) {
@@ -12,7 +12,7 @@ export async function orgEventRpc<T>(slug: string, next: string, fn: string, ext
   if (!s.hasAccess) forbidden();
   const r = await orgRpc<T>(fn, { p_actor: s.userId, p_slug: slug, ...extra });
   if (!r.ok) notFound();   // interdit et introuvable : même réponse, on ne révèle rien
-  return { s, data: r.data, title: editorial(slug).title };
+  return { s, data: r.data, title: await eventTitle(slug) };
 }
 
 export const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? '';

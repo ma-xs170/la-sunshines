@@ -3167,6 +3167,10 @@ nav .acct-links button.link{
   border:1px solid var(--ev-line-strong, var(--panel-border-strong));
   background:var(--ev-panel, var(--bg-2));color:inherit;
 }
+.tp__promo{display:flex;flex-direction:column;gap:6px;font-size:13px;}
+.tp__promo label{font-weight:700;}
+.tp__promo input{padding:10px 12px;border:1px solid var(--panel-border-strong);border-radius:var(--r-sm);background:#fff;font:inherit;text-transform:uppercase;letter-spacing:.06em;max-width:260px;}
+.tp__hint{color:var(--gray);font-size:12px;}
 .tp__consent{display:flex;flex-direction:column;gap:var(--s-8);font-size:13px;}
 .tp__consent label{display:flex;gap:var(--s-8);align-items:flex-start;cursor:pointer;}
 .tp__consent input{margin-top:3px;width:18px;height:18px;flex:none;}

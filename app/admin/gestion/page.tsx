@@ -1,2 +1,2 @@
 import { redirect } from 'next/navigation';
-export default function GestionIndex() { redirect('/admin/gestion/organisateurs'); }
+export default function GestionIndex() { redirect('/admin'); }
