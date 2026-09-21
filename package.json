@@ -12,7 +12,7 @@
     "smoke": "node scripts/smoke.mjs",
     "test:db": "node scripts/test-db.mjs",
     "test:e2e": "node tests/e2e/run.mjs",
-    "test:unit": "node --test tests/unit"
+    "test:unit": "node --import ./tests/support/register.mjs --test tests/unit"
   },
   "dependencies": {
     "@mistralai/mistralai": "^2.6.4",

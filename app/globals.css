@@ -3631,3 +3631,10 @@ nav .acct-links button.link{
 .org-faq__item[open] summary::after{content:"–";}
 .org-faq__item summary:focus-visible{outline:2px solid var(--amber-ink);outline-offset:-2px;border-radius:var(--r-lg);}
 .org-faq__item p{padding:0 var(--s-24) var(--s-16);color:var(--gray);font-size:15px;line-height:1.65;}
+
+/* Dresscode par couleurs (pill des pages évènement) et flyer vidéo */
+.evm-dc{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px;}
+.evm-dc__label{margin-right:2px;}
+.evm-dc__chip{padding:2px 10px;border-radius:var(--r-pill);border:1px solid rgba(25,20,16,.25);font-size:.86em;font-weight:800;letter-spacing:.02em;}
+.evm-dc__note{width:100%;text-transform:none;font-weight:600;opacity:.85;font-size:.86em;}
+.event-flyer__video,.event-flyer__img{display:block;width:100%;height:auto;border-radius:var(--r-md);background:#000;}

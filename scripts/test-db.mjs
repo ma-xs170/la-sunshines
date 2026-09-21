@@ -21,7 +21,7 @@ const R = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'supabas
 const DIR = path.join(os.tmpdir(), 'sunshines-testdb-' + process.pid);
 const PORT = 54339;
 const migrations = fs.readdirSync(R + 'migrations').filter((f) => f.endsWith('.sql')).sort();
-const sqlTests = ['001_rls_profiles', '002_rls_ticketing', '002_rules', '002_verify', '003_fulfill', '004_email', '005_scan_admin', '007_support', '008_artist_private', '009_organizers', '010_organizer_ui', '011_organizer_tiers_scan', '012_news', '013_organizer_analytics_payments', '014_org_references'];
+const sqlTests = ['001_rls_profiles', '002_rls_ticketing', '002_rules', '002_verify', '003_fulfill', '004_email', '005_scan_admin', '007_support', '008_artist_private', '009_organizers', '010_organizer_ui', '011_organizer_tiers_scan', '012_news', '013_organizer_analytics_payments', '014_org_references', '015_event_pages'];
 const concurrency = ['002_concurrency', '003_concurrency', '005_concurrency'];
 
 const server = new EmbeddedPostgres({ databaseDir: DIR, user: 'postgres', password: 'pw', port: PORT, persistent: false, onLog: () => {}, onError: () => {} });

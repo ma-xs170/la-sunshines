@@ -22,6 +22,8 @@ import EventMap from '@/components/EventMap';
 import EventMeta from '@/components/EventMeta';
 import ComingSoon from '@/components/ComingSoon';
 import FlyerLightbox from '@/components/FlyerLightbox';
+import FlyerVideo from '@/components/FlyerVideo';
+import { getPublicEventDetails } from '@/lib/publicEventDetails';
 import GalleryLightbox from '@/components/GalleryLightbox';
 import ArtistName from '@/components/ArtistName';
 import VenueLink from '@/components/VenueLink';
@@ -81,6 +83,8 @@ export default async function EditionPage({
   // Billetterie interne : null tant que le flag est sur « bizouk » (défaut), que Supabase
   // n'est pas configuré ou que l'événement n'est pas activé → la page reste identique.
   const ticketing = upcoming ? await getPublicTicketing(slug) : null;
+  // Détails saisis par l'organisateur (dresscode couleurs, flyer vidéo) : null tant que rien n'est publié → fiche inchangée.
+  const extra = await getPublicEventDetails(slug);
 
   // Nom d'artiste normalisé pour comparaison (casse, espaces, préfixe « DJ »).
   const normArtist = (s: string) =>
@@ -141,6 +145,7 @@ export default async function EditionPage({
                 dateFull={ed.dateFull}
                 timeLabel={ed.timeLabel}
                 dresscode={ed.dresscode}
+                structured={extra?.dresscode}
               />
 
               <div className="event-hero__links">
@@ -163,7 +168,9 @@ export default async function EditionPage({
             </div>
 
             <figure className="event-flyer">
-              {ed.flyer ? (
+              {extra?.video && (extra.video.hevc_url || extra.video.h264_url) ? (
+                <FlyerVideo hevc={extra.video.hevc_url} h264={extra.video.h264_url} poster={extra.video.poster_url ?? ed.flyer ?? null} alt={ed.flyerAlt ?? `Affiche animée — ${ed.name}`} />
+              ) : ed.flyer ? (
                 <FlyerLightbox
                   src={ed.flyer}
                   width={ed.flyerSize?.w}

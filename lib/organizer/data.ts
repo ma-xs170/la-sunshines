@@ -23,6 +23,15 @@ const MESSAGES: Record<string, OrgFailure> = {
   BAD_SIRET: { status: 400, message: 'Le SIRET doit comporter 14 chiffres.' },
   STRIPE_ACCOUNT_LOCKED: { status: 409, message: 'Un compte Stripe est déjà lié à cette organisation.' },
   BAD_EMAIL: { status: 400, message: 'Adresse email invalide.' },
+  BAD_FIELD: { status: 400, message: 'Champ non modifiable.' },
+  BAD_PATCH: { status: 400, message: 'Requête invalide.' },
+  BAD_VISIBILITY: { status: 400, message: 'Visibilité invalide.' },
+  BAD_PUBLISH: { status: 400, message: 'Mode de publication invalide.' },
+  BAD_URL: { status: 400, message: 'Adresse de fichier invalide.' },
+  BAD_STATUS: { status: 400, message: 'Statut invalide.' },
+  VENUE_NOT_FOUND: { status: 404, message: 'Lieu introuvable.' },
+  SESSION_NOT_FOUND: { status: 404, message: 'Session introuvable.' },
+  CONFIRM_DATE_CHANGE: { status: 409, message: 'Les ventes sont ouvertes : confirme le changement de date (les acheteurs verront la nouvelle date).' },
   REPLY_TO_MISSING: { status: 409, message: 'L’organisateur n’a pas d’adresse de réponse : [À COMPLÉTER] dans les informations de l’organisateur.' },
 };
 

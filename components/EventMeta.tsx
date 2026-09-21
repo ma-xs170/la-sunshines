@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react';
 import Icon, { type IconName } from './Icon';
 import { dresscodeGradient, formatDresscodeLabel } from '@/lib/dresscode';
+import { dresscodeText, readableOn, type DresscodeValue } from '@/lib/dresscodeColors';
 
 // Composant PARTAGÉ des pills d'infos : date / heure / dresscode (+ âge).
 // Utilisé par :
@@ -40,14 +41,18 @@ export default function EventMeta({
   timeLabel,
   dresscode,
   ageLabel,
+  structured,
   tone = 'dark',
 }: {
   dateFull: string;
   timeLabel?: string;
   dresscode?: string;
   ageLabel?: string;
+  /** Dresscode structuré saisi par l'organisateur : prioritaire sur le texte libre. */
+  structured?: DresscodeValue | null;
   tone?: Tone;
 }) {
+  const hasStructured = Boolean(structured && (structured.free || structured.colors.length));
   const dc = dresscode ? dresscodeGradient(dresscode) : null;
 
   return (
@@ -62,7 +67,21 @@ export default function EventMeta({
           {timeLabel}
         </Pill>
       )}
-      {dresscode && (
+      {hasStructured && structured && (
+        <Pill icon="shirt" upper>
+          <span className="evm-dc">
+            <span className="evm-dc__label">Dresscode</span>
+            {structured.free
+              ? <span className="evm-dc__name">Tenue libre</span>
+              : structured.colors.map((c) => (
+                  <span className="evm-dc__chip" key={c.name} style={{ background: c.hex, color: readableOn(c.hex) }}>{c.name}</span>
+                ))}
+            {structured.note && <span className="evm-dc__note">{structured.note}</span>}
+          </span>
+          <span className="sr-only">{`Dresscode : ${dresscodeText(structured)}`}</span>
+        </Pill>
+      )}
+      {!hasStructured && dresscode && (
         <Pill icon="shirt" dc={dc} upper>
           {formatDresscodeLabel(dresscode)}
         </Pill>
