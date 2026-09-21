@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import Image from 'next/image';
 import { usePathname, useSearchParams } from 'next/navigation';
 import Icon from '../Icon';
+import BackFooter from '../BackFooter';
 import LogoutButton from '../auth/LogoutButton';
 import { accountMenu, activeGroupId, crumbs, eventMenu, eventSlugOf, isActiveHref, visibleMenu, type MenuGroup } from '@/lib/organizer/menu';
 import { can, ROLE_LABEL, type OrgRole } from '@/lib/organizer/roles';
@@ -168,10 +169,7 @@ export default function OrgShell({ orgs, currentId, unread, firstName, children 
         {can(current.role, 'manage') && !pathname.startsWith('/organisateur/support') && (
           <a className="sup-help" href={`/organisateur/support/nouveau?page=${encodeURIComponent(pathname)}`}><Icon name="help" />Aide</a>
         )}
-        <footer className="ofoot">
-          <span>© LA SUNSHINES</span>
-          <a href="/cgv">CGU</a><a href="/politique-de-confidentialite">Confidentialité</a><a href="/contact">Contact</a>
-        </footer>
+        <BackFooter />
       </div>
     </div>
   );

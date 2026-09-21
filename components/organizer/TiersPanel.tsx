@@ -2,10 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import ProgressBar from './ProgressBar';
+import { TierGaugeBody, gaugeClass } from './TierGauge';
 import type { OrgTierFull } from '@/lib/organizer/data';
-import { euroToCents, formatEuro, gpLocalToIso, isoToGpLocal, priceError } from '@/lib/ticketing/time';
-import FreeBadge from '@/components/ticketing/FreeBadge';
+import { euroToCents, gpLocalToIso, isoToGpLocal, priceError } from '@/lib/ticketing/time';
 
 interface Draft { id: string | null; name: string; description: string; price: string; quantity: string; maxPerOrder: string; maxPerAccount: string; start: string; end: string; active: boolean; sort: number }
 const blank = (sort: number): Draft => ({ id: null, name: '', description: '', price: '', quantity: '', maxPerOrder: '6', maxPerAccount: '2', start: '', end: '', active: true, sort });
@@ -15,7 +14,7 @@ const fromTier = (t: OrgTierFull): Draft => ({
 });
 
 /** Tarifs d'un événement : création et modification selon les règles de la billetterie (prix 0 € = gratuit ou ≥ 0,50 €, quantité ≥ vendus, archivage si vendu). */
-export default function TiersPanel({ slug, tiers, capacity, consumed }: { slug: string; tiers: OrgTierFull[]; capacity: number; consumed: number }) {
+export default function TiersPanel({ slug, tiers, capacity, consumed, revenues = {} }: { slug: string; tiers: OrgTierFull[]; capacity: number; consumed: number; revenues?: Record<string, number> }) {
   const router = useRouter();
   const [draft, setDraft] = useState<Draft | null>(null);
   const [busy, setBusy] = useState(false);
@@ -95,18 +94,11 @@ export default function TiersPanel({ slug, tiers, capacity, consumed }: { slug: 
       {tiers.length === 0 && !draft ? (
         <div className="glass org-empty"><h3>Aucun tarif</h3><p>Crée un premier tarif pour ouvrir la vente de billets.</p></div>
       ) : (
-        <ul className="org-tierlist">
+        <ul className="org-tierlist tgauge-list">
           {tiers.map((t) => (
-            <li key={t.id} className={'glass org-tier' + (t.archived ? ' is-archived' : '')}>
-              <div className="org-tier__top">
-                <div>
-                  <strong className="org-tier__name">{t.name}</strong>
-                  <span className={'org-state ' + (t.archived ? 'org-state--ended' : t.is_active ? 'org-state--on_sale' : 'org-state--draft')}>{t.archived ? 'Archivé' : t.is_active ? 'En vente' : 'En pause'}</span>
-                </div>
-                <strong className="org-tier__price">{t.price_cents === 0 ? <FreeBadge /> : formatEuro(t.price_cents)}</strong>
-              </div>
+            <li key={t.id} className={gaugeClass({ ...t, quantity_total: t.quantity_total, reserved: Math.max(t.consumed - t.sold, 0) }) + ' org-tier' + (t.archived ? ' is-archived' : '')} data-tier-gauge={t.id}>
+              <TierGaugeBody tier={{ id: t.id, name: t.name, price_cents: t.price_cents, quantity_total: t.quantity_total, sold: t.sold, reserved: Math.max(t.consumed - t.sold, 0), revenue_cents: revenues[t.id] ?? 0, archived: t.archived, is_active: t.is_active, sales_start: t.sales_start, sales_end: t.sales_end }} />
               {t.description && <p className="org-muted">{t.description}</p>}
-              <ProgressBar sold={t.sold} reserved={Math.max(t.consumed - t.sold, 0)} capacity={t.quantity_total} compact />
               {!t.archived && (
                 <div className="org-tier__actions">
                   <button type="button" className="btn btn--outline" onClick={() => { setDraft(fromTier(t)); setErr(''); setInfo(''); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Modifier</button>

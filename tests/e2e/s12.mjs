@@ -63,7 +63,7 @@ r = await owner.req('/api/organisateur/paiements/connect', { method: 'POST', bod
 ok(r.status === 200 && Object.keys((await L.stripeState()).accounts).length === 1, 'un second clic ne crée pas un second compte');
 r = await owner.req('/organisateur/paiements'); ok(/Inscription à terminer/.test(r.data) && /Continuer l’inscription/.test(r.data), 'état : inscription à terminer');
 r = await owner.req('/organisateur'); ok(/Connecter Stripe/.test(r.data), 'accueil : l’étape Stripe reste à faire');
-await fetch(`http://127.0.0.1:54332/__account?id=${acct.stripe_account_id}&ready=1`);
+await fetch(`${L.STRIPE}/__account?id=${acct.stripe_account_id}&ready=1`);
 r = await owner.req('/api/organisateur/paiements/sync', { method: 'POST', body: { org: orgA } }); ok(r.status === 200 && r.data.status === 'ready', `synchronisation → prêt (${JSON.stringify(r.data)})`);
 ok((await one(`select stripe_ready from public.organizers where id = $1`, [orgA])).stripe_ready === true, 'état « prêt » enregistré');
 r = await owner.req('/organisateur/paiements'); ok(/Compte actif/.test(r.data) && /Ouvrir mon tableau de bord Stripe/.test(r.data) && !/Connecter Stripe/.test(r.data), 'état : compte actif');

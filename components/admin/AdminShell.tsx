@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import Image from 'next/image';
 import { usePathname, useSearchParams } from 'next/navigation';
 import Icon from '../Icon';
+import BackFooter from '../BackFooter';
 import LogoutButton from '../auth/LogoutButton';
 import GlobalSearch from './GlobalSearch';
 import { activeAdminGroup, adminCrumbs, adminMenu, isAdminActive, visibleAdminMenu } from '@/lib/admin/menu';
@@ -105,7 +106,7 @@ export default function AdminShell({ firstName, reference, isSuper, pending, sup
           </div>
         </header>
         <div className="oshell__main" id="org-main" tabIndex={-1}>{children}</div>
-        <footer className="ofoot"><span>© LA SUNSHINES</span><a href="/status">Statuts</a><a href="/">Voir le site</a></footer>
+        <BackFooter />
       </div>
     </div>
   );

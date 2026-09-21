@@ -13,7 +13,9 @@ import { fileURLToPath } from 'url';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '..', '..');
 const POSTGREST = process.env.POSTGREST_BIN || path.join(HERE, '.bin', 'postgrest');
-const PORTS = { pg: 54329, rest: 54331, gw: 54330, stripe: 54332, resend: 54333, next: 3130 };
+// E2E_OFFSET décale tous les ports : deux bancs (deux sessions de travail) peuvent tourner en même temps.
+const OFF = Number(process.env.E2E_OFFSET || 0);
+const PORTS = { pg: 54329 + OFF, rest: 54331 + OFF, gw: 54330 + OFF, stripe: 54332 + OFF, resend: 54333 + OFF, next: 3130 + OFF };
 export const JWT_SECRET = 'e2e-jwt-secret-e2e-jwt-secret-e2e-jwt-secret';
 const b64 = (o) => Buffer.from(typeof o === 'string' ? o : JSON.stringify(o)).toString('base64url');
 export const sign = (payload) => { const h = b64({ alg: 'HS256', typ: 'JWT' }), p = b64(payload); return `${h}.${p}.${crypto.createHmac('sha256', JWT_SECRET).update(`${h}.${p}`).digest('base64url')}`; };

@@ -17,7 +17,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
   const s = r.data;
   return Response.json(
     { sold: s.sold, reserved: s.reserved, remaining: s.remaining, entered: s.entered, revenue_cents: s.revenue_cents, refunded_cents: s.refunded_cents,
-      tiers: s.tiers.map((t) => [t.tier_id, t.sold, t.reserved]) },
+      tiers: s.tiers.map((t) => [t.tier_id, t.sold, t.reserved, t.quantity_total, t.revenue_cents]) },
     { headers: { 'Cache-Control': 'no-store' } },
   );
 }

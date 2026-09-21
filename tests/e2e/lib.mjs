@@ -4,8 +4,9 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 const require = createRequire(path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'package.json'));
 const Stripe = require('stripe');
-export const BASE = 'http://localhost:3130';
-export const STRIPE = 'http://127.0.0.1:54332', MAIL = 'http://127.0.0.1:54333';
+const OFF = Number(process.env.E2E_OFFSET || 0);
+export const BASE = `http://localhost:${3130 + OFF}`;
+export const STRIPE = `http://127.0.0.1:${54332 + OFF}`, MAIL = `http://127.0.0.1:${54333 + OFF}`;
 export const USERS = {
   cust:  { id: 'c1000000-0000-4000-8000-000000000001', email: 'cust@test.local',  password: 'Passw0rd!' },
   cust2: { id: 'c2000000-0000-4000-8000-000000000002', email: 'cust2@test.local', password: 'Passw0rd!' },
@@ -13,7 +14,7 @@ export const USERS = {
   orgb:  { id: '0b000000-0000-4000-8000-0000000000b2', email: 'orgb@test.local',  password: 'Passw0rd!' },
   staff: { id: '57000000-0000-4000-8000-000000000057', email: 'staff@test.local', password: 'Passw0rd!' },
 };
-export const db = new pg.Client({ connectionString: 'postgresql://postgres:pw@localhost:54329/main' });
+export const db = new pg.Client({ connectionString: `postgresql://postgres:pw@localhost:${54329 + OFF}/main` });
 await db.connect();
 export const q = async (sql, params) => (await db.query(sql, params)).rows;
 export const one = async (sql, params) => (await q(sql, params))[0];
@@ -90,7 +91,7 @@ export const jwtFor = (claims) => { const h = b64({ alg: 'HS256', typ: 'JWT' }),
 export const ANON_KEY = jwtFor({ role: 'anon', iss: 'e2e' });
 export const userJwt = (u) => jwtFor({ sub: u.id, role: 'authenticated', aud: 'authenticated', email: u.email });
 export async function rest(path, { method = 'GET', token = ANON_KEY, body, headers = {} } = {}) {
-  const r = await fetch('http://127.0.0.1:54330/rest/v1' + path, { method, headers: { apikey: ANON_KEY, authorization: 'Bearer ' + token, 'content-type': 'application/json', prefer: 'return=representation', ...headers }, body: body ? JSON.stringify(body) : undefined });
+  const r = await fetch(`http://127.0.0.1:${54330 + OFF}/rest/v1` + path, { method, headers: { apikey: ANON_KEY, authorization: 'Bearer ' + token, 'content-type': 'application/json', prefer: 'return=representation', ...headers }, body: body ? JSON.stringify(body) : undefined });
   return { status: r.status, data: await r.json().catch(() => null) };
 }
 export const legacyAdminCookie = () => 'sun_admin=' + crypto.createHash('sha256').update('e2e-admin').digest('hex');

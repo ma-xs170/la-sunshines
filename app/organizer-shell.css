@@ -76,7 +76,7 @@ a.oside__leaf:hover{background:rgba(25,20,16,.05);}
 .oshell__note--suspended{background:rgba(190,40,40,.08);border:1px solid rgba(190,40,40,.35);color:#7d1f1f;}
 
 /* ---- pied de page ---- */
-.ofoot{display:flex;flex-wrap:wrap;gap:6px var(--s-16);padding:20px var(--gutter);border-top:1px solid var(--panel-border);font-size:12.5px;font-weight:600;color:var(--gray);}
+.ofoot{position:static;margin-top:var(--s-32);background:transparent;display:flex;flex-wrap:wrap;gap:6px var(--s-16);padding:20px var(--gutter);border-top:1px solid var(--panel-border);font-size:12.5px;font-weight:600;color:var(--gray);}
 .ofoot span{margin-right:auto;}
 .ofoot a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:3px;}
 
@@ -179,3 +179,31 @@ body.is-scroll-locked{overflow:hidden;}
 .admin-layout--embedded .admin-shell{margin-left:0;padding:0;max-width:none;}
 .admin-layout--embedded .admin-shell > *{max-width:none;}
 .oshell__main .admin-layout--embedded{padding:0 var(--gutter) var(--s-64);}
+
+/* ---- jauge d'un tarif ---- */
+.tgauge-list{list-style:none;margin:0;padding:0;display:grid;gap:var(--s-12);grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));}
+.tgauge{padding:16px 18px;display:flex;flex-direction:column;gap:10px;border-left:4px solid transparent;}
+.tgauge--low{border-left-color:#d98a00;}
+.tgauge--out{border-left-color:#be2828;}
+.tgauge__top{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;}
+.tgauge__name{font-size:15px;margin-right:auto;}
+.tgauge__price{font-weight:700;font-size:14px;}
+.tgauge__status{font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(25,20,16,.07);}
+.tgauge__status--on_sale{background:rgba(40,150,80,.14);color:#1e6b3a;}
+.tgauge__status--sold_out{background:rgba(190,40,40,.12);color:#8a1f1f;}
+.tgauge__status--upcoming{background:rgba(255,178,56,.2);color:#7a4d06;}
+.tgauge__status--closed{background:rgba(25,20,16,.08);color:var(--gray);}
+.tgauge__nums{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0;font-size:12.5px;}
+.tgauge__nums dt{color:var(--gray);font-weight:600;}
+.tgauge__nums dd{margin:2px 0 0;font-weight:700;}
+.tgauge--low .org-bar__sold{background:#d98a00;}
+.tgauge--out .org-bar__sold{background:#be2828;}
+.tgauge__alert{margin:0;font-size:12.5px;font-weight:700;color:#8a1f1f;}
+.tgauge--low .tgauge__alert{color:#7a4d06;}
+@media (max-width:520px){.tgauge__nums{grid-template-columns:1fr 1fr;}}
+
+/* ---- accès à l'évènement / lien public ---- */
+.evlink{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;padding:16px 18px;}
+.evlink code{word-break:break-all;font-size:13px;}
+.evlink__row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+.preview-badge{display:inline-block;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:999px;background:rgba(255,178,56,.25);border:1px solid rgba(165,103,15,.4);}

@@ -112,7 +112,7 @@ export function activeGroupId(groups: MenuGroup[], pathname: string, onglet: str
 const CRUMB: Record<string, string> = {
   evenements: 'Mes évènements', nouveau: 'Nouvel évènement', participants: 'Participants', analyse: 'Analyse', paiements: 'Paiements',
   parametres: 'Informations légales', actualites: 'Actualités', aide: 'Centre d’aide',
-  finance: 'Finance', versements: 'Versements', billetterie: 'Méthode de billetterie', stats: 'Ventes', notifications: 'Notifications', commandes: 'Commandes', remboursements: 'Remboursements', scans: 'Historique des scans', invitations: 'Invitations', suivi: 'Suivi', promos: 'Codes de réduction', description: 'Description', flyer: 'Décliner le flyer', lieux: 'Lieux', sessions: 'Sessions', formulaires: 'Formulaires', conditions: 'Conditions générales', consentements: 'Consentements RGPD',
+  finance: 'Finance', versements: 'Versements', billetterie: 'Méthode de billetterie', stats: 'Ventes', notifications: 'Notifications', commandes: 'Commandes', remboursements: 'Remboursements', scans: 'Historique des scans', invitations: 'Invitations', suivi: 'Suivi', promos: 'Codes de réduction', description: 'Description', flyer: 'Décliner le flyer', lieux: 'Lieux', sessions: 'Sessions', formulaires: 'Formulaires', conditions: 'Conditions générales', consentements: 'Consentements RGPD', apercu: 'Aperçu',
 };
 
 /** Fil d'Ariane à partir du chemin (l'évènement s'affiche « Évènement » : son titre est dans l'en-tête de la page). */

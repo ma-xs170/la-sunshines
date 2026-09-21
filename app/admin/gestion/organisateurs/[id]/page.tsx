@@ -37,7 +37,6 @@ export default async function OrganizerDetailPage({ params, searchParams }: { pa
       <div className="org-subnav" role="navigation" aria-label="Sections">{TABS.map(([k, v]) => <a key={k} href={`?onglet=${k}`} className={'org-subnav__link' + (tab === k ? ' is-active' : '')} aria-current={tab === k ? 'page' : undefined}>{v}</a>)}</div>
       {tab === 'apercu' && (<>
         <section className="org-kpis"><div className="glass org-kpi"><span className="kicker">Évènements</span><strong>{events.length}</strong><span>au total</span></div>
-          <div className="glass org-kpi"><span className="kicker">Billets vendus</span><strong>{events.reduce((n, e) => n + e.sold, 0)}</strong><span>tous évènements</span></div>
           <div className="glass org-kpi"><span className="kicker">Recette nette</span><strong>{formatEuro(revenue)}</strong><span>hors invitations</span></div>
           <div className="glass org-kpi"><span className="kicker">Paiements Stripe</span><strong>{o.stripe_ready ? 'Actifs' : o.stripe_connected ? 'À finaliser' : 'Non reliés'}</strong><span>compte de versement</span></div></section>
         <OrgAdminActions org={{ id: o.id, status: o.account_status as 'pending' | 'approved' | 'suspended', name: o.name, legal_form: o.legal_form, siret: o.siret, responsible_name: o.responsible_name, address: o.address, contact_email: o.contact_email }} events={events.map((e) => e.slug)} />
