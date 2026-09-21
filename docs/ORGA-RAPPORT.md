@@ -1,6 +1,6 @@
 # Rapport : refonte espace organisateur et admin
 
-État au 20/09/2026. Tout est mergé sur `main` (dernier merge `acc1c12`). Migrations **014 à 020 appliquées** sur la base réelle (sauvegardes JSON dans `~/sunshines-backups/`, hors dépôt). `002_verify.sql` : 408 contrôles, 0 échec ; chaque `0NN_verify.sql` : 0 échec. Comptages des tables existantes inchangés à chaque migration. **Aucune donnée de test n'a été créée sur la vraie base** (tous les tests SQL tournent en `ROLLBACK` sur une base jetable). Le mode public reste sur **Bizouk** ; les pages ajoutées au public (dresscode couleurs, vidéo, bloc et pages organisateurs) sont inertes tant que ce mode n'est pas changé.
+État au 21/09/2026. Tout est mergé sur `main` (dernier merge `7304f82` ; tag de secours `pre-orga-2026-09-21` = état de main avant ce lot). Migrations **014 à 020 appliquées** (puis **022 à 025 appliquées** le 21/09 ; **021 « billets gratuits » toujours NON appliquée**) sur la base réelle (sauvegardes JSON dans `~/sunshines-backups/`, hors dépôt). `002_verify.sql` : 408 contrôles, 0 échec ; chaque `0NN_verify.sql` : 0 échec. Comptages des tables existantes inchangés à chaque migration. **Aucune donnée de test n'a été créée sur la vraie base** (tous les tests SQL tournent en `ROLLBACK` sur une base jetable). Le mode public reste sur **Bizouk** ; les pages ajoutées au public (dresscode couleurs, vidéo, bloc et pages organisateurs) sont inertes tant que ce mode n'est pas changé.
 
 ## Ce qui est fait
 | Phase | Contenu | Migration |
@@ -13,10 +13,22 @@
 | 5 | Administrateurs multiples (mot de passe aléatoire par e-mail, changement obligatoire, verrouillage 5 échecs, désactivation), organisateurs (fiche à onglets, approuver / suspendre / contact), transfert d'évènement atomique, vue globale des évènements, **recherche globale Cmd+K** | 018 |
 | 6 | Support : tickets `TK.XXXXXX`, chat (2 s), pièces jointes privées, ajout d'une organisation par référence ORG, prise en charge atomique, notes internes, réponses rapides, bouton d'aide flottant | 019 |
 | 7 | Pages `/organisateurs/[slug]` (auto à l'approbation, avatar aux initiales, JSON-LD, sitemap), bloc « Organisé par », Suivre (opt-in), calendrier régional organisateur + admin avec conflits | 020 |
+| 4bis-A | Évènements existants rattachés à THE MOUV (table `event_links`, 6 éditions), compte `mathxs.170@gmail.com` super-admin + OWNER de THE MOUV, « Vendu via Bizouk — statistiques non disponibles ici » | 022 |
+| 4bis-B | `/admin` au même design que `/organisateur` (menu latéral plat, tableau de bord, journal d'audit, réglages), ancien panneau en `/admin/contenu` | — |
+| C | Inscription d'organisation en 5 pages (`/devenir-organisateur`), pièces en stockage privé, consultation par les admins (journalisée) | 023 |
+| D | Recherche globale admin (Cmd+K), branchée dans le cadre `/admin` | 018 |
+| E | Création d'évènement en 3 étapes (organisation → billetterie interne / Bizouk / aucune → informations), brouillon + checklist « Prochaines étapes », menu Billetterie par évènement, **code Bizouk analysé (liste blanche bizouk.com) et widget régénéré en iframe sandbox** | 024 |
+| F | Codes promo appliqués au paiement (remise calculée en base, montant Stripe = total en base) ; évènement de test supprimé (sauvegarde + liste exacte) ; SIRET de THE MOUV corrigé (10665995600010, journalisé) | 025 |
 
-Tests : `npm run test:unit` (64) et `npm run test:db` (SQL + concurrence sur base jetable, migrations 001 → 021) passent ; `tsc` et `next build` passent. Le parcours e2e complet (création → achat 4242 → scan → support → transfert) n'a **pas** été rejoué : il exige le banc PostgREST partagé avec d'autres sessions et un Stripe de test ; chaque maillon est couvert par des tests SQL / unitaires. `next lint` n'est pas configuré dans le dépôt (voir D9).
+Tests (21/09) : `npm run test:unit` 104/104, `npm run test:db` (SQL + concurrence, migrations 001 → 025) tout passe, `tsc` et `next build` (dossier séparé) passent, banc e2e : s3, s4, s6, s7, s8, s13, s14 (création + inscription, Playwright), s15 (Playwright : pages publiques, organisateur, admin, ordinateur + mobile, menu plat) et s16 (promo) passent. **Échecs e2e déjà présents avant ce lot** (mesurés sur `fd4024f`) : s5 (4), s9 (4), s10 (4), s11 (5), s12 (4) : attentes devenues fausses (403 « Accès refusé » au lieu de 200/404, textes) ; aucun échec nouveau. `npm run lint` n'est pas configuré dans le projet.
 
-## URLs à ouvrir (connecté avec ton compte admin)
+## URLs à ouvrir sur ton téléphone (connecté avec mathxs.170@gmail.com)
+- `/admin` (tableau de bord), `/admin/gestion/organisateurs` (fiche > onglet « Dossier d'inscription »), `/admin/gestion/audit`, `/admin/gestion/reglages`, `/admin/contenu` (ancien panneau)
+- `/organisateur/evenements/nouveau` (assistant en 3 étapes), `/organisateur/evenements` (onglets À venir / Passés / Brouillons), `/devenir-organisateur` (inscription), `/organisateur/calendrier`
+- Après une création : `/organisateur/evenements/<slug>` (checklist) et `/organisateur/evenements/<slug>/billetterie`
+- Public : `/`, `/editions`, `/editions/la-nuit-des-ombres`, `/artistes`, `/interdits`, `/infos`, `/connexion`, `/organisateurs/the-mouv`
+
+## Anciennes URLs (mêmes pages, connecté admin)
 - `/admin/gestion` (recherche globale : ORG.78973257, « MOUV », un e-mail…), `/admin/gestion/organisateurs`, `/admin/gestion/administrateurs`, `/admin/gestion/evenements`, `/admin/gestion/transfert`, `/admin/gestion/support`, `/admin/gestion/calendrier`
 - `/organisateur` (nouveau menu), `/organisateur/evenements`, `/organisateur/evenements/<slug>/description` (et `/lieux`, `/sessions`, `/formulaires`, `/conditions`, `/consentements`, `/flyer`, `/commandes`, `/remboursements`, `/promos`, `/invitations`, `/invitations/suivi`, `/scans`, `/finance`, `/stats`), `/organisateur/calendrier`, `/organisateur/support`, `/organisateur/notifications`, `/organisateur/organisation/page-publique`
 - Public (inerte tant que le mode reste « bizouk ») : `/organisateurs/the-mouv`, fiches `/editions/<slug>`
@@ -27,7 +39,8 @@ Stripe Connect à la place d'un formulaire IBAN (D1) ; sondage 2 s plutôt que R
 ## Limites connues
 - **Job de transcodage vidéo absent** : une vidéo > 1080p / 60 i/s reste « Envoyée » (l'affiche image est utilisée) ; les règles HEVC / H.264 sont écrites et testées mais aucun ffmpeg ne tourne (D12).
 - Lineup côté organisateur, liste d'entrée, impression de lots PDF, simulateur de prix / glisser-déposer des tarifs, statistiques d'audience / acquisition / tunnel : « Bientôt » (aucune donnée inventée).
-- Codes promo non appliqués au paiement Stripe ; e-mails automatiques (notifications, « nouvel évènement », réponse de support) non envoyés, seul l'accusé de réception d'un ticket l'est.
+- Évènements créés en ligne : brouillons, sans page publique `/editions/<slug>` ni bouton « Publier » (la publication passe par l'équipe) ; capacité provisoire de 100 places. Le widget Bizouk d'un tel évènement s'affiche dans l'aperçu organisateur ; côté public il faut une édition (limite connue). Mode public en base : `native` (réglé le 20/09) alors que la consigne dit « bizouk » : NON modifié, à confirmer. `/mentions-legales` et `/cgv` affichent encore l'ancien SIRET. Pas de preview Vercel Git détectée (déploiements par CLI) : build vérifié en local. Un code promo qui rendrait la commande gratuite est refusé (les billets gratuits ont leur parcours).
+- E-mails automatiques (notifications, « nouvel évènement », réponse de support) non envoyés, seul l'accusé de réception d'un ticket l'est.
 - A2F non imposée (colonne `mfa_required` prête). Aucun test visuel navigateur systématique dans cette session : à contrôler sur la preview (menu latéral, tiroir mobile, calendrier).
 - Le calendrier ne montre que les évènements de billetterie reliés à un lieu.
 - Une autre session Claude travaille en parallèle (migration 021 « billets gratuits », branche paiement) : elle est fusionnée sur `main` mais **021 n'est pas appliquée** à la base réelle par moi.
