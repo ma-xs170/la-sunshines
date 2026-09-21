@@ -81,7 +81,7 @@ begin
 
   -- 5 : org_list — le staff ne reçoit pas les informations légales
   j := public.org_list(st);  if j -> 0 ->> 'siret' is not null or j -> 0 ->> 'my_role' <> 'staff' then raise exception 'FAIL 5a : %', j; end if;
-  j := public.org_list(mg);  if j -> 0 ->> 'siret' <> '10425394300013' then raise exception 'FAIL 5b'; end if;
+  j := public.org_list(mg);  if j -> 0 ->> 'siret' <> '10665995600010' then raise exception 'FAIL 5b'; end if;
   j := public.org_list(adm); if jsonb_array_length(j) <> 2 then raise exception 'FAIL 5c : l''admin voit toutes les organisations'; end if;
   raise notice 'OK 5 : org_list selon le rôle';
 
@@ -92,10 +92,10 @@ begin
   perform pg_temp.expect('BAD_SIRET', format('select public.org_update_organizer(%L, %L, ''X'', '''', ''123'', '''', '''', '''')', ow, org_a));
   perform pg_temp.expect('BAD_EMAIL', format('select public.org_update_organizer(%L, %L, ''X'', '''', '''', '''', '''', ''pas-un-email'')', ow, org_a));
   perform pg_temp.expect('ORG_NAME_REQUIRED', format('select public.org_update_organizer(%L, %L, '' '', '''', '''', '''', '''', '''')', ow, org_a));
-  perform public.org_update_organizer(ow, org_a, 'THE MOUV 2', 'Association', '104 253 943 00013', 'Dupont Jean', '1 rue Test', 'Contact@Test.Local');
-  if (select siret || '|' || contact_email || '|' || name from public.organizers where id = org_a) <> '10425394300013|contact@test.local|THE MOUV 2' then raise exception 'FAIL 6a : mise à jour'; end if;
+  perform public.org_update_organizer(ow, org_a, 'THE MOUV 2', 'Association', '106 659 956 00010', 'Dupont Jean', '1 rue Test', 'Contact@Test.Local');
+  if (select siret || '|' || contact_email || '|' || name from public.organizers where id = org_a) <> '10665995600010|contact@test.local|THE MOUV 2' then raise exception 'FAIL 6a : mise à jour'; end if;
   if not exists (select 1 from public.audit_log where actor_id = ow and action = 'organizer.legal_update' and entity_id = org_a::text) then raise exception 'FAIL 6b : audit'; end if;
-  perform public.org_update_organizer(adm, org_a, 'THE MOUV', 'Association loi 1901', '10425394300013', '', '1 Morne Caruel', 'themouv2.0971@gmail.com');
+  perform public.org_update_organizer(adm, org_a, 'THE MOUV', 'Association loi 1901', '10665995600010', '', '1 Morne Caruel', 'themouv2.0971@gmail.com');
   raise notice 'OK 6 : informations légales — owner / admin, validation, journal';
 
   -- 7 : fonctions non appelables par le navigateur

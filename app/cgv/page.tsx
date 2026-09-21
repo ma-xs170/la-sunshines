@@ -20,7 +20,7 @@ export default async function CgvPage() {
           <h2>1. Vendeur</h2>
           <p>
             Les billets sont vendus par l’association <strong>THE MOUV</strong> (association loi 1901), organisatrice des soirées LA SUNSHINES —
-            SIRET 104 253 943 00013 — 1 Morne Caruel, Cité Deboisvieux, 97139 Les Abymes. Contact : <a href="mailto:themouv2.0971@gmail.com">themouv2.0971@gmail.com</a>{' '}
+            SIRET 106 659 956 00010 — 1 Morne Caruel, Cité Deboisvieux, 97139 Les Abymes. Contact : <a href="mailto:themouv2.0971@gmail.com">themouv2.0971@gmail.com</a>{' '}
             ou page <a href="/contact">Contact</a>. Le site est édité par LAWCY MUSIC, qui n’est pas le vendeur (voir les <a href="/mentions-legales">Mentions légales</a>).
           </p>
           <h2>2. Prix et TVA</h2>

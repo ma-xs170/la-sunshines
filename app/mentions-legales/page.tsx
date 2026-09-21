@@ -48,7 +48,7 @@ export default async function LegalNoticePage() {
           <ul>
             <li>Dénomination : <strong>THE MOUV</strong></li>
             <li>Forme juridique : association loi 1901</li>
-            <li>SIRET : <strong>104 253 943 00013</strong></li>
+            <li>SIRET : <strong>106 659 956 00010</strong></li>
             <li>Adresse : 1 Morne Caruel, Cité Deboisvieux, 97139 Les Abymes</li>
           </ul>
 

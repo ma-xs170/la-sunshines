@@ -14,7 +14,7 @@ ok(/class="tp /.test(home.data) && !/bizouk__frame/.test(home.data), 'flag inter
 ok(/class="tp /.test(ev.data) && !/bizouk__frame/.test(ev.data) && !/Acheter sur Bizouk/.test(ev.data), 'flag interne : page événement = panneau, plus de lien « Acheter sur Bizouk »');
 ok(/href="\/mentions-legales"/.test(ev.data) && /href="\/cgv"/.test(ev.data) && /href="\/remboursement"/.test(ev.data), 'panneau : liens vers mentions légales, CGV et remboursement');
 const cgv = await anon.req('/cgv'), rem = await anon.req('/remboursement');
-ok(cgv.status === 200 && /THE MOUV/.test(cgv.data) && /104 253 943 00013/.test(cgv.data) && /293 B/.test(cgv.data), '/cgv : vendeur, SIRET et article 293 B repris du site');
+ok(cgv.status === 200 && /THE MOUV/.test(cgv.data) && /106 659 956 00010/.test(cgv.data) && /293 B/.test(cgv.data), '/cgv : vendeur, SIRET et article 293 B repris du site');
 ok(rem.status === 200 && /remboursé/i.test(rem.data), '/remboursement accessible en mode interne');
 await admin.req('/api/billetterie/admin/settings', { method: 'PATCH', body: { key: 'ticketing_mode', value: 'bizouk' } });
 await new Promise((r) => setTimeout(r, 500));

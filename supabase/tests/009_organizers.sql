@@ -77,7 +77,7 @@ begin
 
   -- 2 : organisateur par défaut + THE MOUV seedé
   if (select organizer_id from public.ticketed_events where event_slug = 'evt-a') <> org_a then raise exception 'FAIL 2a : événement sans organisateur non rattaché'; end if;
-  if (select siret from public.organizers where id = org_a) <> '10425394300013' then raise exception 'FAIL 2b : SIRET THE MOUV'; end if;
+  if (select siret from public.organizers where id = org_a) <> '10665995600010' then raise exception 'FAIL 2b : SIRET THE MOUV'; end if;
   raise notice 'OK 2 : organisateur par défaut (THE MOUV) appliqué aux événements sans organisateur';
 
   -- 3 : RLS — chaque membre ne voit QUE l'organisateur / les événements / commandes / billets des siens
