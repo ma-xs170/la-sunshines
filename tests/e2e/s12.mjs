@@ -33,7 +33,8 @@ ok(/La Nuit Des Ombres/.test(r.data) && !/Welcome to Dominica/.test(r.data), 'un
 ok(/>3</.test(r.data) && /40,00/.test(r.data.replace(/&nbsp;| | /g, ' ')), 'billets et chiffre d’affaires : 3 billets, 40,00 €');
 ok(/Standard/.test(r.data) && /Early/.test(r.data), 'répartition par tarif');
 for (const p of ['7', '30', '90', 'all', 'piege', '../x']) { r = await owner.req(`/organisateur/analyse?periode=${encodeURIComponent(p)}`); ok(r.status === 200, `période « ${p} » : page saine (${r.status})`); }
-r = await orgb.req('/organisateur/analyse'); ok(/Welcome to Dominica/.test(r.data) && !/La Nuit Des Ombres/.test(r.data), 'l’autre organisation ne voit que ses chiffres');
+r = await orgb.req('/organisateur/analyse'); const body = r.data.slice(r.data.indexOf('<main'), r.data.indexOf('</main>'));   // contenu de la page seulement (le site cite « La Nuit Des Ombres » dans sa description et son bandeau)
+ok(/Welcome to Dominica/.test(body) && !/La Nuit Des Ombres/.test(body), 'l’autre organisation ne voit que ses chiffres');
 
 section('Paiements : accès');
 r = await anon.req('/organisateur/paiements'); ok(r.status >= 300 && r.status < 400, `sans connexion → connexion (${r.status})`);

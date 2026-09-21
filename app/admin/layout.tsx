@@ -1,4 +1,4 @@
-import { Suspense, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import AdminShell from '@/components/admin/AdminShell';
 import { getAdminShellData } from '@/lib/admin/shell-data';
 import '../organizer-shell.css';
@@ -8,5 +8,5 @@ import '../organizer-shell.css';
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const d = await getAdminShellData().catch(() => null);
   if (!d) return <>{children}</>;
-  return <Suspense fallback={null}><AdminShell firstName={d.firstName} reference={d.reference} isSuper={d.isSuper} pending={d.pending} support={d.support}>{children}</AdminShell></Suspense>;
+  return <AdminShell firstName={d.firstName} reference={d.reference} isSuper={d.isSuper} pending={d.pending} support={d.support} publications={d.publications}>{children}</AdminShell>;
 }

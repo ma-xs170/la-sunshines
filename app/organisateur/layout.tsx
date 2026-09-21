@@ -1,9 +1,10 @@
-import { Suspense, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import OrgShell from '@/components/organizer/OrgShell';
 import { getOrgContext } from '@/lib/organizer/context';
 import { unreadNewsCount } from '@/lib/organizer/news';
 import './../organizer-shell.css';
 
+// Pas de <Suspense> autour du cadre : les pages sont dynamiques, et une frontière de streaming ferait répondre 200 aux notFound() / redirect() des pages (soft-404).
 // Cadre de l'espace organisateur : menu latéral à deux contextes (compte / évènement) et en-tête avec la référence ORG.
 // Les pages « accès refusé » gardent la navigation du site (aucune organisation → pas de cadre).
 export default async function OrganizerLayout({ children }: { children: ReactNode }) {
@@ -12,8 +13,6 @@ export default async function OrganizerLayout({ children }: { children: ReactNod
   const unread = await unreadNewsCount(s.userId);
   const shellOrgs = orgs.map((o) => ({ id: o.id, name: o.name, role: o.my_role, reference: o.reference ?? null, status: o.account_status ?? 'approved' }));
   return (
-    <Suspense fallback={null}>
-      <OrgShell orgs={shellOrgs} currentId={current.id} unread={unread} firstName={s.firstName}>{children}</OrgShell>
-    </Suspense>
+    <OrgShell orgs={shellOrgs} currentId={current.id} unread={unread} firstName={s.firstName}>{children}</OrgShell>
   );
 }

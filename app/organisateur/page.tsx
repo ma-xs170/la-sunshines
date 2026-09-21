@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { forbidden, redirect } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import Icon from '@/components/Icon';
 import Checklist from '@/components/organizer/Checklist';
 import NewsBanner from '@/components/organizer/NewsBanner';
@@ -21,7 +21,8 @@ export default async function OrganizerHome() {
   const { s, current } = await getOrgContext();
   if (!s) redirect('/connexion?next=/organisateur');
 
-  if (!s.hasAccess || !current) forbidden();
+  // compte sans organisation : le chemin naturel est le dépôt d'un dossier (l'organisation sera créée en attente)
+  if (!s.hasAccess || !current) redirect('/devenir-organisateur');
 
   const role = current.my_role;
   const manage = can(role, 'manage');

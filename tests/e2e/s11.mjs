@@ -11,14 +11,14 @@ const admin = await as(USERS.admin), owner = await as(USERS.staff), crew = await
 const orgA = (await one(`select id from public.organizers where is_default`)).id;
 await q(`insert into public.organizer_members (organizer_id, user_id, role) values ($1, $2, 'owner'), ($1, $3, 'staff')`, [orgA, USERS.staff.id, USERS.cust2.id]);
 const post = (o) => ({ id: null, title: 'Nouvelle page Analyse', category: 'nouveaute', body: 'Suivez vos ventes.', image_url: null, status: 'published', pinned: false, ...o });
-const badge = (html) => (html.match(/obar__badge"[^>]*>([^<]*)</) ?? [])[1] ?? '0';
+const badge = (html) => (html.match(/oside__badge"[^>]*>([^<]*)</) ?? [])[1] ?? '0';
 
 section('Écriture réservée aux admins');
 let r = await anon.req('/api/admin/news', { method: 'PUT', body: post() }); ok(r.status === 401, `sans connexion → 401 (${r.status})`);
 r = await owner.req('/api/admin/news', { method: 'PUT', body: post() }); ok(r.status === 403, `propriétaire d'organisation → 403 (${r.status})`);
 r = await crew.req('/api/admin/news', { method: 'PUT', body: post() }); ok(r.status === 403, `staff d'organisation → 403 (${r.status})`);
 r = await owner.req('/api/admin/news'); ok(r.status === 403, `lecture admin refusée aux organisateurs (${r.status})`);
-r = await owner.req('/admin/actualites'); ok(r.status === 200 && /Accès refusé/.test(r.data), 'page /admin/actualites : accès refusé à un organisateur');
+r = await owner.req('/admin/actualites'); ok(r.status === 403 && /Accès refusé/.test(r.data), 'page /admin/actualites : accès refusé (403) à un organisateur');
 r = await anon.req('/admin/actualites'); ok(r.status >= 300 && r.status < 400, `page /admin/actualites sans connexion → redirection (${r.status})`);
 r = await admin.req('/admin/actualites'); ok(r.status === 200 && /Nouvelle publication/.test(r.data), 'page /admin/actualites pour un admin');
 ok((await one(`select count(*)::int n from public.news_posts`)).n === 0, 'rien n’a été écrit par les refus');
@@ -39,7 +39,7 @@ ok(!/[<>]/.test(row.title + row.body) && row.title === 'Maintenance b samedi /b'
 r = await admin.req('/api/admin/news'); ok(r.status === 200 && r.data.length === 3, 'l’admin voit tout, brouillon compris');
 
 section('Lecture par les organisateurs');
-r = await cust.req('/organisateur/actualites'); ok(r.status === 200 && /Accès réservé/.test(r.data) || (r.status >= 300 && r.status < 400), `client sans organisation : pas d’actualités (${r.status})`);
+r = await cust.req('/organisateur/actualites'); ok((r.status === 200 && /Accès réservé/.test(r.data)) || r.status === 403 || (r.status >= 300 && r.status < 400), `client sans organisation : pas d’actualités (${r.status})`);
 r = await anon.req('/organisateur/actualites'); ok(r.status >= 300 && r.status < 400, `sans connexion → connexion (${r.status})`);
 r = await owner.req('/organisateur/actualites');
 ok(r.status === 200 && /Maintenance b samedi \/b/.test(r.data) && /Nouvelle page Analyse/.test(r.data), 'propriétaire : voit les publications');
