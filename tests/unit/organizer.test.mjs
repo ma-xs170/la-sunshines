@@ -63,10 +63,10 @@ test('barre du haut : entrées selon le rôle, jamais d\'entrée « Marketing »
 test('checklist : étapes cochées selon les informations de l\'organisation', () => {
   const org = { name: 'THE MOUV', siret: '', responsible_name: '', address: '', contact_email: '', stripe_ready: false };
   assert.deepEqual(checklist(org).map((s) => s.done), [false, false, false]);
-  assert.equal(legalComplete({ ...org, address: '1 rue', siret: '10425394300013' }), true);
+  assert.equal(legalComplete({ ...org, address: '1 rue', siret: '10665995600010' }), true);
   assert.equal(legalComplete({ ...org, address: '1 rue', responsible_name: 'Dupont Jean' }), true);   // nom + prénom à défaut de SIRET
-  assert.equal(legalComplete({ ...org, siret: '10425394300013' }), false);                            // adresse obligatoire
-  const full = { ...org, address: '1 rue', siret: '10425394300013', contact_email: 'a@b.fr', stripe_ready: true };
+  assert.equal(legalComplete({ ...org, siret: '10665995600010' }), false);                            // adresse obligatoire
+  const full = { ...org, address: '1 rue', siret: '10665995600010', contact_email: 'a@b.fr', stripe_ready: true };
   assert.equal(canPublish(full), true);
   assert.equal(canPublish({ ...full, stripe_ready: false }), false);
 });

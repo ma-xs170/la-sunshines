@@ -42,7 +42,7 @@ create index organizer_members_user_idx on public.organizer_members (user_id);
 
 -- THE MOUV : mêmes informations que les mentions légales publiques du site (/mentions-legales).
 insert into public.organizers (name, legal_form, siret, address, contact_email, is_default)
-values ('THE MOUV', 'Association loi 1901', '10425394300013',
+values ('THE MOUV', 'Association loi 1901', '10665995600010',
         '1 Morne Caruel, Cité Deboisvieux, 97139 Les Abymes', 'themouv2.0971@gmail.com', true);
 
 -- Rattachement des événements : existants → THE MOUV ; nouveaux sans organisateur → THE MOUV (organisateur par défaut).

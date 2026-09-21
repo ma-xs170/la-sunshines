@@ -8,7 +8,7 @@
 - `/cgv` (CGV) et `/remboursement` (politique de remboursement) existent, sont **invisibles (404) tant que le flag est sur Bizouk**,
   et sont liés depuis le panneau de réservation (avec les **mentions légales**), ainsi que les cases à cocher CGV + autorisation parentale.
 - Le vendeur, le SIRET et l'adresse des CGV sont **repris des mentions légales** existantes : association **THE MOUV**
-  (loi 1901), SIRET 104 253 943 00013, 1 Morne Caruel, Cité Deboisvieux, 97139 Les Abymes ; contact `themouv2.0971@gmail.com` ;
+  (loi 1901), SIRET 106 659 956 00010, 1 Morne Caruel, Cité Deboisvieux, 97139 Les Abymes ; contact `themouv2.0971@gmail.com` ;
   site édité par **LAWCY MUSIC** (SIRET 107 145 534 00015).
 - Mention **« TVA non applicable, article 293 B du CGI »** : page de paiement Stripe, panneau de réservation, email, CGV.
 

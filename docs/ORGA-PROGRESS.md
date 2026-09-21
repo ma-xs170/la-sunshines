@@ -41,3 +41,10 @@ Scripts hors dépôt (scratchpad) : `db.mjs` (connexion, lit `.env.local`), `bac
 - En ligne : 4bis-A/B, C, D, E, promo au paiement (025), correctif `authInterrupts`, bancs e2e s14/s15/s16.
 - Reste : migration 021 (billets gratuits) non appliquée sur la base réelle ; publication d'évènements créés en ligne ; échecs e2e antérieurs (s5, s9–s12) à réaligner ; e-mails automatiques.
 - À ouvrir sur le téléphone : /admin, /organisateur/evenements/nouveau, /devenir-organisateur, /organisateur/evenements, /organisateurs/the-mouv, /editions/la-nuit-des-ombres.
+
+### 2026-09-21 (suite) : décisions de Mathis appliquées
+- Mode public `ticketing_mode` repassé sur **bizouk** (audit_log `setting.update` native → bizouk, acteur admin).
+- Migration **021 appliquée** (relue : additive, tables vides ; sauvegarde `~/sunshines-backups/avant-021` ; `021_verify.sql` tout vert ; s13 / s16 / s3 verts en local).
+- **SIRET THE MOUV = 10665995600010** aligné : base (journal `organizer.siret_fix`), `/mentions-legales`, `/cgv`, `docs/billetterie/LEGAL.md`, graine de la migration 009, tests. Le SIRET de LAWCY MUSIC (107 145 534 00015) est inchangé.
+- Vercel : `https://la-sunshines.vercel.app` sert déjà le code de `main` (routes de ce lot présentes) ; projet exact / lien Git non lisibles via l'API (voir rapport à Mathis).
+- Publication d'évènements créés en ligne : étapes restantes documentées dans ORGA-RAPPORT.md (non construites).

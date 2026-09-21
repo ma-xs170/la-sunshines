@@ -1,6 +1,6 @@
 # Rapport : refonte espace organisateur et admin
 
-État au 21/09/2026. Tout est mergé sur `main` (dernier merge `7304f82` ; tag de secours `pre-orga-2026-09-21` = état de main avant ce lot). Migrations **014 à 020 appliquées** (puis **022 à 025 appliquées** le 21/09 ; **021 « billets gratuits » toujours NON appliquée**) sur la base réelle (sauvegardes JSON dans `~/sunshines-backups/`, hors dépôt). `002_verify.sql` : 408 contrôles, 0 échec ; chaque `0NN_verify.sql` : 0 échec. Comptages des tables existantes inchangés à chaque migration. **Aucune donnée de test n'a été créée sur la vraie base** (tous les tests SQL tournent en `ROLLBACK` sur une base jetable). Le mode public reste sur **Bizouk** ; les pages ajoutées au public (dresscode couleurs, vidéo, bloc et pages organisateurs) sont inertes tant que ce mode n'est pas changé.
+État au 21/09/2026. Tout est mergé sur `main` (dernier merge `7304f82` ; tag de secours `pre-orga-2026-09-21` = état de main avant ce lot). Migrations **014 à 020 appliquées** (puis **022 à 025 appliquées** le 21/09 ; **021 « billets gratuits » appliquée le 21/09**) sur la base réelle (sauvegardes JSON dans `~/sunshines-backups/`, hors dépôt). `002_verify.sql` : 408 contrôles, 0 échec ; chaque `0NN_verify.sql` : 0 échec. Comptages des tables existantes inchangés à chaque migration. **Aucune donnée de test n'a été créée sur la vraie base** (tous les tests SQL tournent en `ROLLBACK` sur une base jetable). Le mode public reste sur **Bizouk** ; les pages ajoutées au public (dresscode couleurs, vidéo, bloc et pages organisateurs) sont inertes tant que ce mode n'est pas changé.
 
 ## Ce qui est fait
 | Phase | Contenu | Migration |
@@ -39,11 +39,22 @@ Stripe Connect à la place d'un formulaire IBAN (D1) ; sondage 2 s plutôt que R
 ## Limites connues
 - **Job de transcodage vidéo absent** : une vidéo > 1080p / 60 i/s reste « Envoyée » (l'affiche image est utilisée) ; les règles HEVC / H.264 sont écrites et testées mais aucun ffmpeg ne tourne (D12).
 - Lineup côté organisateur, liste d'entrée, impression de lots PDF, simulateur de prix / glisser-déposer des tarifs, statistiques d'audience / acquisition / tunnel : « Bientôt » (aucune donnée inventée).
-- Évènements créés en ligne : brouillons, sans page publique `/editions/<slug>` ni bouton « Publier » (la publication passe par l'équipe) ; capacité provisoire de 100 places. Le widget Bizouk d'un tel évènement s'affiche dans l'aperçu organisateur ; côté public il faut une édition (limite connue). Mode public en base : `native` (réglé le 20/09) alors que la consigne dit « bizouk » : NON modifié, à confirmer. `/mentions-legales` et `/cgv` affichent encore l'ancien SIRET. Pas de preview Vercel Git détectée (déploiements par CLI) : build vérifié en local. Un code promo qui rendrait la commande gratuite est refusé (les billets gratuits ont leur parcours).
+- Évènements créés en ligne : brouillons, sans page publique `/editions/<slug>` ni bouton « Publier » (la publication passe par l'équipe) ; capacité provisoire de 100 places. Le widget Bizouk d'un tel évènement s'affiche dans l'aperçu organisateur ; côté public il faut une édition (limite connue). Mode public en base : repassé sur « bizouk » le 21/09 (journalisé). SIRET de THE MOUV aligné sur 10665995600010 partout (base, `/mentions-legales`, `/cgv`, `LEGAL.md`, billet PDF via la base). Migration 021 appliquée le 21/09. Vercel : voir le suivi (projet exact non identifiable via l'API disponible). Un code promo qui rendrait la commande gratuite est refusé (les billets gratuits ont leur parcours).
 - E-mails automatiques (notifications, « nouvel évènement », réponse de support) non envoyés, seul l'accusé de réception d'un ticket l'est.
 - A2F non imposée (colonne `mfa_required` prête). Aucun test visuel navigateur systématique dans cette session : à contrôler sur la preview (menu latéral, tiroir mobile, calendrier).
 - Le calendrier ne montre que les évènements de billetterie reliés à un lieu.
 - Une autre session Claude travaille en parallèle (migration 021 « billets gratuits », branche paiement) : elle est fusionnée sur `main` mais **021 n'est pas appliquée** à la base réelle par moi.
+
+## Publication d'un évènement créé en ligne : étapes restantes (non construites)
+Objectif : après approbation de l'organisation, l'organisateur publie lui-même son évènement, sous contrôle d'un admin.
+1. **Base** : table `event_publication_requests` (évènement, demandeur, statut `pending` / `approved` / `rejected`, motif, dates) ; fonctions `org_request_publication` (contrôle : organisation approuvée, rôle propriétaire ou gestionnaire, checklist complète : description, lieu, date, tarifs ou widget Bizouk valide, pas de demande déjà en cours) et `admin_review_publication` (approuver / refuser avec motif). Journal d'audit à chaque étape.
+2. **Approbation** : passe `ticketed_events.status` de `draft` à `published` (et `ticketing_enabled` seulement en mode « internal » avec Stripe prêt) ; refus = retour en brouillon avec motif visible.
+3. **Bouton « Demander la publication »** dans la checklist « Prochaines étapes » (remplace le lien vers le support), avec état « Demande envoyée le … » et annulation.
+4. **File d'attente admin** : page `/admin/gestion/publications` (entrée de menu + pastille sur le tableau de bord), filtres En attente / Traitées, aperçu de l'évènement avant décision, boutons Approuver / Refuser.
+5. **Page publique** : passerelle entre un évènement créé en ligne et `/editions/<slug>` (aujourd'hui les pages viennent du code et de `data/content.json`) : édition construite depuis `event_details`, `event_venues` / `event_sessions`, flyer et dresscode ; le widget Bizouk et la billetterie interne s'y branchent comme pour les éditions actuelles ; sitemap et bloc « Organisé par ».
+6. **Interrupteur de sécurité** inchangé : `ticketing_mode` global (« bizouk » aujourd'hui) ; un évènement « internal » n'est visible que si le mode public est ouvert, un évènement « bizouk » affiche toujours son widget.
+7. **Notifications** : e-mail à l'organisateur (approuvée / refusée) et aux admins (nouvelle demande) ; capacité réelle demandée avant publication (100 places provisoires).
+8. **Tests** : SQL (rôles, organisation non approuvée, double demande, refus), e2e (demande → approbation → page publique → widget), Playwright de la file admin.
 
 ## À FAIRE PAR MATHIS
 1. **Resend** : vérifier un domaine d'envoi. Tant que l'expéditeur est `onboarding@resend.dev`, les invitations d'admins partent « non envoyées » (bouton « Renvoyer » ensuite).
@@ -51,6 +62,6 @@ Stripe Connect à la place d'un formulaire IBAN (D1) ; sondage 2 s plutôt que R
 3. **Créer ton compte super-admin secondaire** si besoin depuis `/admin/gestion/administrateurs` ; vérifier que ton compte y apparaît « Super-administrateur ».
 4. **Juridique** : valider le texte de l'autorisation parentale (12–17 ans) et les conditions par défaut (`lib/rulesText.ts`) ; SIRET de THE MOUV et de LAWCY MUSIC à vérifier ; médiateur de la consommation dans `/cgv` ; TVA 293 B.
 5. **Décisions à prendre** : brancher les codes promo au paiement ; job de transcodage vidéo (GitHub Actions gratuit ?) ; ouvrir le lineup aux organisateurs ; supprimer l'accès legacy `sun_admin` quand tu n'en as plus besoin.
-6. **Migration 021** (autre session) : à appliquer toi-même ou à me demander, après relecture.
+6. ~~Migration 021~~ : appliquée le 21/09 (sauvegarde `~/sunshines-backups/avant-021`).
 7. **Sauvegardes** `~/sunshines-backups/` : contiennent des données personnelles ; à supprimer quand tu n'en as plus besoin.
 8. Passer le mode public de « bizouk » à « native » **seulement** quand tu es prêt : c'est ce qui ouvrira les pages organisateurs et la billetterie.

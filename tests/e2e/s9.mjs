@@ -94,7 +94,7 @@ if (hasPoppler) {
   const ref = (await one('select reference from public.tickets where id = $1', [tk1[0].id])).reference;
   if (process.env.DEBUG_PDF) console.log('----PDF TEXT----\n' + text + '----');
   // pdftotext insère des espaces dans les textes à espacement de lettres (la référence est volontairement espacée)
-  ok(text.replace(/\s+/g, '').includes(ref) && /293 B/.test(text) && /THE MOUV/.test(text) && /104 253 943 00013/.test(text) && /Élodie/i.test(text), `texte du PDF : référence ${ref}, TVA 293 B, organisateur + SIRET, titulaire`);
+  ok(text.replace(/\s+/g, '').includes(ref) && /293 B/.test(text) && /THE MOUV/.test(text) && /106 659 956 00010/.test(text) && /Élodie/i.test(text), `texte du PDF : référence ${ref}, TVA 293 B, organisateur + SIRET, titulaire`);
   ok(/Un billet = une entrée/.test(text) || /un billet = une entrée/.test(text), 'mentions « un billet = une entrée » et rappel du QR');
 } else console.log('  ⚠ poppler absent : contrôles visuels / QR du PDF ignorés');
 
