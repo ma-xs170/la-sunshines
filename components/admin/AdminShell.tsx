@@ -10,7 +10,7 @@ import GlobalSearch from './GlobalSearch';
 import { activeAdminGroup, adminCrumbs, adminMenu, isAdminActive, visibleAdminMenu } from '@/lib/admin/menu';
 
 /** Cadre de l'espace admin : MÊMES classes et même disposition que l'espace organisateur (menu latéral plat pleine hauteur, en-tête, pied de page). */
-export default function AdminShell({ firstName, reference, isSuper, pending, support, children }: { firstName: string; reference: string | null; isSuper: boolean; pending: number; support: number; children: ReactNode }) {
+export default function AdminShell({ firstName, reference, isSuper, pending, support, publications, children }: { firstName: string; reference: string | null; isSuper: boolean; pending: number; support: number; publications: number; children: ReactNode }) {
   const pathname = usePathname();
   const params = useSearchParams();
   const groups = useMemo(() => visibleAdminMenu(adminMenu(), isSuper), [isSuper]);
@@ -32,8 +32,8 @@ export default function AdminShell({ firstName, reference, isSuper, pending, sup
   // Le scan à l'entrée reste plein écran (téléphone du staff), sans cadre.
   if (pathname.startsWith('/admin/scan')) return <>{children}</>;
 
-  const count = (b?: 'support' | 'pending') => (b === 'support' ? support : b === 'pending' ? pending : 0);
-  const Badge = ({ b }: { b?: 'support' | 'pending' }) => count(b) > 0 ? <b className="oside__badge" aria-label={`${count(b)} à traiter`}>{count(b) > 9 ? '9+' : count(b)}</b> : null;
+  const count = (b?: 'support' | 'pending' | 'publications') => (b === 'support' ? support : b === 'pending' ? pending : b === 'publications' ? publications : 0);
+  const Badge = ({ b }: { b?: 'support' | 'pending' | 'publications' }) => count(b) > 0 ? <b className="oside__badge" aria-label={`${count(b)} à traiter`}>{count(b) > 9 ? '9+' : count(b)}</b> : null;
   const trail = adminCrumbs(pathname);
 
   return (

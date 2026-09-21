@@ -51,6 +51,7 @@ export default async function AdminHome({ searchParams }: { searchParams: Promis
         <a className="glass org-kpi" href="/admin/gestion/organisateurs?statut=pending"><span className="kicker">Organisateurs en attente</span><strong>{pend.count ?? 0}</strong><span>à approuver</span></a>
         <a className="glass org-kpi" href="/admin/gestion/organisateurs?statut=approved"><span className="kicker">Organisateurs actifs</span><strong>{act.count ?? 0}</strong><span>approuvés</span></a>
         <a className="glass org-kpi" href="/admin/gestion/evenements"><span className="kicker">Évènements à venir</span><strong>{upc.count ?? 0}</strong><span>publiés</span></a>
+        <a className="glass org-kpi" href="/admin/gestion/publications"><span className="kicker">Publications à valider</span><strong>{d.publications}</strong><span>demandes en attente</span></a>
         <a className="glass org-kpi" href="/admin/gestion/support"><span className="kicker">Tickets non pris en charge</span><strong>{sup.count ?? 0}</strong><span>ouverts</span></a>
         <div className="glass org-kpi"><span className="kicker">Ventes de la plateforme</span><strong>{formatEuro(gross)}</strong><span>30 derniers jours · dont {formatEuro(fees)} de frais de service</span></div>
       </section>

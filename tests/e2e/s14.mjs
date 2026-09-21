@@ -5,7 +5,7 @@ import * as L from './lib.mjs';
 const { ok, section, as, q, one, USERS } = L;
 
 await L.resetDb();
-await q(`truncate public.organizer_documents, public.organizer_applications, public.organizer_members, public.event_sessions, public.event_details cascade`);
+await q(`truncate public.event_venues, public.organizer_documents, public.organizer_applications, public.organizer_members, public.event_sessions, public.event_details cascade`);
 await q(`delete from public.organizers where not is_default`);
 const A = (await one(`insert into public.organizers (name, account_status, siret) values ('Orga A', 'approved', '10665995600010') returning id`)).id;
 const B = (await one(`insert into public.organizers (name, account_status) values ('Orga B', 'approved') returning id`)).id;

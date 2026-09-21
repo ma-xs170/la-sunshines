@@ -42,6 +42,10 @@ const MESSAGES: Record<string, OrgFailure> = {
   VENUE_REQUIRED: { status: 400, message: 'Le lieu est obligatoire.' },
   SLUG_TAKEN: { status: 409, message: 'Cette adresse d’évènement existe déjà.' },
   HAS_SALES: { status: 409, message: 'Des billets ont déjà été vendus : le mode de billetterie ne peut plus être changé.' },
+  CHECKLIST_INCOMPLETE: { status: 409, message: 'Il manque encore des éléments : complète la checklist avant de demander la publication.' },
+  ALREADY_PENDING: { status: 409, message: 'Une demande de publication est déjà en attente pour cet évènement.' },
+  NOT_DRAFT: { status: 409, message: 'Seul un évènement en brouillon peut faire l’objet d’une demande de publication.' },
+  NO_PENDING: { status: 404, message: 'Aucune demande en attente.' },
   REPLY_TO_MISSING: { status: 409, message: 'L’organisateur n’a pas d’adresse de réponse : [À COMPLÉTER] dans les informations de l’organisateur.' },
 };
 

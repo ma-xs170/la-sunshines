@@ -69,6 +69,6 @@ export function nextSteps(i: StepInput, base: string): { key: string; label: str
     i.mode === 'bizouk' ? { key: 'tickets', label: 'Vérifier le widget Bizouk', done: i.hasBizouk, href: `${base}/billetterie` }
       : i.mode === 'none' ? { key: 'tickets', label: 'Choisir une méthode de billetterie (facultatif)', done: false, href: `${base}/billetterie` }
       : { key: 'tickets', label: 'Créer les tarifs', done: i.hasTiers, href: `${base}?onglet=tarifs` },
-    { key: 'publish', label: 'Publier l’évènement (validation avec l’équipe)', done: i.published, href: '/organisateur/support/nouveau' },
+    { key: 'publish', label: 'Demander la publication (validation par l’équipe)', done: i.published, href: '#pub-h' },
   ];
 }
