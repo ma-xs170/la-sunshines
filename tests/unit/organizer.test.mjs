@@ -128,7 +128,7 @@ test('menu : le contexte évènement se déclenche sur /evenements/<slug>, pas s
 
 test('menu : filtré par rôle (le staff ne voit que le contrôle d’accès)', () => {
   const labels = (role) => visibleMenu(eventMenu('x'), caps[role]).flatMap((g) => g.items.map((i) => i.label));
-  assert.deepEqual(labels('staff'), ['Tableau de bord', 'Scan à l’entrée', 'Liste d’entrée']);
+  assert.deepEqual(labels('staff'), ['Tableau de bord', 'Scan à l’entrée']);
   assert.ok(!labels('manager').includes('Récapitulatif'));
   assert.ok(labels('owner').includes('Récapitulatif'));
   assert.deepEqual(visibleMenu(accountMenu(), caps.staff).map((g) => g.id), ['dashboard', 'events', 'news', 'help']);
@@ -140,7 +140,8 @@ test('menu : aucune entrée cliquable sans page, aucun href en double', () => {
     const all = menu.flatMap((g) => g.items);
     const hrefs = all.filter((i) => i.href).map((i) => i.href);
     assert.equal(new Set(hrefs).size, hrefs.length);
-    assert.ok(all.some((i) => !i.href), 'les pages non construites sont marquées « bientôt »');
+    assert.ok(all.every((i) => i.href), 'aucune entrée sans page : plus de « Bientôt »');
+    assert.equal(new Set(hrefs).size, hrefs.length, 'aucun lien en double dans le menu');
   }
 });
 

@@ -1,0 +1,9 @@
+-- 030_verify.sql — contrôle en LECTURE SEULE après la migration 030.
+select 'colonnes de frais sur ticketed_events' as controle, count(*) = 4 as ok, count(*) as valeur from information_schema.columns where table_schema = 'public' and table_name = 'ticketed_events' and column_name in ('fee_mode', 'min_order_cents', 'fee_percent_override', 'fee_fixed_override')
+union all select 'colonnes de frais sur organizers', count(*) = 2, count(*) from information_schema.columns where table_schema = 'public' and table_name = 'organizers' and column_name in ('fee_percent_override', 'fee_fixed_override')
+union all select 'orders.fee_absorbed_cents', count(*) = 1, count(*) from information_schema.columns where table_schema = 'public' and table_name = 'orders' and column_name = 'fee_absorbed_cents'
+union all select 'tables event_lineup / event_views', count(*) = 2, count(*) from pg_tables where schemaname = 'public' and tablename in ('event_lineup', 'event_views')
+union all select 'RLS active sur event_lineup / event_views', count(*) = 2, count(*) from pg_tables where schemaname = 'public' and tablename in ('event_lineup', 'event_views') and rowsecurity
+union all select 'fonctions 030 non exécutables par anon / authenticated', count(*) = 0, count(*) from pg_proc p where p.pronamespace = 'public'::regnamespace and p.proname in ('event_fee_config', 'org_fee_settings', 'org_set_fee_settings', 'record_absorbed_fee', 'org_lineup', 'org_lineup_save', 'org_members', 'org_member_add', 'org_member_set_role', 'org_member_remove', 'org_staff', 'org_print_ticket_ids', 'org_stats_extra', 'track_event_view', 'org_event_views') and (has_function_privilege('anon', p.oid, 'execute') or has_function_privilege('authenticated', p.oid, 'execute'))
+union all select 'aucune commande existante avec frais absorbés', count(*) = 0, count(*) from public.orders where fee_absorbed_cents <> 0
+order by ok, controle;

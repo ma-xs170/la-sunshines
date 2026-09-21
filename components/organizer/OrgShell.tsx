@@ -33,9 +33,6 @@ function CopyRef({ value }: { value: string }) {
 }
 
 function Leaf({ leaf, active, unread }: { leaf: MenuGroup['items'][number]; active: boolean; unread: number }) {
-  if (!leaf.href) {
-    return <li><span className="oside__leaf oside__leaf--soon" aria-disabled="true">{leaf.label}<em className="oside__soon">Bientôt</em></span></li>;
-  }
   return (
     <li>
       <a href={leaf.href} className={'oside__leaf' + (active ? ' is-active' : '')} aria-current={active ? 'page' : undefined}>
@@ -97,12 +94,10 @@ export default function OrgShell({ orgs, currentId, unread, firstName, children 
                 const active = isActiveHref(leaf.href, pathname, onglet);
                 return (
                   <li key={g.id} className="oside__group">
-                    {leaf.href
-                      ? <a href={leaf.href} className={'oside__head oside__head--link' + (active ? ' is-active' : '')} aria-current={active ? 'page' : undefined}>
-                          <Icon name={g.icon} className="icon oside__ico" /><span>{g.label}</span>
-                          {leaf.badge === 'news' && unread > 0 && <b className="oside__badge" aria-label={`${unread} non lue${unread > 1 ? 's' : ''}`}>{unread > 9 ? '9+' : unread}</b>}
-                        </a>
-                      : <span className="oside__head oside__head--soon" aria-disabled="true"><Icon name={g.icon} className="icon oside__ico" /><span>{g.label}</span><em className="oside__soon">Bientôt</em></span>}
+                    <a href={leaf.href} className={'oside__head oside__head--link' + (active ? ' is-active' : '')} aria-current={active ? 'page' : undefined}>
+                      <Icon name={g.icon} className="icon oside__ico" /><span>{g.label}</span>
+                      {leaf.badge === 'news' && unread > 0 && <b className="oside__badge" aria-label={`${unread} non lue${unread > 1 ? 's' : ''}`}>{unread > 9 ? '9+' : unread}</b>}
+                    </a>
                   </li>
                 );
               }

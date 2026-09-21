@@ -7,7 +7,9 @@ import { stripeConfigured } from '@/lib/stripe';
 import { checkoutSchema } from '@/lib/ticketing/schemas';
 import { getTicketingSettings } from '@/lib/ticketing/settings';
 import { editionForSlug } from '@/lib/ticketing/guard';
-import { applyPromo, checkoutKind, createCheckoutSession, expireSessions, reserveFreeOrder, reserveOrder } from '@/lib/ticketing/checkout';
+import { applyPromo, checkoutKind, createCheckoutSession, eventFeeConfig, expireSessions, feeSettingsFor, recordAbsorbedFee, requestedSubtotal, reserveFreeOrder, reserveOrder } from '@/lib/ticketing/checkout';
+import { computeFee } from '@/lib/ticketing/fees';
+import { formatEuro } from '@/lib/ticketing/time';
 import { afterOrderPaid } from '@/lib/ticketing/order-mail';
 
 export const runtime = 'nodejs';
@@ -70,25 +72,36 @@ export async function POST(req: Request) {
   }
 
   if (!stripeConfigured()) return fail('Le paiement en ligne n’est pas disponible pour le moment.', 503);
+
+  // frais de l'évènement (surcharges, mode « inclus dans le prix ») et montant minimum de commande : relus en base
+  const feeCfg = await eventFeeConfig(db, input.slug);
+  const fee = feeSettingsFor(feeCfg, settings);
+  if (feeCfg.min_order_cents > 0) {
+    const sub = await requestedSubtotal(db, input);
+    if (sub !== null && sub > 0 && sub < feeCfg.min_order_cents) return fail(`Le montant minimum d’une commande pour cet évènement est de ${formatEuro(feeCfg.min_order_cents)}.`, 400);
+  }
   const reserved = await reserveOrder(db, {
     input,
     userId: session.userId,
     eventTitle: edition.name, // résolu ICI, jamais fourni par le navigateur
     buyer: { email: session.email, first_name, last_name, phone },
-    settings,
+    settings: fee.settings,
   });
   if (!reserved.ok) return fail(reserved.message, reserved.status);
   let order = reserved.order;
 
   // code promo (facultatif) : appliqué juste après la réservation, avant tout paiement ; refus = commande libérée, rien n'est facturé
   if (input.promo_code) {
-    const promo = await applyPromo(db, { orderId: order.order_id, userId: session.userId, code: input.promo_code, settings });
+    const promo = await applyPromo(db, { orderId: order.order_id, userId: session.userId, code: input.promo_code, settings: fee.settings });
     if (!promo.ok) {
       await db.from('orders').update({ status: 'expired' }).eq('id', order.order_id).eq('status', 'pending');
       return fail(promo.message, promo.status);
     }
     order = { ...order, ...promo.totals };
   }
+
+  // mode « inclus dans le prix » : la part de la plateforme est prise sur l'organisateur, le client ne paie que le prix affiché
+  if (feeCfg.mode === 'included') await recordAbsorbedFee(db, order.order_id, computeFee(order.subtotal_cents, fee.rates));
 
   // un tarif est devenu gratuit entre-temps : jamais de session Stripe à 0 €
   if (order.total_cents <= 0) {

@@ -11,6 +11,7 @@ import type { CheckoutInput } from './schemas';
 import { newTicketCode } from './tokens';
 import { randomUUID } from 'crypto';
 import type { TicketingSettings } from './settings';
+import { effectiveRates, type FeeConfig, type FeeRates } from './fees';
 
 export const CHECKOUT_ERRORS: Record<string, { status: number; message: string }> = {
   AUTH_REQUIRED: { status: 401, message: 'Connexion requise.' },
@@ -91,6 +92,38 @@ export async function applyPromo(
   }
   const row = (Array.isArray(data) ? data[0] : data) as { subtotal_cents: number; fee_cents: number; total_cents: number; discount_cents: number } | undefined;
   return row ? { ok: true, totals: row } : { ok: false, status: 500, message: 'Le code promo n’a pas pu être appliqué. Réessaie.' };
+}
+
+/** Configuration de frais de l'évènement (mode, minimum, surcharges). Tolérante : base sans la migration 030 ou erreur → comportement historique (frais payés par le client, aucun minimum). */
+export async function eventFeeConfig(db: SupabaseClient, slug: string): Promise<FeeConfig> {
+  const fallback: FeeConfig = { mode: 'customer', min_order_cents: 0, percent: null, fixed: null };
+  try {
+    const { data, error } = await db.rpc('event_fee_config', { p_slug: slug });
+    if (error || !data) return fallback;
+    const d = data as Partial<FeeConfig>;
+    return { mode: d.mode === 'included' ? 'included' : 'customer', min_order_cents: Number(d.min_order_cents) || 0, percent: d.percent == null ? null : Number(d.percent), fixed: d.fixed == null ? null : Number(d.fixed) };
+  } catch { return fallback; }
+}
+
+/** Réglages de frais à passer à la base : en mode « inclus dans le prix » le client ne paie aucun frais en plus (la part de la plateforme est prise sur l'organisateur : fee_absorbed_cents). */
+export function feeSettingsFor(cfg: FeeConfig, settings: TicketingSettings): { settings: TicketingSettings; rates: FeeRates } {
+  const rates = effectiveRates(cfg, settings);
+  return { rates, settings: cfg.mode === 'included' ? { ...settings, feePercent: 0, feeFixedCents: 0 } : { ...settings, feePercent: rates.percent, feeFixedCents: rates.fixedCents } };
+}
+
+/** Sous-total demandé (prix relus en base, avant code promo). null si un tarif est introuvable. */
+export async function requestedSubtotal(db: SupabaseClient, input: CheckoutInput): Promise<number | null> {
+  const ids = input.items.map((i) => i.tier_id);
+  const { data, error } = await db.from('ticket_tiers').select('id, price_cents, ticketed_events!inner(event_slug)').in('id', ids).eq('ticketed_events.event_slug', input.slug);
+  if (error || !data || data.length !== new Set(ids).size) return null;
+  const price = new Map(data.map((t) => [t.id as string, t.price_cents as number]));
+  return input.items.reduce((n, i) => n + (price.get(i.tier_id) ?? 0) * i.quantity, 0);
+}
+
+/** Enregistre la part « frais inclus » d'une commande en attente (mode « inclus dans le prix »). */
+export async function recordAbsorbedFee(db: SupabaseClient, orderId: string, cents: number): Promise<void> {
+  const { error } = await db.rpc('record_absorbed_fee', { p_order: orderId, p_cents: cents });
+  if (error) console.error('[checkout] record_absorbed_fee a échoué :', error.message);
 }
 
 /** Tarifs demandés : 'free' si TOUS sont à 0 €, sinon 'paid' (panier payant ou mixte). Lecture seule, sans verrou :

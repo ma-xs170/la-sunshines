@@ -29,6 +29,7 @@ import OrganizerAvatar from '@/components/OrganizerAvatar';
 import GalleryLightbox from '@/components/GalleryLightbox';
 import ArtistName from '@/components/ArtistName';
 import VenueLink from '@/components/VenueLink';
+import ViewBeacon from '@/components/ViewBeacon';
 
 type Params = { slug: string };
 
@@ -315,6 +316,7 @@ export default async function EditionPage({
         )}
       </main>
 
+      <ViewBeacon slug={ed.slug} />
       <Footer />
     </>
   );

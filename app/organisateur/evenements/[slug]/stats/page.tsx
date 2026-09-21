@@ -26,7 +26,7 @@ export default async function StatsPage({ params }: { params: Promise<{ slug: st
           <div className="org-table"><table aria-label="Chaleur des ventes"><thead><tr><th />{Array.from({ length: 24 }, (_, h) => <th key={h}>{h}h</th>)}</tr></thead>
             <tbody>{DOW.map((n, i) => <tr key={n}><th scope="row">{n}</th>{Array.from({ length: 24 }, (_, h) => { const v = heat.get(`${i + 1}|${h}`) ?? 0; return <td key={h} title={`${n} ${h}h : ${v} billet(s)`} style={{ background: v ? `rgba(255,178,56,${0.2 + 0.8 * (v / max)})` : undefined, textAlign: 'center', padding: '6px 4px' }}>{v || ''}</td>; })}</tr>)}</tbody></table></div>)}
       </section>
-      <p className="org-muted">Audience, acquisition, tunnel de conversion et paniers abandonnés demandent une mesure de fréquentation qui n’existe pas encore : ces rubriques ouvriront quand les données seront réellement collectées, sans chiffres inventés.</p>
+      <p className="org-muted">Audience, acquisition, tunnel de conversion, canaux et géographie : <a href={`/organisateur/evenements/${slug}/statistiques/vue-densemble`}>autres statistiques de l’évènement</a>.</p>
     </main>
   );
 }

@@ -48,3 +48,13 @@ Scripts hors dépôt (scratchpad) : `db.mjs` (connexion, lit `.env.local`), `bac
 - **SIRET THE MOUV = 10665995600010** aligné : base (journal `organizer.siret_fix`), `/mentions-legales`, `/cgv`, `docs/billetterie/LEGAL.md`, graine de la migration 009, tests. Le SIRET de LAWCY MUSIC (107 145 534 00015) est inchangé.
 - Vercel : `https://la-sunshines.vercel.app` sert déjà le code de `main` (routes de ce lot présentes) ; projet exact / lien Git non lisibles via l'API (voir rapport à Mathis).
 - Publication d'évènements créés en ligne : étapes restantes documentées dans ORGA-RAPPORT.md (non construites).
+
+## Série 2 (2026-09-21) : ordre de travail
+Consigne : pousser après chaque bloc ; merge sur main seulement si tsc + tests (unitaires, SQL, e2e) + build (dossier séparé) + Playwright sont verts ; mode public « bizouk » inchangé ; aucune migration destructive, sauvegarde JSON avant chaque migration ; décisions dans ORGA-DECISIONS.md (D30+). Travail dans le worktree `la-sunshines-orga2` (branche `feat/orga-serie-2`), car une autre session modifie `la-sunshines-project`.
+- [x] 1) Tableau de bord d'évènement : « Voir l'évènement » (public si publié, sinon aperçu privé `/organisateur/evenements/<slug>/apercu`, badge « Aperçu »), carte « Lien public de l'évènement » + « Copier le lien » (« Copié ! »), lien d'aperçu pour les brouillons. Mergé sur main (`f0f210e`).
+- [x] 2) Cartes de statistiques (4 cartes + « Remplissage ») uniquement sur le tableau de bord d'évènement et la page Statistiques > Vue d'ensemble ; retirées des onglets Participants / Tarifs / Scan et de la fiche organisateur admin. Jauge PAR TARIF (vendus / stock, %, restantes, chiffre d'affaires, statut En vente / Épuisé / Fermé / À venir, alerte stock bas ou épuisé) : tableau de bord, onglet Tarifs, Vue d'ensemble ; mise à jour toutes les 2 s. Mergé (`f0f210e`).
+- [x] 4) Bande noire supprimée : la règle globale `footer{background:#14100C}` s'appliquait au pied de page du back-office ; remplacée par `BackFooter` (© La Sunshines · CGU · Confidentialité · Contact) dans /organisateur et /admin. Mergé (`f0f210e`).
+- [ ] 3) Plus aucune entrée « Bientôt » : migration 030 + pages réelles (Frais et paiement, Lineup, Membres et rôles, Liste du staff, Présences, QR de connexion, Liste d'entrée, Message aux participants, Renvoyer les billets, Imprimer des billets, Médias, Statistiques Vue d'ensemble / Audience / Acquisition / Tunnel / Participants / Canaux / Géographie / Performance, Rôles de l'évènement) ; entrées hors périmètre supprimées (Marketing / liens de suivi, Photos).
+- [ ] 5) E-mails d'administrateurs + diagnostic e-mail dans /admin
+- [ ] 6) Fonctions admin en plus
+- [ ] 7) Livraison : rapport de fin de bloc

@@ -33,3 +33,32 @@ test('liens de l’évènement : publié avec page → public ; sinon aperçu pr
   assert.equal(draft.live, false); assert.equal(draft.viewHref, previewPath('la-nuit')); assert.equal(draft.isPreview, true);
   assert.equal(eventLinks('x', true, false).viewHref, previewPath('x'));
 });
+
+import { computeFee, effectiveRates, feePreview } from '../../lib/ticketing/fees.ts';
+import { sourceOf } from '../../lib/organizer/audience.ts';
+
+test('frais : taux effectifs (surcharge > global), calcul, aperçu client / organisateur', () => {
+  const g = { feePercent: 3, feeFixedCents: 50 };
+  assert.deepEqual(effectiveRates(null, g), { percent: 3, fixedCents: 50, source: 'global' });
+  assert.deepEqual(effectiveRates({ percent: null, fixed: null }, g), { percent: 3, fixedCents: 50, source: 'global' });
+  assert.deepEqual(effectiveRates({ percent: 5, fixed: null }, g), { percent: 5, fixedCents: 50, source: 'event' });
+  assert.deepEqual(effectiveRates({ percent: 0, fixed: 0 }, g), { percent: 0, fixedCents: 0, source: 'event' });
+  assert.equal(computeFee(0, { percent: 3, fixedCents: 50 }), 0);            // gratuit : jamais de frais
+  assert.equal(computeFee(1500, { percent: 3, fixedCents: 50 }), 95);        // 45 + 50
+  assert.deepEqual(feePreview(1500, { percent: 3, fixedCents: 50 }, 'customer'), { customerPays: 1595, fee: 95, organizerReceives: 1500 });
+  assert.deepEqual(feePreview(1500, { percent: 3, fixedCents: 50 }, 'included'), { customerPays: 1500, fee: 95, organizerReceives: 1405 });
+  assert.deepEqual(feePreview(0, { percent: 3, fixedCents: 50 }, 'included'), { customerPays: 0, fee: 0, organizerReceives: 0 });
+  assert.equal(feePreview(30, { percent: 0, fixedCents: 100 }, 'included').organizerReceives, 0); // jamais négatif
+});
+
+test('audience : canal d’une visite d’après le referrer', () => {
+  assert.equal(sourceOf('', 'la-sunshines.vercel.app'), 'direct');
+  assert.equal(sourceOf('la-sunshines.vercel.app', 'la-sunshines.vercel.app'), 'site');
+  assert.equal(sourceOf('l.instagram.com', 'x.app'), 'instagram');
+  assert.equal(sourceOf('www.tiktok.com', 'x.app'), 'tiktok');
+  assert.equal(sourceOf('m.facebook.com', 'x.app'), 'facebook');
+  assert.equal(sourceOf('www.google.fr', 'x.app'), 'google');
+  assert.equal(sourceOf('wa.me', 'x.app'), 'whatsapp');
+  assert.equal(sourceOf('exemple.org', 'x.app'), 'autre');
+  assert.equal(sourceOf('instagram.com.evil.org', 'x.app'), 'autre');
+});

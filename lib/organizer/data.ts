@@ -42,6 +42,13 @@ const MESSAGES: Record<string, OrgFailure> = {
   VENUE_REQUIRED: { status: 400, message: 'Le lieu est obligatoire.' },
   SLUG_TAKEN: { status: 409, message: 'Cette adresse d’évènement existe déjà.' },
   HAS_SALES: { status: 409, message: 'Des billets ont déjà été vendus : le mode de billetterie ne peut plus être changé.' },
+  BAD_FEE_MODE: { status: 400, message: 'Mode de frais invalide.' },
+  BAD_MIN: { status: 400, message: 'Montant minimum invalide (0 pour aucun minimum, sinon au moins 0,50 €).' },
+  BAD_LINEUP: { status: 400, message: 'Lineup invalide : un nom de 1 à 80 caractères par ligne, 60 lignes au maximum.' },
+  BAD_ROLE: { status: 400, message: 'Rôle invalide.' },
+  USER_NOT_FOUND: { status: 404, message: 'Aucun compte avec cette adresse : la personne doit d’abord créer son compte sur le site.' },
+  ALREADY_MEMBER: { status: 409, message: 'Cette personne fait déjà partie de l’organisation.' },
+  LAST_OWNER: { status: 409, message: 'Impossible : ce serait le dernier propriétaire de l’organisation.' },
   REPLY_TO_MISSING: { status: 409, message: 'L’organisateur n’a pas d’adresse de réponse : [À COMPLÉTER] dans les informations de l’organisateur.' },
 };
 

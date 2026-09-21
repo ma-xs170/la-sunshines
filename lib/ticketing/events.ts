@@ -5,6 +5,8 @@ import { getEditionBySlug } from '@/lib/content';
 import type { Edition } from '@/lib/editions';
 import { createSupabasePublicClient } from '@/lib/supabase/public';
 import { getTicketingSettings, type TicketingSettings } from './settings';
+import { eventFeeConfig, feeSettingsFor } from './checkout';
+import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
 export type SaleState = 'on_sale' | 'upcoming' | 'sold_out' | 'closed';
 
@@ -37,8 +39,11 @@ export async function getPublicTicketing(slug: string): Promise<PublicTicketing 
   const supabase = createSupabasePublicClient(false);
   if (!supabase) return null;
   try {
-    const settings = await getTicketingSettings(false);
-    if (settings.mode !== 'native') return null;
+    const base = await getTicketingSettings(false);
+    if (base.mode !== 'native') return null;
+    // frais propres à l'évènement (surcharges, mode « inclus dans le prix ») : ce que le panneau affiche = ce que la base facturera
+    let settings = base;
+    try { settings = feeSettingsFor(await eventFeeConfig(createSupabaseAdminClient(), slug), base).settings; } catch { settings = base; }
 
     const { data: ev } = await supabase
       .from('ticketed_events')

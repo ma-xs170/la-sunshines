@@ -1,16 +1,18 @@
 // Menus de l'espace organisateur : deux contextes (compte / évènement). Fonctions PURES (testées).
-// Règle : une entrée sans `href` est une page « Bientôt disponible » : affichée grisée, jamais cliquable.
+// Règle : toute entrée mène à une vraie page (aucune entrée « Bientôt ») ; ce qui est hors périmètre n'apparaît pas dans le menu.
 // Les rôles filtrent l'AFFICHAGE ; le contrôle réel reste côté serveur (routes /api/organisateur/*, fonctions SQL org_*).
 import type { IconName } from '@/components/Icon';
 
 /** Capacité requise (voir roles.ts) : redéclarée en type pour garder ce fichier sans import relatif (testable tel quel par node). */
 export type Capability = 'scan' | 'manage' | 'owner';
 
-export interface MenuLeaf { label: string; href?: string; cap: Capability; badge?: 'news' }
+export interface MenuLeaf { label: string; href: string; cap: Capability; badge?: 'news' }
 export interface MenuGroup { id: string; label: string; icon: IconName; items: MenuLeaf[]; sub?: { after: number; label: string } }
 
 const SLUG = /^\/organisateur\/evenements\/([a-z0-9][a-z0-9-]{0,80})(?:\/|$)/;
 const RESERVED = new Set(['nouveau']);
+/** Segments d'URL qui n'ont pas de page à eux : présents dans le fil d'Ariane mais sans lien. */
+const NO_PAGE = new Set(['organisation', 'statistiques']);
 
 /** Slug de l'évènement ouvert, ou null : c'est ce qui fait basculer le menu du contexte « compte » au contexte « évènement ». */
 export function eventSlugOf(pathname: string): string | null {
@@ -29,7 +31,7 @@ export function accountMenu(): MenuGroup[] {
     { id: 'calendar', label: 'Calendrier', icon: 'calendar', items: [{ label: 'Calendrier régional', href: '/organisateur/calendrier', cap: 'manage' }] },
     { id: 'org', label: 'Mon organisation', icon: 'shield', items: [
       { label: 'Informations légales', href: '/organisateur/parametres', cap: 'owner' },
-      { label: 'Membres et rôles', cap: 'owner' },
+      { label: 'Membres et rôles', href: '/organisateur/organisation/membres', cap: 'owner' },
       { label: 'Compte de versement', href: '/organisateur/paiements', cap: 'owner' },
       { label: 'Page publique', href: '/organisateur/organisation/page-publique', cap: 'manage' },
     ] },
@@ -50,35 +52,35 @@ export function eventMenu(slug: string): MenuGroup[] {
     { id: 'ev-event', label: 'Évènement', icon: 'sparkles', items: [
       { label: 'Description', href: `${base}/description`, cap: 'manage' }, { label: 'Décliner le flyer', href: `${base}/flyer`, cap: 'manage' },
       { label: 'Lieux', href: `${base}/lieux`, cap: 'manage' }, { label: 'Sessions', href: `${base}/sessions`, cap: 'manage' },
-      { label: 'Formulaires', href: `${base}/formulaires`, cap: 'manage' }, { label: 'Lineup', cap: 'manage' },
+      { label: 'Formulaires', href: `${base}/formulaires`, cap: 'manage' }, { label: 'Lineup', href: `${base}/lineup`, cap: 'manage' },
       { label: 'Conditions générales', href: `${base}/conditions`, cap: 'manage' }, { label: 'Consentements RGPD', href: `${base}/consentements`, cap: 'manage' },
     ] },
     { id: 'ev-tickets', label: 'Billetterie', icon: 'ticket', items: [
-      { label: 'Méthode de billetterie', href: `${base}/billetterie`, cap: 'manage' }, { label: 'Tarifs', href: tab('tarifs'), cap: 'manage' }, { label: 'Codes de réduction', href: `${base}/promos`, cap: 'manage' }, { label: 'Remboursements', href: `${base}/remboursements`, cap: 'manage' }, { label: 'Frais et paiement', cap: 'manage' },
+      { label: 'Méthode de billetterie', href: `${base}/billetterie`, cap: 'manage' }, { label: 'Tarifs', href: tab('tarifs'), cap: 'manage' }, { label: 'Codes de réduction', href: `${base}/promos`, cap: 'manage' }, { label: 'Remboursements', href: `${base}/remboursements`, cap: 'manage' }, { label: 'Frais et paiement', href: `${base}/frais`, cap: 'manage' },
     ] },
     { id: 'ev-sales', label: 'Ventes', icon: 'list', sub: { after: 2, label: 'Distribuer' }, items: [
       { label: 'Participants', href: tab('participants'), cap: 'manage' }, { label: 'Commandes', href: `${base}/commandes`, cap: 'manage' },
-      { label: 'Envoyer des invitations', href: `${base}/invitations`, cap: 'manage' }, { label: 'Suivi des invitations', href: `${base}/invitations/suivi`, cap: 'manage' }, { label: 'Imprimer des billets', cap: 'manage' }, { label: 'Exporter les billets', href: `/api/organisateur/events/${slug}/export`, cap: 'manage' },
+      { label: 'Envoyer des invitations', href: `${base}/invitations`, cap: 'manage' }, { label: 'Suivi des invitations', href: `${base}/invitations/suivi`, cap: 'manage' }, { label: 'Imprimer des billets', href: `${base}/impression`, cap: 'manage' }, { label: 'Exporter les billets', href: `/api/organisateur/events/${slug}/export`, cap: 'manage' },
     ] },
     { id: 'ev-staff', label: 'Staff', icon: 'history', items: [
-      { label: 'Liste du staff', cap: 'manage' }, { label: 'Présences', cap: 'manage' }, { label: 'QR codes de connexion', cap: 'manage' },
+      { label: 'Liste du staff', href: `${base}/staff`, cap: 'manage' }, { label: 'Présences', href: `${base}/presences`, cap: 'manage' }, { label: 'QR codes de connexion', href: `${base}/staff/qr`, cap: 'manage' },
     ] },
     { id: 'ev-access', label: 'Contrôle d’accès', icon: 'scan', items: [
-      { label: 'Scan à l’entrée', href: tab('scan'), cap: 'scan' }, { label: 'Liste d’entrée', cap: 'scan' }, { label: 'Historique des scans', href: `${base}/scans`, cap: 'manage' },
+      { label: 'Scan à l’entrée', href: tab('scan'), cap: 'scan' }, { label: 'Liste d’entrée', href: `${base}/liste-entree`, cap: 'manage' }, { label: 'Historique des scans', href: `${base}/scans`, cap: 'manage' },
     ] },
     { id: 'ev-comm', label: 'Communication', icon: 'mail', items: [
-      { label: 'Envoyer un message aux participants', cap: 'manage' }, { label: 'Renvoyer les billets', cap: 'manage' },
+      { label: 'Envoyer un message aux participants', href: `${base}/message`, cap: 'manage' }, { label: 'Renvoyer les billets', href: `${base}/renvoi`, cap: 'manage' },
     ] },
-    { id: 'ev-marketing', label: 'Marketing', icon: 'share', items: [{ label: 'Codes promo et liens de suivi', cap: 'manage' }] },
-    { id: 'ev-media', label: 'Médias', icon: 'grid', items: [{ label: 'Photos', cap: 'manage' }, { label: 'Vidéos', cap: 'manage' }] },
+    { id: 'ev-media', label: 'Médias', icon: 'grid', items: [{ label: 'Affiche et vidéo', href: `${base}/medias`, cap: 'manage' }] },
     { id: 'ev-stats', label: 'Statistiques', icon: 'filter', items: [
-      { label: 'Vue d’ensemble', cap: 'manage' }, { label: 'Audience', cap: 'manage' }, { label: 'Acquisition', cap: 'manage' }, { label: 'Tunnel de conversion', cap: 'manage' },
-      { label: 'Ventes', href: `${base}/stats`, cap: 'manage' }, { label: 'Participants', cap: 'manage' }, { label: 'Canaux', cap: 'manage' }, { label: 'Géographie', cap: 'manage' }, { label: 'Performance', cap: 'manage' },
+      { label: 'Vue d’ensemble', href: `${base}/statistiques/vue-densemble`, cap: 'manage' }, { label: 'Audience', href: `${base}/statistiques/audience`, cap: 'manage' }, { label: 'Acquisition', href: `${base}/statistiques/acquisition`, cap: 'manage' },
+      { label: 'Tunnel de conversion', href: `${base}/statistiques/tunnel`, cap: 'manage' }, { label: 'Ventes', href: `${base}/stats`, cap: 'manage' }, { label: 'Participants', href: `${base}/statistiques/participants`, cap: 'manage' },
+      { label: 'Canaux', href: `${base}/statistiques/canaux`, cap: 'manage' }, { label: 'Géographie', href: `${base}/statistiques/geographie`, cap: 'manage' }, { label: 'Performance', href: `${base}/statistiques/performance`, cap: 'manage' },
     ] },
     { id: 'ev-finance', label: 'Finance', icon: 'check', items: [
       { label: 'Récapitulatif', href: `${base}/finance`, cap: 'owner' }, { label: 'Versements', href: `${base}/finance/versements`, cap: 'owner' },
     ] },
-    { id: 'ev-users', label: 'Utilisateurs', icon: 'phone', items: [{ label: 'Rôles de l’évènement', cap: 'owner' }] },
+    { id: 'ev-users', label: 'Utilisateurs', icon: 'phone', items: [{ label: 'Rôles de l’évènement', href: `${base}/roles`, cap: 'manage' }] },
     { id: 'ev-notif', label: 'Notifications', icon: 'bell', items: [{ label: 'Notifications', href: '/organisateur/notifications', cap: 'manage' }] },
   ];
 }
@@ -112,7 +114,7 @@ export function activeGroupId(groups: MenuGroup[], pathname: string, onglet: str
 const CRUMB: Record<string, string> = {
   evenements: 'Mes évènements', nouveau: 'Nouvel évènement', participants: 'Participants', analyse: 'Analyse', paiements: 'Paiements',
   parametres: 'Informations légales', actualites: 'Actualités', aide: 'Centre d’aide',
-  finance: 'Finance', versements: 'Versements', billetterie: 'Méthode de billetterie', stats: 'Ventes', notifications: 'Notifications', commandes: 'Commandes', remboursements: 'Remboursements', scans: 'Historique des scans', invitations: 'Invitations', suivi: 'Suivi', promos: 'Codes de réduction', description: 'Description', flyer: 'Décliner le flyer', lieux: 'Lieux', sessions: 'Sessions', formulaires: 'Formulaires', conditions: 'Conditions générales', consentements: 'Consentements RGPD', apercu: 'Aperçu',
+  finance: 'Finance', versements: 'Versements', billetterie: 'Méthode de billetterie', stats: 'Ventes', notifications: 'Notifications', commandes: 'Commandes', remboursements: 'Remboursements', scans: 'Historique des scans', invitations: 'Invitations', suivi: 'Suivi', promos: 'Codes de réduction', description: 'Description', flyer: 'Décliner le flyer', lieux: 'Lieux', sessions: 'Sessions', formulaires: 'Formulaires', conditions: 'Conditions générales', consentements: 'Consentements RGPD', apercu: 'Aperçu', frais: 'Frais et paiement', lineup: 'Lineup', membres: 'Membres et rôles', organisation: 'Mon organisation', staff: 'Staff', qr: 'QR codes de connexion', presences: 'Présences', roles: 'Rôles de l’évènement', 'liste-entree': 'Liste d’entrée', message: 'Message aux participants', renvoi: 'Renvoyer les billets', impression: 'Imprimer des billets', medias: 'Médias', statistiques: 'Statistiques', 'vue-densemble': 'Vue d’ensemble', audience: 'Audience', acquisition: 'Acquisition', tunnel: 'Tunnel de conversion', canaux: 'Canaux', geographie: 'Géographie', performance: 'Performance',
 };
 
 /** Fil d'Ariane à partir du chemin (l'évènement s'affiche « Évènement » : son titre est dans l'en-tête de la page). */
@@ -123,7 +125,7 @@ export function crumbs(pathname: string): { label: string; href?: string }[] {
   parts.forEach((p, i) => {
     href += '/' + p;
     const isSlug = i === 1 && parts[0] === 'evenements' && !RESERVED.has(p);
-    out.push({ label: isSlug ? 'Évènement' : CRUMB[p] ?? p, href: i === parts.length - 1 ? undefined : href });
+    out.push({ label: isSlug ? 'Évènement' : CRUMB[p] ?? p, href: i === parts.length - 1 || NO_PAGE.has(p) ? undefined : href });
   });
   return out;
 }
