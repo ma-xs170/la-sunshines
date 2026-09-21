@@ -127,7 +127,7 @@ test('menu : le contexte évènement se déclenche sur /evenements/<slug>, pas s
 
 test('menu : filtré par rôle (le staff ne voit que le contrôle d’accès)', () => {
   const labels = (role) => visibleMenu(eventMenu('x'), caps[role]).flatMap((g) => g.items.map((i) => i.label));
-  assert.deepEqual(labels('staff'), ['Tableau de bord', 'Scan à l’entrée', 'Liste d’entrée', 'Historique des scans']);
+  assert.deepEqual(labels('staff'), ['Tableau de bord', 'Scan à l’entrée', 'Liste d’entrée']);
   assert.ok(!labels('manager').includes('Récapitulatif'));
   assert.ok(labels('owner').includes('Récapitulatif'));
   assert.deepEqual(visibleMenu(accountMenu(), caps.staff).map((g) => g.id), ['dashboard', 'events', 'news', 'help']);

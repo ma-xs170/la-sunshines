@@ -11,7 +11,7 @@ Scripts hors dépôt (scratchpad) : `db.mjs` (connexion, lit `.env.local`), `bac
   - [x] 2b migration 015 APPLIQUÉE sur la base réelle + tests SQL + verify
   - [x] 2c pages organisateur : Description, Lieux, Sessions, Formulaires, CG, RGPD, Décliner le flyer
   - [x] 2d affichage public dresscode couleurs + vidéo flyer (inerte tant que rien n'est saisi)
-- [ ] Phase 3 : billetterie et ventes (promos, remboursements, commandes, distribuer, contrôle d'accès, communication)
+- [x] Phase 3 (migration 016 APPLIQUÉE) : commandes + détail, remboursements (lecture), historique des scans, invitations (envoi + suivi), codes promo (application au paiement NON branchée). Non faits : simulateur de prix / formulaire de tarif 2 colonnes, glisser-déposer, liste d'entrée, impression de lots PDF, messages en masse (existant conservé), voir DECISIONS D16
 - [ ] Phase 4 : tableau de bord, statistiques, finance, notifications
 - [ ] Phase 5 : admin (administrateurs multiples, organisateurs, transfert d'évènement)
 - [ ] Phase 6 : support organisateurs ↔ admins
