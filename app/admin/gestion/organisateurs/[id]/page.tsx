@@ -5,12 +5,13 @@ import { adminRpc, requireAdminPage } from '@/lib/adminSpace';
 import { supportRpc } from '@/lib/supportServer';
 import { CATEGORY_LABEL, statusText } from '@/lib/support';
 import { one } from '@/lib/organizer/event-data';
+import { LEGAL_FORM_LABEL, DOC_KINDS } from '@/lib/organizer/signup';
 import { formatEuro, formatGp } from '@/lib/ticketing/time';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Organisateur · Gestion', robots: { index: false, follow: false } };
 const STATUS: Record<string, string> = { pending: 'En attente', approved: 'Approuvé', suspended: 'Suspendu' };
-const TABS: [string, string][] = [['apercu', 'Aperçu'], ['organisation', 'Organisation'], ['evenements', 'Évènements'], ['membres', 'Membres et rôles'], ['finance', 'Finance'], ['support', 'Support'], ['journal', 'Journal d’activité']];
+const TABS: [string, string][] = [['apercu', 'Aperçu'], ['organisation', 'Organisation'], ['dossier', 'Dossier d’inscription'], ['evenements', 'Évènements'], ['membres', 'Membres et rôles'], ['finance', 'Finance'], ['support', 'Support'], ['journal', 'Journal d’activité']];
 interface Detail { organizer: { id: string; reference: string | null; name: string; legal_form: string; siret: string; address: string; contact_email: string; responsible_name: string; account_status: string; stripe_connected: boolean; stripe_ready: boolean; created_at: string };
   members: { user_id: string; role: string; email: string; first_name: string; last_name: string }[]; events: { slug: string; status: string; starts_at: string; capacity: number; sold: number; revenue_cents: number }[]; activity: { created_at: string; action: string; entity: string }[] }
 const ROLE: Record<string, string> = { owner: 'Propriétaire', manager: 'Gestionnaire', staff: 'Staff' };
@@ -26,6 +27,7 @@ export default async function OrganizerDetailPage({ params, searchParams }: { pa
   type TRow = { id: string; reference: string; subject: string; category: string; status: string; admin_name: string | null; organizer_reference: string | null };
   const pull = async (scope: string) => { const t = await supportRpc<{ rows: TRow[] }>('admin_support_list', { p_actor: s.userId, p_scope: scope }); return t.ok ? t.data.rows : []; };
   const orgTickets = tab === 'support' ? [...(await pull('all')), ...(await pull('closed'))] : [];
+  const dossier = tab === 'dossier' ? await adminRpc<{ application: { data: Record<string, unknown>; submitted_at: string } | null; documents: { id: string; kind: string; name: string; size: number; mime: string }[] }>('admin_org_dossier', { p_actor: s.userId, p_org: id }) : null;
   const revenue = events.reduce((n, e) => n + e.revenue_cents, 0);
   return (
     <>
@@ -43,6 +45,12 @@ export default async function OrganizerDetailPage({ params, searchParams }: { pa
       {tab === 'organisation' && <section className="glass ef-card"><h2>Informations de la structure</h2><dl className="ef-list" style={{ display: 'block' }}>
         {([['Structure', o.name], ['Forme juridique', o.legal_form], ['SIRET', o.siret || '[À COMPLÉTER]'], ['Responsable', o.responsible_name], ['Adresse', o.address], ['E-mail', o.contact_email], ['Créée le', formatGp(o.created_at)]] as [string, string][]).map(([k, v]) => <div key={k} style={{ padding: '8px 0', borderBottom: '1px solid var(--panel-border)' }}><dt className="ef-help">{k}</dt><dd style={{ margin: 0 }}>{v || 'Non renseigné'}</dd></div>)}</dl>
         <p className="ef-help">Modifier ces informations : onglet Aperçu.</p></section>}
+      {tab === 'dossier' && (!dossier?.ok || (!dossier.data.application && dossier.data.documents.length === 0) ? <div className="glass org-empty"><h3>Aucun dossier</h3><p>Cette organisation n’a pas été créée par le formulaire d’inscription (aucune réponse ni pièce enregistrée).</p></div> : (() => { const a = dossier.data.application; const v = (k: string) => String(a?.data?.[k] ?? '—'); return (
+        <section className="glass ef-card"><h2>Dossier d’inscription</h2>{a && <p className="ef-help">Envoyé le {formatGp(a.submitted_at)}</p>}
+          <dl className="ef-list" style={{ display: 'block' }}>{([['Forme juridique', LEGAL_FORM_LABEL[v('legal_form')] ?? v('legal_form')], ['Responsable', `${v('responsible_first')} ${v('responsible_last')}`], ['Téléphone', v('phone')], ['Site', v('website')], ['Régions', Array.isArray(a?.data?.regions) ? (a.data.regions as string[]).join(', ') : '—'], ['Évènements par an', v('events_per_year')], ['Activité', v('description')]] as [string, string][]).map(([k, x]) => <li key={k}><span>{k}</span><strong>{x}</strong></li>)}</dl>
+          <h3>Pièces (espace privé, chaque ouverture est journalisée)</h3>
+          {dossier.data.documents.length === 0 ? <p className="org-muted">Aucune pièce.</p> : <ul className="ef-list">{dossier.data.documents.map((d) => <li key={d.id}><span>{DOC_KINDS.find(([k]) => k === d.kind)?.[1] ?? d.kind} · {d.name} ({Math.max(1, Math.round(d.size / 1024))} Ko)</span><a className="btn btn--outline" href={`/api/admin-gestion/org-document?id=${d.id}`} target="_blank" rel="noopener noreferrer">Ouvrir</a></li>)}</ul>}
+        </section>); })())}
       {tab === 'evenements' && (events.length === 0 ? <div className="glass org-empty"><h3>Aucun évènement</h3><p>Cette organisation n’a pas encore créé d’évènement.</p></div> : <div className="org-table glass"><table><thead><tr><th>Évènement</th><th>Date</th><th>Statut</th><th>Vendus</th><th>Recette</th></tr></thead>
         <tbody>{events.map((e) => <tr key={e.slug}><td data-label="Évènement">{e.slug}</td><td data-label="Date">{formatGp(e.starts_at)}</td><td data-label="Statut">{e.status === 'published' ? (Date.parse(e.starts_at) > Date.now() ? 'À venir' : 'Passé') : e.status === 'draft' ? 'Brouillon' : e.status}</td><td data-label="Vendus">{e.sold} / {e.capacity}</td><td data-label="Recette">{formatEuro(e.revenue_cents)}</td></tr>)}</tbody></table></div>)}
       {tab === 'membres' && (members.length === 0 ? <div className="glass org-empty"><h3>Aucun membre</h3><p>Personne n’est encore rattaché à cette organisation.</p></div> : <div className="org-table glass"><table><thead><tr><th>Nom</th><th>E-mail</th><th>Rôle</th></tr></thead>

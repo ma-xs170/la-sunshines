@@ -23,6 +23,8 @@ const SESSION_PREFIXES = [
   '/api/billetterie',
   '/api/organisateur',
   '/api/admin/news',
+  '/api/admin-gestion',
+  '/devenir-organisateur',
   '/api/scan',
   '/api/tickets',
 ];
