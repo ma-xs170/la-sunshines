@@ -2,7 +2,7 @@ import { requireOrganizerApi } from '@/lib/organizer/access';
 import { orgRpc } from '@/lib/organizer/data';
 import { csvResponse, toCsv } from '@/lib/ticketing/csv';
 import { SLUG_RE } from '@/lib/ticketing/schemas';
-import { formatEuro } from '@/lib/ticketing/time';
+import { formatPrice } from '@/lib/ticketing/time';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -24,6 +24,6 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
 
   const r = await orgRpc<Record<string, string | number | null>[]>('org_export_participants', { p_actor: g.s.userId, p_slug: slug, p_tier: tier || null, p_status: status || null });
   if (!r.ok) return Response.json({ error: r.error.message }, { status: r.error.status });
-  const rows = r.data.map((p) => [p.reference, p.first_name, p.last_name, p.email, p.phone, p.tier, formatEuro(Number(p.price_cents)), STATUS[String(p.status)] ?? p.status, p.entered_at ?? '', p.order_number, p.source === 'manual' ? 'Invitation' : 'Web']);
-  return csvResponse(`participants-${slug}-${new Date().toISOString().slice(0, 10)}.csv`, toCsv(['Référence', 'Prénom', 'Nom', 'Email', 'Téléphone', 'Tarif', 'Prix', 'Statut', 'Entré le', 'Commande', 'Origine'], rows));
+  const rows = r.data.map((p) => [p.reference, p.first_name, p.last_name, p.email, p.phone, p.tier, formatPrice(Number(p.price_cents)), Number(p.price_cents) === 0 ? 'Gratuit' : 'Payant', STATUS[String(p.status)] ?? p.status, p.entered_at ?? '', p.order_number, p.source === 'manual' ? 'Invitation' : 'Web']);
+  return csvResponse(`participants-${slug}-${new Date().toISOString().slice(0, 10)}.csv`, toCsv(['Référence', 'Prénom', 'Nom', 'Email', 'Téléphone', 'Tarif', 'Prix', 'Type', 'Statut', 'Entré le', 'Commande', 'Origine'], rows));
 }

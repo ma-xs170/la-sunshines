@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { redirect } from 'next/navigation';
+import { forbidden, redirect } from 'next/navigation';
 import { getSession } from '@/lib/auth/roles';
 import { supabaseConfigured } from '@/lib/supabase/config';
 import { createSupabaseAdminClient, supabaseAdminConfigured } from '@/lib/supabase/admin';
@@ -32,9 +32,7 @@ export default async function BilletterieAdminPage() {
   }
   const session = await getSession();
   if (!session) redirect('/connexion?next=/admin/billetterie');
-  if (session.profile.role !== 'admin') {
-    return shell(<p className="admin-hint">Accès refusé : ton compte n’a pas le rôle « admin ».</p>);
-  }
+  if (session.profile.role !== 'admin') forbidden();
 
   const settings = await getTicketingSettings(true);
   const db = createSupabaseAdminClient();

@@ -1,7 +1,7 @@
 // Espace de gestion réservé aux administrateurs du site (Phase 5). Contrôle refait CÔTÉ SERVEUR à chaque page et chaque action :
 // compte Supabase de rôle admin ACTIF (le mot de passe historique /admin ne donne aucun accès ici).
 import 'server-only';
-import { redirect } from 'next/navigation';
+import { forbidden, redirect } from 'next/navigation';
 import { NextResponse } from 'next/server';
 import { getSession, type Session } from '@/lib/auth/roles';
 import { createSupabaseAdminClient, supabaseAdminConfigured } from '@/lib/supabase/admin';
@@ -22,12 +22,12 @@ export async function adminRpc<T>(fn: string, args: Record<string, unknown>): Pr
   return { ok: true, data: data as T };
 }
 
-/** Pages : redirige vers la connexion / change de mot de passe, ou répond 404 si le compte n'est pas administrateur. */
+/** Pages : redirige vers la connexion / change de mot de passe, ou affiche « Accès refusé » (403) si le compte n'est pas administrateur. */
 export async function requireAdminPage(next: string): Promise<Session> {
   if (!supabaseConfigured() || !supabaseAdminConfigured()) redirect('/');
   const s = await getSession();
   if (!s) redirect(`/connexion?next=${encodeURIComponent(next)}`);
-  if (s.profile.role !== 'admin') redirect('/');
+  if (s.profile.role !== 'admin') forbidden();
   if (s.mustChangePassword) redirect('/compte/mot-de-passe');
   return s;
 }

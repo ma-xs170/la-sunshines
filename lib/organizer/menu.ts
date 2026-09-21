@@ -26,12 +26,12 @@ export function accountMenu(): MenuGroup[] {
       { label: 'Participants', href: '/organisateur/participants', cap: 'manage' },
       { label: 'Analyse', href: '/organisateur/analyse', cap: 'manage' },
     ] },
-    { id: 'calendar', label: 'Calendrier', icon: 'calendar', items: [{ label: 'Calendrier régional' , cap: 'manage' }] },
+    { id: 'calendar', label: 'Calendrier', icon: 'calendar', items: [{ label: 'Calendrier régional', href: '/organisateur/calendrier', cap: 'manage' }] },
     { id: 'org', label: 'Mon organisation', icon: 'shield', items: [
       { label: 'Informations légales', href: '/organisateur/parametres', cap: 'owner' },
       { label: 'Membres et rôles', cap: 'owner' },
       { label: 'Compte de versement', href: '/organisateur/paiements', cap: 'owner' },
-      { label: 'Page publique', cap: 'manage' },
+      { label: 'Page publique', href: '/organisateur/organisation/page-publique', cap: 'manage' },
     ] },
     { id: 'support', label: 'Support', icon: 'help', items: [
       { label: 'Créer un ticket', href: '/organisateur/support/nouveau', cap: 'manage' },

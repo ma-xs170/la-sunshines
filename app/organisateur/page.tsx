@@ -1,8 +1,5 @@
 import type { Metadata } from 'next';
-import { redirect } from 'next/navigation';
-import Nav from '@/components/Nav';
-import Footer from '@/components/Footer';
-import PageHero from '@/components/PageHero';
+import { forbidden, redirect } from 'next/navigation';
 import Icon from '@/components/Icon';
 import Checklist from '@/components/organizer/Checklist';
 import NewsBanner from '@/components/organizer/NewsBanner';
@@ -24,18 +21,7 @@ export default async function OrganizerHome() {
   const { s, current } = await getOrgContext();
   if (!s) redirect('/connexion?next=/organisateur');
 
-  if (!s.hasAccess || !current) {
-    return (
-      <>
-        <Nav />
-        <main className="org content-page">
-          <PageHero eyebrow="Espace organisateur" title="Accès réservé" lead="Ton compte n’est rattaché à aucune organisation. Si tu organises des soirées avec LA SUNSHINES, contacte l’équipe pour être ajouté·e." />
-          <a className="btn btn--outline" href="/contact">Nous contacter</a>
-        </main>
-        <Footer />
-      </>
-    );
-  }
+  if (!s.hasAccess || !current) forbidden();
 
   const role = current.my_role;
   const manage = can(role, 'manage');

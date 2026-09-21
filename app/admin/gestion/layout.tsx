@@ -12,7 +12,7 @@ export default async function GestionLayout({ children }: { children: ReactNode 
     <div className="agest">
       <header className="agest__bar">
         <nav className="agest__nav" aria-label="Gestion">
-          <a href="/admin/gestion/organisateurs">Organisateurs</a><a href="/admin/gestion/evenements">Évènements</a><a href="/admin/gestion/support">Support</a><a href="/admin/gestion/transfert">Transfert</a>
+          <a href="/admin/gestion/organisateurs">Organisateurs</a><a href="/admin/gestion/evenements">Évènements</a><a href="/admin/gestion/calendrier">Calendrier</a><a href="/admin/gestion/support">Support</a><a href="/admin/gestion/transfert">Transfert</a>
           <a href="/admin/gestion/administrateurs">Administrateurs</a><a href="/admin/billetterie">Billetterie</a><a href="/admin">Contenu du site</a>
         </nav>
         <GlobalSearch />

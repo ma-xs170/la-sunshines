@@ -44,7 +44,9 @@ export function formatEuro(cents: number): string {
 
 /** « 12,5 » / « 12.50 » → 1250 ; NaN si invalide. */
 export function euroToCents(input: string): number {
-  const n = Number(input.replace(/\s/g, '').replace(',', '.'));
+  const clean = input.replace(/\s/g, '').replace(',', '.');
+  if (clean === '') return NaN; // champ vide ≠ 0 € : un tarif gratuit se saisit « 0 »
+  const n = Number(clean);
   return Number.isFinite(n) ? Math.round(n * 100) : NaN;
 }
 
@@ -53,3 +55,19 @@ export function computeFee(subtotalCents: number, percent: number, fixedCents: n
   if (subtotalCents <= 0) return 0;
   return Math.round((subtotalCents * percent) / 100) + fixedCents;
 }
+
+/** Montant en centimes → « Gratuit » pour 0, sinon « 12,50 € » (prix d'un tarif, total d'une commande). */
+export function formatPrice(cents: number): string {
+  return cents === 0 ? 'Gratuit' : formatEuro(cents);
+}
+
+/** Prix saisi (centimes) valable pour un tarif : 0 (gratuit) ou ≥ 0,50 € (minimum Stripe). Renvoie un message ou null. */
+export function priceError(cents: number): string | null {
+  if (!Number.isFinite(cents)) return 'Indique un prix.';
+  if (cents < 0) return 'Le prix ne peut pas être négatif.';
+  if (cents > 0 && cents < 50) return 'Un prix entre 0,01 € et 0,49 € est refusé : Stripe ne peut pas l’encaisser. Mets 0 pour un tarif gratuit, ou au moins 0,50 €.';
+  return null;
+}
+
+/** Commande / panier gratuit : rien à payer, donc jamais de session Stripe. */
+export const isFree = (totalCents: number): boolean => totalCents === 0;

@@ -16,7 +16,7 @@ import { formatCode } from './tokens';
 import { qrPng } from './qr';
 import { loadTicketPages } from './pdf/data';
 import { renderTicketsPdf } from './pdf/render';
-import { formatEuro, formatGp } from './time';
+import { formatEuro, formatGp, formatPrice } from './time';
 
 const FALLBACK_FROM = 'LA SUNSHINES <onboarding@resend.dev>';
 
@@ -67,7 +67,7 @@ export function buildConfirmationEmail(order: MailOrder, base: string) {
   const first = order.items[0];
   const title = first?.event_title ?? 'ton événement';
   const lines = order.items
-    .map((i) => `<tr><td style="padding:4px 0">${esc(i.tier_name)} × ${i.quantity}</td><td style="padding:4px 0;text-align:right">${formatEuro(i.unit_price_cents * i.quantity)}</td></tr>`)
+    .map((i) => `<tr><td style="padding:4px 0">${esc(i.tier_name)} × ${i.quantity}</td><td style="padding:4px 0;text-align:right">${formatPrice(i.unit_price_cents * i.quantity)}</td></tr>`)
     .join('');
   const fee = order.fee_cents > 0 ? `<tr><td style="padding:4px 0">Frais de service</td><td style="padding:4px 0;text-align:right">${formatEuro(order.fee_cents)}</td></tr>` : '';
   const blocks = order.tickets
@@ -89,11 +89,11 @@ ${blocks}
 <p style="margin:0 0 18px;text-align:center">${mailButton(`${base}/compte/billets`, 'Voir mes billets')}</p>
 <p style="margin:0 0 4px;font-size:13px;color:rgba(25,20,16,0.64)">Tes billets sont aussi en <strong>PDF</strong> en pièce jointe (un billet = une page), et téléchargeables dans « Mes billets ». Présente le QR code à l'entrée, sur ton téléphone ou imprimé. Chaque billet n'est valable qu'une fois : ne le partage pas.</p>
 <table style="width:100%;border-collapse:collapse;font-size:14px;margin-top:14px">${lines}${fee}
-<tr><td style="padding:8px 0 0;font-weight:700;border-top:1px solid rgba(25,20,16,0.10)">Total</td><td style="padding:8px 0 0;text-align:right;font-weight:700;border-top:1px solid rgba(25,20,16,0.10)">${formatEuro(order.total_cents)}</td></tr></table>
+<tr><td style="padding:8px 0 0;font-weight:700;border-top:1px solid rgba(25,20,16,0.10)">Total</td><td style="padding:8px 0 0;text-align:right;font-weight:700;border-top:1px solid rgba(25,20,16,0.10)">${formatPrice(order.total_cents)}</td></tr></table>
 <p style="margin:14px 0 0;font-size:12px;color:rgba(25,20,16,0.55)">${FOOT} Retrouve tous tes billets dans <a href="${base}/compte/billets">Mes billets</a>.</p>`);
   const text = [
     `Tes billets — ${title}`,
-    `Commande ${order.order_number} · ${formatEuro(order.total_cents)}`,
+    `Commande ${order.order_number} · ${formatPrice(order.total_cents)}`,
     `${formatGp(first?.event_starts_at)} · ${first?.venue_name ?? ''}`,
     '',
     ...order.tickets.map((t, i) => `Billet ${i + 1} — ${t.holder_first_name} ${t.holder_last_name} (${t.tier_name}) : ${formatCode(t.code)}`),

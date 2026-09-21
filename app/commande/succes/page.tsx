@@ -7,7 +7,7 @@ import OrderStatusPoller from '@/components/ticketing/OrderStatusPoller';
 import { getSession } from '@/lib/auth/roles';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { supabaseConfigured } from '@/lib/supabase/config';
-import { formatEuro } from '@/lib/ticketing/time';
+import { formatPrice } from '@/lib/ticketing/time';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Commande · LA SUNSHINES', robots: { index: false } };
@@ -41,7 +41,7 @@ export default async function SuccesPage({ searchParams }: { searchParams: Promi
           </>
         ) : paid ? (
           <>
-            <PageHero eyebrow="Paiement confirmé" title="Merci !" lead={`Commande ${order.order_number} · ${formatEuro(order.total_cents)}`} />
+            <PageHero eyebrow={order.total_cents === 0 ? 'Réservation confirmée' : 'Paiement confirmé'} title="Merci !" lead={`Commande ${order.order_number} · ${formatPrice(order.total_cents)}`} />
             <div className="contact-form glass contact-form--done">
               <h2>Tes billets sont prêts</h2>
               <p>Un email de confirmation avec tes billets QR part à <strong>{order.buyer_email}</strong>. Ils restent aussi disponibles à tout moment dans « Mes billets ».</p>

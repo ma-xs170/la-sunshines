@@ -6,7 +6,7 @@ import PageHero from '@/components/PageHero';
 import { getSession } from '@/lib/auth/roles';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { supabaseConfigured } from '@/lib/supabase/config';
-import { formatEuro, formatGp } from '@/lib/ticketing/time';
+import { formatGp, formatPrice } from '@/lib/ticketing/time';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Mes billets · LA SUNSHINES', robots: { index: false } };
@@ -98,7 +98,7 @@ export default async function MesBilletsPage() {
                       </p>
                     </div>
                     <div className="tk__right">
-                      <strong>{formatEuro(o.total_cents)}</strong>
+                      <strong>{formatPrice(o.total_cents)}</strong>
                       <span className={`tk__badge tk__badge--${o.status}`}>{ORDER_LABEL[o.status] ?? o.status}</span>
                       {o.status === 'pending' && <a className="admin-link" href={`/commande/succes?order=${o.order_number}`}>Suivre</a>}
                       {o.tickets.some((t) => isActive(t.status)) && <a className="tk__pdf" href={`/api/orders/${o.id}/pdf`}>PDF de la commande</a>}

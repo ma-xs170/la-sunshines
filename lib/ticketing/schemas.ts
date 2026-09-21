@@ -43,6 +43,8 @@ export const eventSaveSchema = z
   });
 export type EventSaveInput = z.infer<typeof eventSaveSchema>;
 
+export const PRICE_TOO_LOW = 'Un prix entre 0,01 € et 0,49 € est refusé : Stripe ne peut pas l’encaisser. Mets 0 pour un tarif gratuit, ou au moins 0,50 €.';
+
 export const tierSaveSchema = z
   .object({
     id: z.uuid('Identifiant de tarif invalide.').nullable().optional(),
@@ -51,7 +53,7 @@ export const tierSaveSchema = z
     price_cents: z
       .number({ error: 'Indique un prix.' })
       .int('Le prix doit être en centimes entiers.')
-      .min(50, 'Le prix minimum d’un tarif est de 0,50 €.')
+      .min(0, 'Le prix ne peut pas être négatif.')
       .max(1000000, 'Prix trop élevé.'),
     quantity_total: z
       .number({ error: 'Indique la quantité.' })
@@ -59,12 +61,18 @@ export const tierSaveSchema = z
       .min(0, 'Quantité invalide.')
       .max(100000, 'Quantité trop élevée.'),
     max_per_order: z.number().int().min(1, 'Maximum par commande : 1 minimum.').max(20, 'Maximum par commande : 20.'),
+    // billets gratuits : plafond par compte client (ignoré pour un tarif payant)
+    max_per_account: z.number().int().min(1, 'Maximum par compte : 1 minimum.').max(20, 'Maximum par compte : 20.').optional(),
     sales_start: optDate,
     sales_end: optDate,
     is_active: z.boolean(),
     sort_order: z.number().int().min(0).max(1000),
   })
   .superRefine((v, ctx) => {
+    // 0 € = gratuit (jamais envoyé à Stripe) ; 0,01 – 0,49 € = impossible à encaisser par Stripe
+    if (v.price_cents > 0 && v.price_cents < 50) {
+      ctx.addIssue({ code: 'custom', message: PRICE_TOO_LOW, path: ['price_cents'] });
+    }
     if (v.sales_start && v.sales_end && Date.parse(v.sales_end) <= Date.parse(v.sales_start)) {
       ctx.addIssue({ code: 'custom', message: 'La fin de vente doit être après le début.', path: ['sales_end'] });
     }

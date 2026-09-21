@@ -1,6 +1,6 @@
 // Chargement commun des pages évènement (Phase 2) : session, accès (rôle revérifié en SQL), données.
 import 'server-only';
-import { notFound, redirect } from 'next/navigation';
+import { forbidden, notFound, redirect } from 'next/navigation';
 import { getOrgSession } from './access';
 import { editorial, orgRpc } from './data';
 import { SLUG_RE } from '@/lib/ticketing/schemas';
@@ -20,7 +20,7 @@ export async function loadEventPage(slug: string, next: string) {
   if (!SLUG_RE.test(slug)) notFound();
   const s = await getOrgSession();
   if (!s) redirect(`/connexion?next=${encodeURIComponent(next)}`);
-  if (!s.hasAccess) notFound();
+  if (!s.hasAccess) forbidden();
   const r = await orgRpc<EventPageData>('org_event_details', { p_actor: s.userId, p_slug: slug });
   if (!r.ok) notFound();   // FORBIDDEN (autre organisation, staff) et introuvable : même réponse
   const ed = getAllEditions({ includeHidden: true }).find((e) => e.slug === slug);

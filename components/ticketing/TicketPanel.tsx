@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { PublicTier, SaleState } from '@/lib/ticketing/events';
 import { computeFee, formatEuro, formatGp } from '@/lib/ticketing/time';
+import FreeBadge from '@/components/ticketing/FreeBadge';
 import { useAuthUser } from '@/components/auth/useAuthUser';
 
 interface Props {
@@ -86,7 +87,9 @@ export default function TicketPanel({ slug, tiers: initial, feePercent, feeFixed
     return { count: c, subtotal: s };
   }, [tiers, qty]);
 
+  // 0 € : aucun frais (ni % ni frais fixe) ; panier mixte : frais sur la seule partie payante
   const fee = computeFee(subtotal, feePercent, feeFixedCents);
+  const isFreeOrder = count > 0 && subtotal === 0;
   const step = (t: PublicTier, d: number) =>
     setQty((q) => {
       const max = Math.min(t.maxPerOrder, t.remaining);
@@ -127,8 +130,13 @@ export default function TicketPanel({ slug, tiers: initial, feePercent, feeFixed
         body: JSON.stringify({ slug, items, accept_terms: terms, guardian_consent: guardian }),
       });
       const data = await res.json().catch(() => ({}));
+      if (res.ok && data.free && data.redirect) {
+        // commande gratuite : déjà confirmée, aucun paiement
+        window.location.assign(data.redirect);
+        return;
+      }
       if (!res.ok || !data.url) {
-        setError(data.error ?? 'Le paiement n’a pas pu démarrer. Réessaie.');
+        setError(data.error ?? (isFreeOrder ? 'La réservation n’a pas pu aboutir. Réessaie.' : 'Le paiement n’a pas pu démarrer. Réessaie.'));
         refresh();
         setBusy(false);
         return;
@@ -164,7 +172,7 @@ export default function TicketPanel({ slug, tiers: initial, feePercent, feeFixed
                 </p>
               </div>
               <div className="tp__side">
-                <p className="tp__price">{formatEuro(t.priceCents)}</p>
+                <p className="tp__price">{t.priceCents === 0 ? <FreeBadge /> : formatEuro(t.priceCents)}</p>
                 {buyable ? (
                   <div className="tp__stepper" role="group" aria-label={`Quantité — ${t.name}`}>
                     <button type="button" onClick={() => step(t, -1)} disabled={n === 0} aria-label="Retirer un billet">−</button>
@@ -201,7 +209,7 @@ export default function TicketPanel({ slug, tiers: initial, feePercent, feeFixed
           <dl>
             <div><dt>Sous-total</dt><dd>{formatEuro(subtotal)}</dd></div>
             {fee > 0 && <div><dt>Frais de service</dt><dd>{formatEuro(fee)}</dd></div>}
-            <div className="tp__grand"><dt>Total</dt><dd>{formatEuro(subtotal + fee)}</dd></div>
+            <div className="tp__grand"><dt>Total</dt><dd>{subtotal + fee === 0 ? <FreeBadge /> : formatEuro(subtotal + fee)}</dd></div>
           </dl>
           {count > 0 && (
             <div className="tp__consent">
@@ -218,10 +226,10 @@ export default function TicketPanel({ slug, tiers: initial, feePercent, feeFixed
             </a>
           ) : (
             <button type="button" className="btn btn--amber" disabled={count === 0 || busy || !ready} onClick={pay}>
-              {busy ? 'Redirection vers le paiement…' : count > 0 ? `Payer ${formatEuro(subtotal + fee)}` : 'Choisis tes billets'}
+              {busy ? (isFreeOrder ? 'Réservation en cours…' : 'Redirection vers le paiement…') : count === 0 ? 'Choisis tes billets' : isFreeOrder ? 'Réserver gratuitement' : `Payer ${formatEuro(subtotal + fee)}`}
             </button>
           )}
-          <p className="tp__note">Paiement sécurisé par Stripe. TVA non applicable, art. 293 B du CGI. Places réservées 15 minutes pendant le paiement. <a href="/mentions-legales" target="_blank" rel="noopener">Mentions légales</a> · <a href="/cgv" target="_blank" rel="noopener">CGV</a> · <a href="/remboursement" target="_blank" rel="noopener">Remboursement</a></p>
+          <p className="tp__note">{isFreeOrder ? 'Billets gratuits : aucun paiement demandé, e-mail de ton compte confirmé requis. ' : 'Paiement sécurisé par Stripe. '}TVA non applicable, art. 293 B du CGI. {!isFreeOrder && 'Places réservées 15 minutes pendant le paiement.'} <a href="/mentions-legales" target="_blank" rel="noopener">Mentions légales</a> · <a href="/cgv" target="_blank" rel="noopener">CGV</a> · <a href="/remboursement" target="_blank" rel="noopener">Remboursement</a></p>
         </div>
       )}
     </div>

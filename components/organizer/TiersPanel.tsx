@@ -4,16 +4,17 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ProgressBar from './ProgressBar';
 import type { OrgTierFull } from '@/lib/organizer/data';
-import { euroToCents, formatEuro, gpLocalToIso, isoToGpLocal } from '@/lib/ticketing/time';
+import { euroToCents, formatEuro, gpLocalToIso, isoToGpLocal, priceError } from '@/lib/ticketing/time';
+import FreeBadge from '@/components/ticketing/FreeBadge';
 
-interface Draft { id: string | null; name: string; description: string; price: string; quantity: string; maxPerOrder: string; start: string; end: string; active: boolean; sort: number }
-const blank = (sort: number): Draft => ({ id: null, name: '', description: '', price: '', quantity: '', maxPerOrder: '6', start: '', end: '', active: true, sort });
+interface Draft { id: string | null; name: string; description: string; price: string; quantity: string; maxPerOrder: string; maxPerAccount: string; start: string; end: string; active: boolean; sort: number }
+const blank = (sort: number): Draft => ({ id: null, name: '', description: '', price: '', quantity: '', maxPerOrder: '6', maxPerAccount: '2', start: '', end: '', active: true, sort });
 const fromTier = (t: OrgTierFull): Draft => ({
   id: t.id, name: t.name, description: t.description, price: (t.price_cents / 100).toFixed(2).replace('.', ','), quantity: String(t.quantity_total),
-  maxPerOrder: String(t.max_per_order), start: isoToGpLocal(t.sales_start), end: isoToGpLocal(t.sales_end), active: t.is_active, sort: t.sort_order,
+  maxPerOrder: String(t.max_per_order), maxPerAccount: String(t.max_per_account ?? 2), start: isoToGpLocal(t.sales_start), end: isoToGpLocal(t.sales_end), active: t.is_active, sort: t.sort_order,
 });
 
-/** Tarifs d'un événement : création et modification selon les règles de la billetterie (prix ≥ 0,50 €, quantité ≥ vendus, archivage si vendu). */
+/** Tarifs d'un événement : création et modification selon les règles de la billetterie (prix 0 € = gratuit ou ≥ 0,50 €, quantité ≥ vendus, archivage si vendu). */
 export default function TiersPanel({ slug, tiers, capacity, consumed }: { slug: string; tiers: OrgTierFull[]; capacity: number; consumed: number }) {
   const router = useRouter();
   const [draft, setDraft] = useState<Draft | null>(null);
@@ -30,14 +31,15 @@ export default function TiersPanel({ slug, tiers, capacity, consumed }: { slug: 
     if (!draft) return;
     setErr(''); setInfo('');
     const price = euroToCents(draft.price);
-    if (!Number.isFinite(price) || price < 50) { setErr('Le prix minimum d’un tarif est de 0,50 €.'); return; }
+    const pe = priceError(price);
+    if (pe) { setErr(pe); return; }
     const qty = Number(draft.quantity);
     if (!Number.isInteger(qty) || qty < 0) { setErr('Indique une quantité (nombre entier).'); return; }
     if (qty < floor) { setErr(`Impossible : ${floor} place(s) sont déjà vendues ou en cours de paiement. La quantité doit être d’au moins ${floor}.`); return; }
     setBusy(true);
     const r = await fetch(`/api/organisateur/events/${slug}/tiers`, {
       method: 'PUT', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: draft.id, name: draft.name, description: draft.description, price_cents: price, quantity_total: qty, max_per_order: Number(draft.maxPerOrder) || 6,
+      body: JSON.stringify({ id: draft.id, name: draft.name, description: draft.description, price_cents: price, quantity_total: qty, max_per_order: Number(draft.maxPerOrder) || 6, ...(price === 0 ? { max_per_account: Number(draft.maxPerAccount) || 2 } : {}),
         sales_start: gpLocalToIso(draft.start), sales_end: gpLocalToIso(draft.end), is_active: draft.active, sort_order: draft.sort }),
     });
     const j = await r.json().catch(() => ({}));
@@ -71,9 +73,12 @@ export default function TiersPanel({ slug, tiers, capacity, consumed }: { slug: 
           <h3>{draft.id ? 'Modifier le tarif' : 'Nouveau tarif'}</h3>
           <div className="org-settings__grid">
             <label className="admin-field"><span>Nom</span><input value={draft.name} onChange={(e) => set({ name: e.target.value })} required maxLength={80} /></label>
-            <label className="admin-field"><span>Prix (€) — minimum 0,50 €</span><input value={draft.price} onChange={(e) => set({ price: e.target.value })} inputMode="decimal" required placeholder="15,00" /></label>
+            <label className="admin-field"><span>Prix (€) — 0 pour un tarif gratuit</span><input value={draft.price} onChange={(e) => set({ price: e.target.value })} inputMode="decimal" required placeholder="15,00" /></label>
             <label className="admin-field"><span>Quantité{floor > 0 ? ` (au moins ${floor}, déjà vendues ou en cours)` : ''}</span><input type="number" min={floor} max={100000} value={draft.quantity} onChange={(e) => set({ quantity: e.target.value })} required /></label>
             <label className="admin-field"><span>Maximum par commande</span><input type="number" min={1} max={20} value={draft.maxPerOrder} onChange={(e) => set({ maxPerOrder: e.target.value })} /></label>
+            {euroToCents(draft.price) === 0 && (
+              <label className="admin-field"><span>Maximum par compte (billets gratuits)</span><input type="number" min={1} max={20} value={draft.maxPerAccount} onChange={(e) => set({ maxPerAccount: e.target.value })} /></label>
+            )}
             <label className="admin-field"><span>Début de vente (heure de Guadeloupe)</span><input type="datetime-local" value={draft.start} onChange={(e) => set({ start: e.target.value })} /></label>
             <label className="admin-field"><span>Fin de vente</span><input type="datetime-local" value={draft.end} min={draft.start || undefined} onChange={(e) => set({ end: e.target.value })} /></label>
             <label className="admin-field org-settings__wide"><span>Description (facultatif)</span><input value={draft.description} onChange={(e) => set({ description: e.target.value })} maxLength={300} /></label>
@@ -98,7 +103,7 @@ export default function TiersPanel({ slug, tiers, capacity, consumed }: { slug: 
                   <strong className="org-tier__name">{t.name}</strong>
                   <span className={'org-state ' + (t.archived ? 'org-state--ended' : t.is_active ? 'org-state--on_sale' : 'org-state--draft')}>{t.archived ? 'Archivé' : t.is_active ? 'En vente' : 'En pause'}</span>
                 </div>
-                <strong className="org-tier__price">{formatEuro(t.price_cents)}</strong>
+                <strong className="org-tier__price">{t.price_cents === 0 ? <FreeBadge /> : formatEuro(t.price_cents)}</strong>
               </div>
               {t.description && <p className="org-muted">{t.description}</p>}
               <ProgressBar sold={t.sold} reserved={Math.max(t.consumed - t.sold, 0)} capacity={t.quantity_total} compact />

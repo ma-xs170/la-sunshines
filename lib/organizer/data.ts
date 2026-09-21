@@ -79,7 +79,7 @@ export function editorial(slug: string): { title: string; flyer: string | null; 
 }
 
 export interface OrgTierFull {
-  id: string; name: string; description: string; price_cents: number; quantity_total: number; max_per_order: number;
+  id: string; name: string; description: string; price_cents: number; quantity_total: number; max_per_order: number; max_per_account: number;
   sales_start: string | null; sales_end: string | null; is_active: boolean; archived: boolean; sort_order: number; sold: number; consumed: number;
 }
 export interface OrgTiers { capacity: number; consumed: number; tiers: OrgTierFull[] }

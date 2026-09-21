@@ -3127,6 +3127,8 @@ nav .acct-links button.link{
   padding:6px 12px;border-radius:var(--r-pill);white-space:nowrap;
   background:rgba(25,20,16,.08);
 }
+.badge-free{display:inline-block;padding:.15rem .6rem;border-radius:999px;background:rgba(46,160,90,.16);color:#1d6b3c;font-size:.78rem;font-weight:700;letter-spacing:.02em;text-transform:uppercase;white-space:nowrap;vertical-align:middle}
+.event--themed .badge-free{background:rgba(120,224,160,.2);color:#a8f0c4}
 .tp__badge--upcoming{background:rgba(255,178,56,.22);}
 .tp__badge--sold_out{background:rgba(255,107,91,.2);color:#b3261e;}
 .tp__total{display:flex;flex-direction:column;gap:var(--s-12);border-top:1px solid var(--ev-line, var(--panel-border));padding-top:var(--s-16);}
@@ -3638,3 +3640,15 @@ nav .acct-links button.link{
 .evm-dc__chip{padding:2px 10px;border-radius:var(--r-pill);border:1px solid rgba(25,20,16,.25);font-size:.86em;font-weight:800;letter-spacing:.02em;}
 .evm-dc__note{width:100%;text-transform:none;font-weight:600;opacity:.85;font-size:.86em;}
 .event-flyer__video,.event-flyer__img{display:block;width:100%;height:auto;border-radius:var(--r-md);background:#000;}
+
+/* Pages publiques d'organisateurs */
+.oavatar{display:inline-grid;place-items:center;flex:none;border-radius:50%;object-fit:cover;border:2px solid #fff;box-shadow:0 4px 14px rgba(25,20,16,.15);}
+.oavatar--gen{font-family:var(--font-display);font-weight:800;color:var(--ink);}
+.opage{max-width:900px;margin:0 auto;padding:clamp(96px,14vh,140px) var(--gutter) var(--s-64);}
+.opage__head{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-16);padding:var(--s-24);border-radius:var(--r-lg);background:var(--bg-2) center/cover;border:1px solid var(--panel-border);}
+.opage__head h1{margin:0;font-size:clamp(26px,3vw + 12px,44px);letter-spacing:-.03em;} .opage__head:has(+ *) .follow{margin-left:auto;}
+.opage__desc{margin:var(--s-24) 0;white-space:pre-line;line-height:1.7;} .opage__links{display:flex;flex-wrap:wrap;gap:8px 16px;font-weight:700;} .opage__links a{color:var(--amber-ink);text-decoration:underline;text-underline-offset:3px;}
+.opage__list{list-style:none;padding:0;margin:0 0 var(--s-24);display:grid;gap:8px;} .opage__list a{display:flex;justify-content:space-between;gap:12px;padding:14px 16px;border:1px solid var(--panel-border);border-radius:var(--r-sm);background:var(--bg-2);} .opage__list span{color:var(--gray);}
+.opage__artists{line-height:2;} .follow{display:flex;flex-direction:column;gap:6px;align-items:flex-start;}
+.event-org{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-16);max-width:900px;margin:var(--s-48, 48px) auto 0;padding:var(--s-16) var(--s-24);border:1px solid var(--panel-border);border-radius:var(--r-md);background:var(--bg-2);z-index:1;position:relative;}
+.event-org__label{margin:0;font-size:12px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.06em;} .event-org__name{margin:0;font-family:var(--font-display);font-weight:800;font-size:18px;} .event-org .btn{margin-left:auto;}
