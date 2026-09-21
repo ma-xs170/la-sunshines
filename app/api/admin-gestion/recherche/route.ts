@@ -13,8 +13,9 @@ export async function GET(req: Request) {
   const q = (new URL(req.url).searchParams.get('q') ?? '').slice(0, 80);
   const r = await adminRpc<{ organizers: unknown[]; admins: unknown[]; orders: unknown[]; events: { slug: string }[] }>('admin_global_search', { p_actor: g.s.userId, p_q: q });
   if (!r.ok) return NextResponse.json({ error: r.message }, { status: r.status });
+  const tk = await adminRpc<{ id: string; reference: string; subject: string; status: string }[]>('admin_support_search', { p_actor: g.s.userId, p_q: q });
   const f = fold(q);
   const known = new Set(r.data.events.map((e) => e.slug));
   const byName = f.length >= 2 ? getAllEditions({ includeHidden: true }).filter((e) => fold(e.name).includes(f) && !known.has(e.slug)).slice(0, 5).map((e) => ({ slug: e.slug, name: e.name })) : [];
-  return NextResponse.json({ ...r.data, editions: byName }, { headers: { 'Cache-Control': 'no-store' } });
+  return NextResponse.json({ ...r.data, editions: byName, tickets: tk.ok ? tk.data : [] }, { headers: { 'Cache-Control': 'no-store' } });
 }

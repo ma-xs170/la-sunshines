@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import OrgAdminActions from '@/components/admin/OrgAdminActions';
 import { adminRpc, requireAdminPage } from '@/lib/adminSpace';
+import { supportRpc } from '@/lib/supportServer';
+import { CATEGORY_LABEL, statusText } from '@/lib/support';
 import { one } from '@/lib/organizer/event-data';
 import { formatEuro, formatGp } from '@/lib/ticketing/time';
 
@@ -21,6 +23,9 @@ export default async function OrganizerDetailPage({ params, searchParams }: { pa
   const r = await adminRpc<Detail>('admin_organizer_detail', { p_actor: s.userId, p_org: id });
   if (!r.ok) notFound();
   const { organizer: o, members, events, activity } = r.data;
+  type TRow = { id: string; reference: string; subject: string; category: string; status: string; admin_name: string | null; organizer_reference: string | null };
+  const pull = async (scope: string) => { const t = await supportRpc<{ rows: TRow[] }>('admin_support_list', { p_actor: s.userId, p_scope: scope }); return t.ok ? t.data.rows : []; };
+  const orgTickets = tab === 'support' ? [...(await pull('all')), ...(await pull('closed'))] : [];
   const revenue = events.reduce((n, e) => n + e.revenue_cents, 0);
   return (
     <>
@@ -43,7 +48,7 @@ export default async function OrganizerDetailPage({ params, searchParams }: { pa
       {tab === 'membres' && (members.length === 0 ? <div className="glass org-empty"><h3>Aucun membre</h3><p>Personne n’est encore rattaché à cette organisation.</p></div> : <div className="org-table glass"><table><thead><tr><th>Nom</th><th>E-mail</th><th>Rôle</th></tr></thead>
         <tbody>{members.map((m) => <tr key={m.user_id}><td data-label="Nom">{m.first_name} {m.last_name}</td><td data-label="E-mail">{m.email}</td><td data-label="Rôle">{ROLE[m.role] ?? m.role}</td></tr>)}</tbody></table></div>)}
       {tab === 'finance' && <section className="glass ef-card"><h2>Finance (lecture)</h2><p>Recette nette cumulée : <strong>{formatEuro(revenue)}</strong>. Le détail et l’enregistrement des versements se font par évènement dans <a className="ef-link" href="/admin/billetterie">Billetterie</a>.</p></section>}
-      {tab === 'support' && <section className="glass ef-card"><h2>Support</h2><p className="ef-help">Les tickets de cette organisation apparaîtront ici avec le module Support.</p></section>}
+      {tab === 'support' && (() => { const mine = orgTickets.filter((t) => t.organizer_reference && t.organizer_reference === o.reference); return mine.length === 0 ? <div className="glass org-empty"><h3>Aucun ticket</h3><p>Cette organisation n’a pas encore contacté le support.</p></div> : <div className="org-table glass"><table><thead><tr><th>Ticket</th><th>Objet</th><th>Catégorie</th><th>Statut</th></tr></thead><tbody>{mine.map((t) => <tr key={t.id}><td data-label="Ticket"><a href={`/admin/gestion/support/${t.id}`}><code>{t.reference}</code></a></td><td data-label="Objet">{t.subject}</td><td data-label="Catégorie">{CATEGORY_LABEL[t.category]}</td><td data-label="Statut">{statusText(t.status, t.admin_name)}</td></tr>)}</tbody></table></div>; })()}
       {tab === 'journal' && (activity.length === 0 ? <div className="glass org-empty"><h3>Aucune activité</h3><p>Le journal se remplit à chaque action sensible.</p></div> : <div className="org-table glass"><table><thead><tr><th>Date</th><th>Action</th><th>Objet</th></tr></thead>
         <tbody>{activity.map((a, i) => <tr key={i}><td data-label="Date">{formatGp(a.created_at)}</td><td data-label="Action"><code>{a.action}</code></td><td data-label="Objet">{a.entity}</td></tr>)}</tbody></table></div>)}
     </>

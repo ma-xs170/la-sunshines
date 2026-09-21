@@ -25,6 +25,6 @@ Scripts hors dépôt (scratchpad) : `db.mjs` (connexion, lit `.env.local`), `bac
   - Tableau de bord : organisateurs (en attente d'approbation, actifs), évènements à venir, tickets support non pris en charge, ventes plateforme, dernières actions.
   - Toutes les fonctions actuelles de /admin restent accessibles et fonctionnelles ; redirections des anciennes URLs.
 - [x] Phase 5 (migration 018 APPLIQUÉE) : administrateurs multiples (création + mot de passe par e-mail, changement obligatoire, verrouillage 5 échecs, désactivation), organisateurs (liste, fiche à onglets, approbation/suspension/contact), transfert atomique, vue globale des évènements, recherche globale Cmd+K (/admin/gestion). Non fait : A2F imposée (colonne prête), création auto de la page publique à l'approbation (Phase 7)
-- [ ] Phase 6 : support organisateurs ↔ admins
+- [x] Phase 6 (migration 019 APPLIQUÉE) : tickets TK.XXXXXX, chat (sondage 2 s), pièces jointes privées, ajout par ORG, prise en charge atomique, notes internes, réponses rapides (lecture + API), bouton d'aide flottant, /admin/gestion/support. Non fait : interface de création de réponses rapides, e-mails de notification de réponse
 - [ ] Phase 7 : calendrier régional et pages publiques d'organisateurs
 - [ ] Vérification finale (section 11) + ORGA-RAPPORT.md

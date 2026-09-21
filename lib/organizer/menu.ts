@@ -34,8 +34,8 @@ export function accountMenu(): MenuGroup[] {
       { label: 'Page publique', cap: 'manage' },
     ] },
     { id: 'support', label: 'Support', icon: 'help', items: [
-      { label: 'Créer un ticket', cap: 'manage' },
-      { label: 'Historique du support', cap: 'manage' },
+      { label: 'Créer un ticket', href: '/organisateur/support/nouveau', cap: 'manage' },
+      { label: 'Historique du support', href: '/organisateur/support', cap: 'manage' },
     ] },
     { id: 'news', label: 'Actualités', icon: 'bell', items: [{ label: 'Actualités', href: '/organisateur/actualites', cap: 'scan', badge: 'news' }] },
     { id: 'help', label: 'Centre d’aide', icon: 'inbox', items: [{ label: 'Centre d’aide', href: '/organisateur/aide', cap: 'scan' }] },

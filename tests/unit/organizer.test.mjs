@@ -182,3 +182,19 @@ test('mot de passe admin : aléatoire, 20 caractères, 4 classes, jamais deux fo
   assert.equal(set.size, 200);
   assert.ok(passwordProblem('court1')); assert.ok(passwordProblem('uniquementdeslettres')); assert.equal(passwordProblem('Correct-horse-9'), null);
 });
+
+import { createSchema, actionSchema, attachOk, statusText } from '../../lib/support.ts';
+test('support : validation de création, pièces jointes (images / PDF, 10 Mo), libellé « pris en charge par »', () => {
+  const ok = { org: '00000000-0000-4000-8000-000000000001', subject: 'Problème de scan', category: 'technical', priority: 'urgent', body: 'Bonjour' };
+  assert.ok(createSchema.safeParse(ok).success);
+  assert.ok(!createSchema.safeParse({ ...ok, subject: 'ab' }).success);
+  assert.ok(!createSchema.safeParse({ ...ok, category: 'autre' }).success);
+  assert.ok(!createSchema.safeParse({ ...ok, body: '   ' }).success);
+  assert.ok(!createSchema.safeParse({ ...ok, attachments: [{ path: 'support/../../etc/passwd', name: 'a', size: 1, type: 'application/pdf' }] }).success);
+  assert.ok(!createSchema.safeParse({ ...ok, attachments: [{ path: 'evil/x.pdf', name: 'a', size: 1, type: 'application/pdf' }] }).success);
+  assert.ok(createSchema.safeParse({ ...ok, attachments: [{ path: 'support/abc-x.pdf', name: 'x.pdf', size: 1000, type: 'application/pdf' }] }).success);
+  assert.ok(attachOk('image/png', 1000)); assert.ok(attachOk('application/pdf', 10 * 1048576));
+  assert.ok(!attachOk('application/pdf', 10 * 1048576 + 1)); assert.ok(!attachOk('text/html', 100)); assert.ok(!attachOk('image/svg+xml', 100));
+  assert.ok(actionSchema.safeParse({ action: 'close', note: 'ok' }).success); assert.ok(!actionSchema.safeParse({ action: 'delete' }).success);
+  assert.equal(statusText('claimed', 'Ada'), 'Pris en charge par Ada'); assert.equal(statusText('open', null), 'Ouvert'); assert.equal(statusText('closed', 'Ada'), 'Fermé');
+});
