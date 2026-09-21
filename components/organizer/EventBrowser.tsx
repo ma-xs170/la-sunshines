@@ -32,35 +32,46 @@ function ArchiveButton({ e }: { e: CardEvent }) {
 }
 
 function Card({ e, list, canManage }: { e: CardEvent; list: boolean; canManage: boolean }) {
-  const dash = `/organisateur/evenements/${e.slug}`;
+  // Évènement rattaché vendu ailleurs (Bizouk) : fiche éditoriale publique, aucune statistique de billetterie.
+  const dash = e.external ? `/editions/${e.slug}` : `/organisateur/evenements/${e.slug}`;
   const pct = e.capacity > 0 ? Math.round((e.sold / e.capacity) * 100) : 0;
+  const flyer = e.external ? e.flyerSrc : `/api/organisateur/events/${e.slug}/flyer`;
   return (
     <article className={'org-card glass ' + (list ? 'org-card--row' : 'org-card--tile')}>
       <a className="org-card__media" href={dash} tabIndex={-1} aria-hidden="true">
-        {e.hasFlyer ? (
+        {e.hasFlyer && flyer ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={`/api/organisateur/events/${e.slug}/flyer`} alt="" loading="lazy" />
+          <img src={flyer} alt="" loading="lazy" />
         ) : (
           <span className="org-card__noflyer script">La Sunshines</span>
         )}
       </a>
       <div className="org-card__body">
         <div className="org-card__head">
-          <span className={`org-state org-state--${e.state}`}>{STATE_LABEL[e.state]}</span>
-          {canManage && <ArchiveButton e={e} />}
+          <span className={`org-state org-state--${e.external && e.state === 'on_sale' ? 'draft' : e.state}`}>{e.external && e.state === 'on_sale' ? 'À venir' : STATE_LABEL[e.state]}</span>
+          {e.isTest && <span className="org-state org-state--draft">Test</span>}
+          {canManage && !e.external && <ArchiveButton e={e} />}
         </div>
         <h3 className="org-card__title"><a href={dash}>{e.title}</a></h3>
         <p className="org-card__meta"><Icon name="calendar" />{e.dateLabel}</p>
         <p className="org-card__meta"><Icon name="map-pin" />{e.venue || 'Lieu à préciser'}</p>
-        <dl className="org-card__stats">
-          <div><dt>Participants</dt><dd>{e.sold}</dd></div>
-          {e.revenueCents !== null && <div><dt>Revenus</dt><dd>{formatEuro(e.revenueCents)}</dd></div>}
-          {e.revenueCents === null && <div><dt>Entrées</dt><dd>{e.entered}</dd></div>}
-        </dl>
-        {canManage && <ProgressBar sold={e.sold} reserved={e.reserved} capacity={e.capacity} label="Remplissage" compact />}
-        {!canManage && <p className="org-bar__text">{pct} % · {e.sold} / {e.capacity} places</p>}
+        {e.external ? (
+          <p className="org-muted">Vendu via Bizouk — statistiques non disponibles ici</p>
+        ) : (
+          <>
+            <dl className="org-card__stats">
+              <div><dt>Participants</dt><dd>{e.sold}</dd></div>
+              {e.revenueCents !== null && <div><dt>Revenus</dt><dd>{formatEuro(e.revenueCents)}</dd></div>}
+              {e.revenueCents === null && <div><dt>Entrées</dt><dd>{e.entered}</dd></div>}
+            </dl>
+            {canManage && <ProgressBar sold={e.sold} reserved={e.reserved} capacity={e.capacity} label="Remplissage" compact />}
+            {!canManage && <p className="org-bar__text">{pct} % · {e.sold} / {e.capacity} places</p>}
+          </>
+        )}
         <div className="org-card__actions">
-          {canManage ? (
+          {e.external ? (
+            <a className="btn btn--outline" href={dash}>Voir la fiche</a>
+          ) : canManage ? (
             <>
               <a className="btn btn--amber" href={dash}>Tableau de bord</a>
               <a className="btn btn--outline" href={`${dash}?onglet=tarifs#onglets`}>Tarifs</a>

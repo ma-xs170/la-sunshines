@@ -4,6 +4,7 @@ import { unstable_cache } from 'next/cache';
 import { createSupabaseAdminClient, supabaseAdminConfigured } from '@/lib/supabase/admin';
 import { TICKETING_CACHE_TAG } from '@/lib/supabase/public';
 import { getTicketingSettings } from '@/lib/ticketing/settings';
+import { linkedOrganizerIdOf, publicLinkedEditionsOf } from '@/lib/eventLinks';
 
 export interface PublicOrganizer { name: string; slug: string; description: string; logo_url: string | null; banner_url: string | null; website: string; socials: Record<string, string>; events: { slug: string; starts_at: string; upcoming: boolean }[] }
 export interface EventOrganizer { name: string; slug: string; logo_url: string | null }
@@ -13,12 +14,28 @@ async function open(): Promise<boolean> {
   try { return (await getTicketingSettings()).mode !== 'bizouk'; } catch { return false; }
 }
 const loadPage = unstable_cache(async (slug: string) => {
-  const { data } = await createSupabaseAdminClient().rpc('public_organizer_page', { p_slug: slug });
-  return (data ?? null) as PublicOrganizer | null;
+  const db = createSupabaseAdminClient();
+  const { data } = await db.rpc('public_organizer_page', { p_slug: slug });
+  const page = (data ?? null) as PublicOrganizer | null;
+  if (!page) return null;
+  // + éditions rattachées à l'organisation (table event_links) : évènements passés et éditorial, y compris ceux vendus ailleurs (Bizouk)
+  const { data: row } = await db.from('organizer_pages').select('organizer_id').eq('slug', slug).maybeSingle();
+  if (row?.organizer_id) {
+    const have = new Set(page.events.map((e) => e.slug));
+    for (const e of await publicLinkedEditionsOf(row.organizer_id as string)) if (!have.has(e.slug)) page.events.push({ slug: e.slug, starts_at: e.dateISO ?? '', upcoming: !e.past });
+  }
+  return page;
 }, ['public-organizer-page'], { revalidate: 60, tags: [TICKETING_CACHE_TAG] });
 const loadBlock = unstable_cache(async (slug: string) => {
-  const { data } = await createSupabaseAdminClient().rpc('public_event_organizer', { p_event_slug: slug });
-  return (data ?? null) as EventOrganizer | null;
+  const db = createSupabaseAdminClient();
+  const { data } = await db.rpc('public_event_organizer', { p_event_slug: slug });
+  if (data) return data as EventOrganizer;
+  // édition rattachée par event_links (pas de billetterie interne) : même bloc « Organisé par »
+  const orgId = await linkedOrganizerIdOf(slug);
+  if (!orgId) return null;
+  const { data: pg } = await db.from('organizer_pages').select('slug, logo_url, organizers!inner(name, account_status)').eq('organizer_id', orgId).eq('organizers.account_status', 'approved').maybeSingle();
+  const o = pg ? (Array.isArray(pg.organizers) ? pg.organizers[0] : pg.organizers) as { name: string } | undefined : undefined;
+  return pg && o ? { name: o.name, slug: pg.slug as string, logo_url: (pg.logo_url as string | null) ?? null } : null;
 }, ['public-event-organizer'], { revalidate: 60, tags: [TICKETING_CACHE_TAG] });
 
 export async function getPublicOrganizer(slug: string): Promise<PublicOrganizer | null> {

@@ -25,7 +25,7 @@ export default async function OrganizerHome() {
 
   const role = current.my_role;
   const manage = can(role, 'manage');
-  const [list, news] = await Promise.all([loadCardEvents(s.userId, current.id), newsFor(s.userId)]);
+  const [list, news] = await Promise.all([loadCardEvents(s.userId, current.id, current.name), newsFor(s.userId)]);
   const events = list.events;
   const dash = manage ? await orgRpc<{ today_cents: number; yesterday_cents: number; month_cents: number; prev_month_cents: number; active_events: number }>('org_dashboard', { p_actor: s.userId, p_org: current.id }) : null;
 

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import LinkedEventsList from '@/components/organizer/LinkedEventsList';
 import RegionalCalendar from '@/components/organizer/RegionalCalendar';
 import { getAllEditions } from '@/lib/content';
 import { isRegion, REGION_LABEL, REGIONS, type CalEvent } from '@/lib/calendar';
@@ -27,5 +28,5 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
   const r = await orgRpc<CalEvent[]>('calendar_events', { p_actor: s.userId, p_region: region, p_from: from, p_to: to });
   const names = Object.fromEntries(getAllEditions({ includeHidden: true }).map((e) => [e.slug, e.name]));
   return (<main className="org org-page"><h1 className="org-head__title">Calendrier</h1><p className="script">{REGION_LABEL[region]}</p>
-    {!r.ok && <p className="admin-error" role="alert">Impossible de charger le calendrier.</p>}<RegionalCalendar region={region} events={r.ok ? r.data : []} admin={false} names={names} /></main>);
+    {!r.ok && <p className="admin-error" role="alert">Impossible de charger le calendrier.</p>}<RegionalCalendar region={region} events={r.ok ? r.data : []} admin={false} names={names} /><LinkedEventsList orgId={current.id} /></main>);
 }

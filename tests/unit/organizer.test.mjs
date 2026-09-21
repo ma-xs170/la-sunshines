@@ -75,19 +75,20 @@ test('liste : onglets, puces, recherche sans accents, lieu et période', () => {
   const list = [ev({ slug: 'a', title: 'La Nuit Des Ombres' }), ev({ slug: 'b', title: 'Été brûlant', state: 'draft', venue: 'Plage', startsAt: '2026-12-05T22:00:00Z' }),
     ev({ slug: 'c', state: 'ended' }), ev({ slug: 'd', archived: true, state: 'ended' }), ev({ slug: 'e', state: 'cancelled' }), ev({ slug: 'f', state: 'sold_out' })];
   const slugs = (f) => filterEvents(list, { ...NO_FILTERS, ...f }).map((e) => e.slug).join('');
-  assert.equal(slugs({}), 'abf');
+  assert.equal(slugs({}), 'af');
+  assert.equal(slugs({ tab: 'drafts' }), 'b');
   assert.equal(slugs({ tab: 'past' }), 'ce');
   assert.equal(slugs({ tab: 'archives' }), 'd');
-  assert.deepEqual(tabCounts(list), { upcoming: 3, past: 2, archives: 1 });
+  assert.deepEqual(tabCounts(list), { upcoming: 2, past: 2, drafts: 1, archives: 1 });
   assert.equal(tabOf(list[3]), 'archives');
   assert.equal(slugs({ chip: 'on_sale' }), 'af');          // « complet » = publié
   assert.equal(slugs({ chip: 'draft' }), 'b');
   assert.equal(slugs({ chip: 'ended', tab: 'past' }), 'c');
-  assert.equal(slugs({ q: 'ete BRULANT' }), 'b');
+  assert.equal(slugs({ q: 'ete BRULANT', tab: 'drafts' }), 'b');
   assert.equal(slugs({ q: 'nuit ombres' }), '');            // la recherche est une sous-chaîne, pas un « et » de mots
-  assert.equal(slugs({ q: 'plage' }), 'b');
-  assert.equal(slugs({ venue: 'Plage' }), 'b');
-  assert.equal(slugs({ from: '2026-12-01' }), 'b');
+  assert.equal(slugs({ q: 'plage', tab: 'drafts' }), 'b');
+  assert.equal(slugs({ venue: 'Plage', tab: 'drafts' }), 'b');
+  assert.equal(slugs({ from: '2026-12-01', tab: 'drafts' }), 'b');
   assert.equal(slugs({ to: '2026-11-30' }), 'af');
   assert.equal(slugs({ from: '2026-11-01', to: '2026-11-01' }), 'af');  // bornes incluses (jour entier, heure de Guadeloupe)
 });
