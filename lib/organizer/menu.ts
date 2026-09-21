@@ -73,13 +73,13 @@ export function eventMenu(slug: string): MenuGroup[] {
     { id: 'ev-media', label: 'Médias', icon: 'grid', items: [{ label: 'Photos', cap: 'manage' }, { label: 'Vidéos', cap: 'manage' }] },
     { id: 'ev-stats', label: 'Statistiques', icon: 'filter', items: [
       { label: 'Vue d’ensemble', cap: 'manage' }, { label: 'Audience', cap: 'manage' }, { label: 'Acquisition', cap: 'manage' }, { label: 'Tunnel de conversion', cap: 'manage' },
-      { label: 'Ventes', cap: 'manage' }, { label: 'Participants', cap: 'manage' }, { label: 'Canaux', cap: 'manage' }, { label: 'Géographie', cap: 'manage' }, { label: 'Performance', cap: 'manage' },
+      { label: 'Ventes', href: `${base}/stats`, cap: 'manage' }, { label: 'Participants', cap: 'manage' }, { label: 'Canaux', cap: 'manage' }, { label: 'Géographie', cap: 'manage' }, { label: 'Performance', cap: 'manage' },
     ] },
     { id: 'ev-finance', label: 'Finance', icon: 'check', items: [
-      { label: 'Récapitulatif', href: '/organisateur/paiements', cap: 'owner' }, { label: 'Versements', cap: 'owner' },
+      { label: 'Récapitulatif', href: `${base}/finance`, cap: 'owner' }, { label: 'Versements', href: `${base}/finance/versements`, cap: 'owner' },
     ] },
     { id: 'ev-users', label: 'Utilisateurs', icon: 'phone', items: [{ label: 'Rôles de l’évènement', cap: 'owner' }] },
-    { id: 'ev-notif', label: 'Notifications', icon: 'bell', items: [{ label: 'Notifications', cap: 'manage' }] },
+    { id: 'ev-notif', label: 'Notifications', icon: 'bell', items: [{ label: 'Notifications', href: '/organisateur/notifications', cap: 'manage' }] },
   ];
 }
 
@@ -112,7 +112,7 @@ export function activeGroupId(groups: MenuGroup[], pathname: string, onglet: str
 const CRUMB: Record<string, string> = {
   evenements: 'Mes évènements', nouveau: 'Nouvel évènement', participants: 'Participants', analyse: 'Analyse', paiements: 'Paiements',
   parametres: 'Informations légales', actualites: 'Actualités', aide: 'Centre d’aide',
-  commandes: 'Commandes', remboursements: 'Remboursements', scans: 'Historique des scans', invitations: 'Invitations', suivi: 'Suivi', promos: 'Codes de réduction', description: 'Description', flyer: 'Décliner le flyer', lieux: 'Lieux', sessions: 'Sessions', formulaires: 'Formulaires', conditions: 'Conditions générales', consentements: 'Consentements RGPD',
+  finance: 'Finance', versements: 'Versements', stats: 'Ventes', notifications: 'Notifications', commandes: 'Commandes', remboursements: 'Remboursements', scans: 'Historique des scans', invitations: 'Invitations', suivi: 'Suivi', promos: 'Codes de réduction', description: 'Description', flyer: 'Décliner le flyer', lieux: 'Lieux', sessions: 'Sessions', formulaires: 'Formulaires', conditions: 'Conditions générales', consentements: 'Consentements RGPD',
 };
 
 /** Fil d'Ariane à partir du chemin (l'évènement s'affiche « Évènement » : son titre est dans l'en-tête de la page). */

@@ -162,3 +162,12 @@ test('fil d’Ariane', () => {
   assert.deepEqual(crumbs('/organisateur/evenements/x').map((c) => c.label), ['Espace organisateur', 'Mes évènements', 'Évènement']);
   assert.equal(crumbs('/organisateur/paiements').at(-1).href, undefined);
 });
+
+import { variation } from '../../lib/organizer/variation.ts';
+test('variation : période précédente à zéro = « nouveau », jamais d’infini', () => {
+  assert.deepEqual(variation(100, 0), { text: 'nouveau', tone: 'up' });
+  assert.deepEqual(variation(0, 0), { text: '—', tone: 'flat' });
+  assert.deepEqual(variation(150, 100), { text: '+50 %', tone: 'up' });
+  assert.deepEqual(variation(50, 100), { text: '−50 %', tone: 'down' });
+  assert.deepEqual(variation(100, 100), { text: '0 %', tone: 'flat' });
+});
