@@ -24,7 +24,7 @@ Scripts hors dépôt (scratchpad) : `db.mjs` (connexion, lit `.env.local`), `bac
   - Menu : Tableau de bord · Organisateurs · Évènements · Administrateurs (super-admin seulement) · Support (Tous, Problème technique, Gestion du compte, Argent & paiement, Demandes de nouveautés, Autre, Mes tickets, Fermés) · Calendrier · Billetterie (mode Bizouk/interne, frais) · Contenu du site (tout l'ancien panneau : éditions, artistes, programme, actualités, règlement, infos) · Journal d'audit · Réglages.
   - Tableau de bord : organisateurs (en attente d'approbation, actifs), évènements à venir, tickets support non pris en charge, ventes plateforme, dernières actions.
   - Toutes les fonctions actuelles de /admin restent accessibles et fonctionnelles ; redirections des anciennes URLs.
-- [ ] Phase 5 : admin (administrateurs multiples, organisateurs, transfert d'évènement)
+- [x] Phase 5 (migration 018 APPLIQUÉE) : administrateurs multiples (création + mot de passe par e-mail, changement obligatoire, verrouillage 5 échecs, désactivation), organisateurs (liste, fiche à onglets, approbation/suspension/contact), transfert atomique, vue globale des évènements, recherche globale Cmd+K (/admin/gestion). Non fait : A2F imposée (colonne prête), création auto de la page publique à l'approbation (Phase 7)
 - [ ] Phase 6 : support organisateurs ↔ admins
 - [ ] Phase 7 : calendrier régional et pages publiques d'organisateurs
 - [ ] Vérification finale (section 11) + ORGA-RAPPORT.md

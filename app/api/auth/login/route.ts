@@ -4,6 +4,7 @@ import { supabaseConfigured } from '@/lib/supabase/config';
 import { loginSchema, safeNext } from '@/lib/auth/schemas';
 import { fail, isOutage, parseBody, TOO_MANY, UNAVAILABLE } from '@/lib/auth/http';
 import { clientIp, rateLimit } from '@/lib/rateLimit';
+import { createSupabaseAdminClient, supabaseAdminConfigured } from '@/lib/supabase/admin';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -18,9 +19,14 @@ export async function POST(req: Request) {
   if ('res' in parsed) return parsed.res;
   const { email, password, next } = parsed.data;
 
+  // Compte administrateur verrouillé (5 échecs) : même réponse que la limitation générale, sans révéler l'existence du compte.
+  const admin = supabaseAdminConfigured() ? createSupabaseAdminClient() : null;
+  if (admin && (await admin.rpc('admin_login_locked', { p_email: email })).data === true) return fail(TOO_MANY, 429);
+
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
+  if (admin && !(error && isOutage(error))) await admin.rpc('admin_login_result', { p_email: email, p_ok: !error });
   if (error) {
     // Panne côté Supabase (réseau / 5xx) : ne pas la faire passer pour un mauvais mot de passe.
     if (isOutage(error)) return fail('Service momentanément indisponible. Réessaie dans un instant.', 503);

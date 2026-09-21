@@ -171,3 +171,14 @@ test('variation : période précédente à zéro = « nouveau », jamais d’inf
   assert.deepEqual(variation(50, 100), { text: '−50 %', tone: 'down' });
   assert.deepEqual(variation(100, 100), { text: '0 %', tone: 'flat' });
 });
+
+import { generatePassword, passwordProblem } from '../../lib/adminPassword.ts';
+test('mot de passe admin : aléatoire, 20 caractères, 4 classes, jamais deux fois le même', () => {
+  const set = new Set();
+  for (let i = 0; i < 200; i++) {
+    const p = generatePassword(); set.add(p);
+    assert.equal(p.length, 20); assert.match(p, /[A-Z]/); assert.match(p, /[a-z]/); assert.match(p, /\d/); assert.match(p, /[!@#$%*?\-_+=]/);
+  }
+  assert.equal(set.size, 200);
+  assert.ok(passwordProblem('court1')); assert.ok(passwordProblem('uniquementdeslettres')); assert.equal(passwordProblem('Correct-horse-9'), null);
+});

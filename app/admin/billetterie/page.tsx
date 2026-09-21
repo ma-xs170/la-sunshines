@@ -21,7 +21,7 @@ export default async function BilletterieAdminPage() {
     <main className="admin-shell admin-shell--wide">
       <div className="admin-top">
         <h1>Billetterie</h1>
-        <div className="admin-top__actions"><a className="admin-link" href="/admin">← Retour à l’admin</a></div>
+        <div className="admin-top__actions"><a className="admin-link" href="/admin/gestion">Espace de gestion (organisateurs, administrateurs, recherche)</a> <a className="admin-link" href="/admin">← Retour à l’admin</a></div>
       </div>
       {children}
     </main>
