@@ -25,6 +25,7 @@ import FlyerLightbox from '@/components/FlyerLightbox';
 import FlyerVideo from '@/components/FlyerVideo';
 import { getPublicEventDetails } from '@/lib/publicEventDetails';
 import { getEventOrganizer } from '@/lib/publicOrganizer';
+import { getDbEdition } from '@/lib/dbEvents';
 import OrganizerAvatar from '@/components/OrganizerAvatar';
 import GalleryLightbox from '@/components/GalleryLightbox';
 import ArtistName from '@/components/ArtistName';
@@ -50,7 +51,7 @@ export async function generateMetadata({
   params: Promise<Params>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const ed = getEditionBySlug(slug);
+  const ed = getEditionBySlug(slug) ?? (await getDbEdition(slug)) ?? undefined;
   if (!ed) return {};
 
   const title = `${ed.name} · LA SUNSHINES`;
@@ -77,7 +78,7 @@ export default async function EditionPage({
   params: Promise<Params>;
 }) {
   const { slug } = await params;
-  const ed = getEditionBySlug(slug);
+  const ed = getEditionBySlug(slug) ?? (await getDbEdition(slug)) ?? undefined;
   if (!ed) notFound();
 
   const embed = ed.bizoukEmbed?.trim() || getBizoukEmbed(slug);

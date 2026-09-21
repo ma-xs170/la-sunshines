@@ -123,7 +123,8 @@ async function main() {
    end $r$;
    grant anon, authenticated, service_role to authenticator;
    create schema auth;
-   create table auth.users (id uuid primary key, email text, raw_user_meta_data jsonb default '{}', email_confirmed_at timestamptz);
+   create table auth.users (id uuid primary key, email text, raw_user_meta_data jsonb default '{}', email_confirmed_at timestamptz, created_at timestamptz default now(), last_sign_in_at timestamptz, banned_until timestamptz);
+ create table auth.sessions (id uuid primary key default gen_random_uuid(), user_id uuid not null references auth.users(id) on delete cascade);
    create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claims', true)::jsonb ->> 'sub','')::uuid $$;
    grant usage on schema public, auth to anon, authenticated, service_role;
    grant execute on function auth.uid() to anon, authenticated, service_role;
@@ -150,7 +151,9 @@ async function main() {
     STRIPE_SECRET_KEY: 'sk_test_e2e', STRIPE_API_MOCK: `127.0.0.1:${PORTS.stripe}`, STRIPE_WEBHOOK_SECRET: 'whsec_e2e_secret',
     TICKET_HMAC_SECRET: 'e2e-ticket-hmac-secret-e2e-ticket-hmac-secret', RESEND_API_KEY: 're_e2e', RESEND_BASE_URL: `http://127.0.0.1:${PORTS.resend}`,
     // .env.local (celui de l'utilisateur) peut définir TICKETING_FORCE_MODE : le banc doit pouvoir tester le mode Bizouk
-    TICKETING_FORCE_MODE: '', MAIL_FROM: 'La Sunshines <billets@test.local>', NEXT_PUBLIC_SITE_URL: `http://localhost:${PORTS.next}`, ADMIN_PASSWORD: 'e2e-admin' };
+    TICKETING_FORCE_MODE: '', MAIL_FROM: 'La Sunshines <billets@test.local>', NEXT_PUBLIC_SITE_URL: `http://localhost:${PORTS.next}`, ADMIN_PASSWORD: 'e2e-admin',
+    // dossier de compilation PROPRE au banc : un `next dev` lancé à côté (port 3000…) partage sinon .next et les deux se corrompent
+    NEXT_DIST_DIR: '.next-e2e' };
   delete env.KV_REST_API_URL;
   const next = spawn('npx', ['next', 'dev', '-p', String(PORTS.next)], { cwd: ROOT, env, stdio: ['ignore', 'pipe', 'pipe'] });
   next.stdout.on('data', (d) => process.env.VERBOSE && process.stdout.write('[next] ' + d)); next.stderr.on('data', (d) => process.env.VERBOSE && process.stderr.write('[next!] ' + d));

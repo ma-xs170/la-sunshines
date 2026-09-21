@@ -49,6 +49,10 @@ const MESSAGES: Record<string, OrgFailure> = {
   USER_NOT_FOUND: { status: 404, message: 'Aucun compte avec cette adresse : la personne doit d’abord créer son compte sur le site.' },
   ALREADY_MEMBER: { status: 409, message: 'Cette personne fait déjà partie de l’organisation.' },
   LAST_OWNER: { status: 409, message: 'Impossible : ce serait le dernier propriétaire de l’organisation.' },
+  CHECKLIST_INCOMPLETE: { status: 409, message: 'Il manque encore des éléments : complète la checklist avant de demander la publication.' },
+  ALREADY_PENDING: { status: 409, message: 'Une demande de publication est déjà en attente pour cet évènement.' },
+  NOT_DRAFT: { status: 409, message: 'Seul un évènement en brouillon peut faire l’objet d’une demande de publication.' },
+  NO_PENDING: { status: 404, message: 'Aucune demande en attente.' },
   REPLY_TO_MISSING: { status: 409, message: 'L’organisateur n’a pas d’adresse de réponse : [À COMPLÉTER] dans les informations de l’organisateur.' },
 };
 

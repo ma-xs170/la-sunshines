@@ -10,7 +10,7 @@ const O = (await q(`select id from public.organizers where is_default`))[0]?.id;
 await q(`insert into public.organizer_members (organizer_id, user_id, role) values ($1, $2, 'owner') on conflict do nothing`, [O, USERS.staff.id]);
 const PUBLIC = ['/', '/editions', '/editions/la-nuit-des-ombres', '/editions/before-christmas', '/artistes', '/interdits', '/infos', '/connexion', '/inscription', '/mentions-legales', '/contact'];
 const ORG = ['/organisateur', '/organisateur/evenements', '/organisateur/evenements/nouveau', '/organisateur/calendrier', '/organisateur/paiements', '/organisateur/notifications', '/organisateur/support', '/devenir-organisateur'];
-const ADM = ['/admin', '/admin/contenu', '/admin/contenu?onglet=artists', '/admin/gestion/organisateurs', '/admin/gestion/evenements', '/admin/gestion/support', '/admin/gestion/calendrier', '/admin/gestion/audit', '/admin/gestion/reglages', '/admin/gestion/administrateurs', '/admin/billetterie'];
+const ADM = ['/admin', '/admin/contenu', '/admin/contenu?onglet=artists', '/admin/gestion/organisateurs', '/admin/gestion/evenements', '/admin/gestion/publications', '/admin/gestion/support', '/admin/gestion/calendrier', '/admin/gestion/audit', '/admin/gestion/reglages', '/admin/gestion/administrateurs', '/admin/billetterie'];
 const IGNORED = /googletagmanager|google-analytics|bizouk|fonts\.g|favicon|Failed to load resource|net::ERR|ERR_BLOCKED|CSP|Content Security Policy|Hydration/i;
 const browser = await chromium.launch();
 
