@@ -2,7 +2,7 @@
    Cadre de l'espace organisateur : menu latéral à deux contextes, en-tête, pied de page.
    Mêmes tokens que le site (crème, encre, ambre en accent unique, Unbounded / Inter / Caveat). Aucune couleur ni police d'ailleurs.
    ========================================================= */
-:root{--oside-w:272px;--otop-h:64px;}
+:root{--oside-w:260px;--otop-h:64px;}
 .oshell{display:flex;min-height:100vh;align-items:flex-start;}
 .oshell__skip{position:absolute;left:-9999px;top:8px;z-index:100;padding:10px 16px;border-radius:var(--r-pill);background:var(--ink);color:#fff;font-weight:700;}
 .oshell__skip:focus{left:8px;}
@@ -19,7 +19,7 @@
 .oside__back{display:flex;align-items:center;gap:6px;margin:4px 12px 8px;padding:10px 12px;border-radius:var(--r-sm);font-size:13px;font-weight:700;color:var(--amber-ink);background:rgba(255,178,56,.12);}
 .oside__back .icon{width:16px;height:16px;}
 .oside__back:hover{background:rgba(255,178,56,.22);}
-.oside__nav{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:4px 12px 24px;scrollbar-width:thin;}
+.oside__nav{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:4px 12px 24px;scrollbar-width:thin;}
 .oside__nav ul{list-style:none;margin:0;padding:0;}
 .oside__group{margin:2px 0;}
 .oside__head{position:relative;display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border:0;border-radius:var(--r-sm);background:transparent;color:var(--ink);font:inherit;font-size:14px;font-weight:700;text-align:left;cursor:pointer;}

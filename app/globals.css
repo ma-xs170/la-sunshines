@@ -280,7 +280,7 @@ body:has(.event-atmos) .glow{display:none;}
 }
 
 .nav-wrap{position:fixed;top:0;left:0;width:100%;z-index:60;display:flex;justify-content:center;padding:16px var(--gutter);}
-nav{
+.nav-wrap nav{
   background: rgba(255,255,255,0.20);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -350,7 +350,7 @@ nav a.cta:active{transform:translateY(0);}
 .nav-toggle{display:none;}
 
 @media (max-width:820px){
-  nav{padding:8px 8px 8px 18px;}
+  .nav-wrap nav{padding:8px 8px 8px 18px;}
   .nav-toggle{
     display:inline-flex;align-items:center;justify-content:center;
     width:40px;height:40px;border-radius:var(--r-pill);color:var(--ink);
@@ -379,7 +379,7 @@ nav a.cta:active{transform:translateY(0);}
   nav a.cta span{display:inline;}
 }
 @media (max-width:360px){
-  nav{padding:8px 8px 8px 14px;}
+  .nav-wrap nav{padding:8px 8px 8px 14px;}
   nav .logo{font-size:13px;}
   nav a.cta span{font-size:12px;}
 }
@@ -1659,7 +1659,7 @@ footer{
 
 /* --- coquille + barre latérale (sidebar) --- */
 .admin-layout{display:flex;min-height:100vh;}
-.admin-layout .admin-shell{flex:1;min-width:0;margin-left:272px;max-width:none;}
+.admin-layout .admin-shell{flex:1;min-width:0;margin-left:260px;max-width:none;}
 .admin-layout .admin-shell > *{max-width:1080px;}
 .admin-layout .admin-shell > .admin-tabpanel{margin-inline:0;}
 
@@ -1668,7 +1668,7 @@ footer{
    aucune marge flottante, aucune forme capsule). Identique en desktop et en
    mobile — SEULE la translation d'ouverture change (media query < 900px). */
 .admin-sidebar{
-  position:fixed;inset:0 auto 0 0;width:272px;z-index:40;
+  position:fixed;inset:0 auto 0 0;width:260px;z-index:40;
   display:flex;flex-direction:column;
   padding:var(--s-24) var(--s-16);
   background:var(--bg-2);
