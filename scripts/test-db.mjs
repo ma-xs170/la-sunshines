@@ -21,7 +21,7 @@ const R = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'supabas
 const DIR = path.join(os.tmpdir(), 'sunshines-testdb-' + process.pid);
 const PORT = 54339;
 const migrations = fs.readdirSync(R + 'migrations').filter((f) => f.endsWith('.sql')).sort();
-const sqlTests = ['001_rls_profiles', '002_rls_ticketing', '002_rules', '002_verify', '003_fulfill', '004_email', '005_scan_admin', '007_support', '008_artist_private', '009_organizers', '010_organizer_ui', '011_organizer_tiers_scan', '012_news', '013_organizer_analytics_payments', '014_org_references', '015_event_pages'];
+const sqlTests = ['001_rls_profiles', '002_rls_ticketing', '002_rules', '002_verify', '003_fulfill', '004_email', '005_scan_admin', '007_support', '008_artist_private', '009_organizers', '010_organizer_ui', '011_organizer_tiers_scan', '012_news', '013_organizer_analytics_payments', '014_org_references', '015_event_pages', '016_org_sales', '017_org_finance_stats', '018_admin_management', '019_support_threads', '020_organizer_pages_calendar', '021_free_tickets'];
 const concurrency = ['002_concurrency', '003_concurrency', '005_concurrency'];
 
 const server = new EmbeddedPostgres({ databaseDir: DIR, user: 'postgres', password: 'pw', port: PORT, persistent: false, onLog: () => {}, onError: () => {} });
@@ -34,7 +34,7 @@ c.on('notice', () => {});
 await c.query(`
  create role anon nologin; create role authenticated nologin; create role service_role nologin bypassrls;
  create schema auth;
- create table auth.users (id uuid primary key, email text, raw_user_meta_data jsonb default '{}');
+ create table auth.users (id uuid primary key, email text, raw_user_meta_data jsonb default '{}', email_confirmed_at timestamptz);
  create function auth.uid() returns uuid language sql stable as $$
    select nullif(current_setting('request.jwt.claims', true)::jsonb ->> 'sub','')::uuid $$;
  grant usage on schema public, auth to anon, authenticated, service_role;

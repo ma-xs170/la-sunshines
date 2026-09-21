@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { notFound, redirect } from 'next/navigation';
+import { forbidden, notFound, redirect } from 'next/navigation';
 import PageHero from '@/components/PageHero';
 import ProgressBar from '@/components/organizer/ProgressBar';
 import SalesChart from '@/components/organizer/SalesChart';
@@ -24,7 +24,7 @@ export default async function OrganizerEventPage({ params, searchParams }: { par
   if (!SLUG_RE.test(slug)) notFound();
   const s = await getOrgSession();
   if (!s) redirect(`/connexion?next=${encodeURIComponent(`/organisateur/evenements/${slug}`)}`);
-  if (!s.hasAccess) notFound();
+  if (!s.hasAccess) forbidden();
 
   const st = await orgRpc<OrgStats>('org_event_stats', { p_actor: s.userId, p_slug: slug });
   if (!st.ok) {

@@ -7,16 +7,19 @@ import { stripeConfigured } from '@/lib/stripe';
 import { checkoutSchema } from '@/lib/ticketing/schemas';
 import { getTicketingSettings } from '@/lib/ticketing/settings';
 import { editionForSlug } from '@/lib/ticketing/guard';
-import { createCheckoutSession, expireSessions, reserveOrder } from '@/lib/ticketing/checkout';
+import { checkoutKind, createCheckoutSession, expireSessions, reserveFreeOrder, reserveOrder } from '@/lib/ticketing/checkout';
+import { afterOrderPaid } from '@/lib/ticketing/order-mail';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 // POST /api/checkout — réserve les places (atomique, 15 min) puis crée la session Stripe.
 // Le corps ne contient AUCUN prix : tout est relu en base.
+// Commande à 0 € : JAMAIS de Stripe (minimum 0,50 €). Réservation + confirmation en une transaction SQL,
+// billets QR + e-mail immédiats. Panier mixte : Stripe n'encaisse que la partie payante.
 export async function POST(req: Request) {
-  if (!stripeConfigured() || !supabaseAdminConfigured()) {
-    return fail('Le paiement en ligne n’est pas disponible pour le moment.', 503);
+  if (!supabaseAdminConfigured()) {
+    return fail('La billetterie en ligne n’est pas disponible pour le moment.', 503);
   }
   const guard = await requireApiRole('customer');
   if (!guard.ok) return guard.res;
@@ -42,6 +45,31 @@ export async function POST(req: Request) {
   }
 
   const db = createSupabaseAdminClient();
+
+  // ---- Commande 100 % gratuite : sans Stripe ----
+  if ((await checkoutKind(db, input)) === 'free') {
+    // limitation de fréquence dédiée (plus stricte : le billet gratuit est une cible d'abus)
+    const rlFree = await rateLimit(`checkout-free:${session.userId}`, 5, 600, { failClosed: true });
+    const rlIp = await rateLimit(`checkout-free-ip:${clientIp(req)}`, 20, 600, { failClosed: true });
+    if (!rlFree.ok || !rlIp.ok) return fail(TOO_MANY, 429);
+    const free = await reserveFreeOrder(db, {
+      input,
+      userId: session.userId,
+      eventTitle: edition.name,
+      buyer: { email: session.email, first_name, last_name, phone },
+      settings,
+    });
+    if (!free.ok) return fail(free.message, free.status);
+    // l'échec d'envoi de l'e-mail ne fait jamais échouer la commande (billets dans « Mes billets »)
+    await afterOrderPaid(db, free.order.order_id);
+    return NextResponse.json({
+      free: true,
+      order_number: free.order.order_number,
+      redirect: `/commande/succes?order=${free.order.order_number}`,
+    });
+  }
+
+  if (!stripeConfigured()) return fail('Le paiement en ligne n’est pas disponible pour le moment.', 503);
   const reserved = await reserveOrder(db, {
     input,
     userId: session.userId,
@@ -51,6 +79,12 @@ export async function POST(req: Request) {
   });
   if (!reserved.ok) return fail(reserved.message, reserved.status);
   const { order } = reserved;
+
+  // un tarif est devenu gratuit entre-temps : jamais de session Stripe à 0 €
+  if (order.total_cents <= 0) {
+    await db.from('orders').update({ status: 'expired' }).eq('id', order.order_id).eq('status', 'pending');
+    return fail('Les tarifs ont changé. Actualise la page et recommence.', 409);
+  }
 
   // anciennes sessions du même client : nettoyage au mieux (le stock est déjà libéré)
   void expireSessions(order.superseded_sessions ?? []).catch(() => undefined);

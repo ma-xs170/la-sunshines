@@ -2,7 +2,7 @@
 // (le mot de passe /admin historique ne suffit pas).
 import 'server-only';
 import type { ReactNode } from 'react';
-import { redirect } from 'next/navigation';
+import { forbidden, redirect } from 'next/navigation';
 import { getSession } from '@/lib/auth/roles';
 import { supabaseConfigured } from '@/lib/supabase/config';
 import { supabaseAdminConfigured } from '@/lib/supabase/admin';
@@ -24,6 +24,6 @@ export async function BilletterieShell({ title, next, children, back = '/admin/b
   }
   const session = await getSession();
   if (!session) redirect(`/connexion?next=${encodeURIComponent(next)}`);
-  if (session.profile.role !== 'admin') return shell(<p className="admin-hint">Accès refusé : ton compte n’a pas le rôle « admin ».</p>);
+  if (session.profile.role !== 'admin') forbidden();
   return shell(children);
 }

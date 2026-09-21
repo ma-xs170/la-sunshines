@@ -165,6 +165,9 @@ export default function OrgShell({ orgs, currentId, unread, firstName, children 
         {note && <p className={'oshell__note oshell__note--' + current.status} role="status">{note}</p>}
         <div className="oshell__main" id="org-main" tabIndex={-1}>{children}</div>
 
+        {can(current.role, 'manage') && !pathname.startsWith('/organisateur/support') && (
+          <a className="sup-help" href={`/organisateur/support/nouveau?page=${encodeURIComponent(pathname)}`}><Icon name="help" />Aide</a>
+        )}
         <footer className="ofoot">
           <span>© LA SUNSHINES</span>
           <a href="/cgv">CGU</a><a href="/politique-de-confidentialite">Confidentialité</a><a href="/contact">Contact</a>

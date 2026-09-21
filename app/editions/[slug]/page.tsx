@@ -24,6 +24,8 @@ import ComingSoon from '@/components/ComingSoon';
 import FlyerLightbox from '@/components/FlyerLightbox';
 import FlyerVideo from '@/components/FlyerVideo';
 import { getPublicEventDetails } from '@/lib/publicEventDetails';
+import { getEventOrganizer } from '@/lib/publicOrganizer';
+import OrganizerAvatar from '@/components/OrganizerAvatar';
 import GalleryLightbox from '@/components/GalleryLightbox';
 import ArtistName from '@/components/ArtistName';
 import VenueLink from '@/components/VenueLink';
@@ -85,6 +87,7 @@ export default async function EditionPage({
   const ticketing = upcoming ? await getPublicTicketing(slug) : null;
   // Détails saisis par l'organisateur (dresscode couleurs, flyer vidéo) : null tant que rien n'est publié → fiche inchangée.
   const extra = await getPublicEventDetails(slug);
+  const organizer = await getEventOrganizer(slug);   // null tant que le mode public est « bizouk » : aucun bloc affiché
 
   // Nom d'artiste normalisé pour comparaison (casse, espaces, préfixe « DJ »).
   const normArtist = (s: string) =>
@@ -301,6 +304,14 @@ export default async function EditionPage({
               <Icon name="arrow-up-right" />
             </a>
           </div>
+        )}
+
+        {organizer && (
+          <section className="event-org" aria-label="Organisateur">
+            <OrganizerAvatar name={organizer.name} src={organizer.logo_url} size={56} />
+            <div><p className="event-org__label">Organisé par</p><p className="event-org__name">{organizer.name}</p></div>
+            <Link className="btn btn--outline" href={`/organisateurs/${organizer.slug}`}>Suivre | Voir les évènements</Link>
+          </section>
         )}
       </main>
 

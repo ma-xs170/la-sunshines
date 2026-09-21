@@ -24,8 +24,8 @@ export async function GET(req: Request) {
 
   await db.rpc('_audit', { p_actor: guard.actor, p_action: 'export.orders', p_entity: 'ticketed_event', p_entity_id: slug, p_before: null, p_after: { rows: rows.length }, p_meta: {} });
   const csv = toCsv(
-    ['Commande', 'Date', 'Statut', 'Origine', 'Email', 'Prénom', 'Nom', 'Billets', 'Sous-total (€)', 'Frais (€)', 'Total (€)', 'Remboursé (€)', 'Email de billets'],
-    rows.map((o) => [o.order_number, o.created_at, o.status, o.source === 'manual' ? 'Invitation' : 'Achat', o.buyer_email, o.buyer_first_name, o.buyer_last_name, o.order_items.map((i) => `${i.quantity} × ${i.tier_name}`).join(' + '), eur(o.subtotal_cents), eur(o.fee_cents), eur(o.total_cents), eur(o.refunded_cents), o.email_status]),
+    ['Commande', 'Date', 'Statut', 'Origine', 'Email', 'Prénom', 'Nom', 'Billets', 'Sous-total (€)', 'Frais (€)', 'Total (€)', 'Remboursé (€)', 'Type', 'Email de billets'],
+    rows.map((o) => [o.order_number, o.created_at, o.status, o.source === 'manual' ? 'Invitation' : 'Achat', o.buyer_email, o.buyer_first_name, o.buyer_last_name, o.order_items.map((i) => `${i.quantity} × ${i.tier_name}`).join(' + '), eur(o.subtotal_cents), eur(o.fee_cents), eur(o.total_cents), eur(o.refunded_cents), o.total_cents === 0 ? 'Gratuit' : 'Payant', o.email_status]),
   );
   return csvResponse(`commandes-${slug}.csv`, csv);
 }

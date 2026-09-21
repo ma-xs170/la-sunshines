@@ -5,7 +5,7 @@
 import React from 'react';
 import { Document, Page, View, Text, Image, Svg, Defs, RadialGradient, LinearGradient, Stop, Rect, StyleSheet } from '@react-pdf/renderer';
 import type { TicketPageData } from './data';
-import { formatEuro } from '../time';
+import { formatPrice } from '../time';
 
 // --- tokens du site (app/globals.css :root) ---
 const C = {
@@ -154,7 +154,7 @@ function TicketPage({ t }: { t: RenderedTicket }) {
         <View style={[s.glass, s.details]}>
           <View style={s.field}><Text style={s.kicker}>Titulaire</Text><Text style={s.valueBig}>{t.holder || '—'}</Text></View>
           <View style={s.field}><Text style={s.kicker}>Tarif</Text><Text style={s.value}>{t.tierName}</Text></View>
-          <View style={s.field}><Text style={s.kicker}>Prix payé</Text><Text style={s.value}>{formatEuro(t.priceCents)}</Text></View>
+          <View style={s.field}><Text style={s.kicker}>{t.priceCents === 0 ? 'Prix' : 'Prix payé'}</Text><Text style={s.value}>{formatPrice(t.priceCents)}</Text></View>
           <View style={s.fieldLast}><Text style={s.kicker}>Commande</Text><Text style={s.value}>{t.orderNumber}</Text></View>
         </View>
       </View>

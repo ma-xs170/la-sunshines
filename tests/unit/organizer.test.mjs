@@ -127,7 +127,7 @@ test('menu : le contexte évènement se déclenche sur /evenements/<slug>, pas s
 
 test('menu : filtré par rôle (le staff ne voit que le contrôle d’accès)', () => {
   const labels = (role) => visibleMenu(eventMenu('x'), caps[role]).flatMap((g) => g.items.map((i) => i.label));
-  assert.deepEqual(labels('staff'), ['Tableau de bord', 'Scan à l’entrée', 'Liste d’entrée', 'Historique des scans']);
+  assert.deepEqual(labels('staff'), ['Tableau de bord', 'Scan à l’entrée', 'Liste d’entrée']);
   assert.ok(!labels('manager').includes('Récapitulatif'));
   assert.ok(labels('owner').includes('Récapitulatif'));
   assert.deepEqual(visibleMenu(accountMenu(), caps.staff).map((g) => g.id), ['dashboard', 'events', 'news', 'help']);
@@ -161,4 +161,60 @@ test('fil d’Ariane', () => {
   assert.deepEqual(crumbs('/organisateur').map((c) => c.label), ['Espace organisateur']);
   assert.deepEqual(crumbs('/organisateur/evenements/x').map((c) => c.label), ['Espace organisateur', 'Mes évènements', 'Évènement']);
   assert.equal(crumbs('/organisateur/paiements').at(-1).href, undefined);
+});
+
+import { variation } from '../../lib/organizer/variation.ts';
+test('variation : période précédente à zéro = « nouveau », jamais d’infini', () => {
+  assert.deepEqual(variation(100, 0), { text: 'nouveau', tone: 'up' });
+  assert.deepEqual(variation(0, 0), { text: '—', tone: 'flat' });
+  assert.deepEqual(variation(150, 100), { text: '+50 %', tone: 'up' });
+  assert.deepEqual(variation(50, 100), { text: '−50 %', tone: 'down' });
+  assert.deepEqual(variation(100, 100), { text: '0 %', tone: 'flat' });
+});
+
+import { generatePassword, passwordProblem } from '../../lib/adminPassword.ts';
+test('mot de passe admin : aléatoire, 20 caractères, 4 classes, jamais deux fois le même', () => {
+  const set = new Set();
+  for (let i = 0; i < 200; i++) {
+    const p = generatePassword(); set.add(p);
+    assert.equal(p.length, 20); assert.match(p, /[A-Z]/); assert.match(p, /[a-z]/); assert.match(p, /\d/); assert.match(p, /[!@#$%*?\-_+=]/);
+  }
+  assert.equal(set.size, 200);
+  assert.ok(passwordProblem('court1')); assert.ok(passwordProblem('uniquementdeslettres')); assert.equal(passwordProblem('Correct-horse-9'), null);
+});
+
+import { createSchema, actionSchema, attachOk, statusText } from '../../lib/support.ts';
+test('support : validation de création, pièces jointes (images / PDF, 10 Mo), libellé « pris en charge par »', () => {
+  const ok = { org: '00000000-0000-4000-8000-000000000001', subject: 'Problème de scan', category: 'technical', priority: 'urgent', body: 'Bonjour' };
+  assert.ok(createSchema.safeParse(ok).success);
+  assert.ok(!createSchema.safeParse({ ...ok, subject: 'ab' }).success);
+  assert.ok(!createSchema.safeParse({ ...ok, category: 'autre' }).success);
+  assert.ok(!createSchema.safeParse({ ...ok, body: '   ' }).success);
+  assert.ok(!createSchema.safeParse({ ...ok, attachments: [{ path: 'support/../../etc/passwd', name: 'a', size: 1, type: 'application/pdf' }] }).success);
+  assert.ok(!createSchema.safeParse({ ...ok, attachments: [{ path: 'evil/x.pdf', name: 'a', size: 1, type: 'application/pdf' }] }).success);
+  assert.ok(createSchema.safeParse({ ...ok, attachments: [{ path: 'support/abc-x.pdf', name: 'x.pdf', size: 1000, type: 'application/pdf' }] }).success);
+  assert.ok(attachOk('image/png', 1000)); assert.ok(attachOk('application/pdf', 10 * 1048576));
+  assert.ok(!attachOk('application/pdf', 10 * 1048576 + 1)); assert.ok(!attachOk('text/html', 100)); assert.ok(!attachOk('image/svg+xml', 100));
+  assert.ok(actionSchema.safeParse({ action: 'close', note: 'ok' }).success); assert.ok(!actionSchema.safeParse({ action: 'delete' }).success);
+  assert.equal(statusText('claimed', 'Ada'), 'Pris en charge par Ada'); assert.equal(statusText('open', null), 'Ouvert'); assert.equal(statusText('closed', 'Ada'), 'Fermé');
+});
+
+import { dayKey, findConflicts, conflictLevels, monthGrid, weekDays, isRegion } from '../../lib/calendar.ts';
+const calEv = (slug, iso, venue = 'v1', extra = {}) => ({ slug, status: 'published', starts_at: iso, ends_at: null, organizer: 'O', organizer_id: 'o', mine: false, venue: 'V', city: 'C', region: 'guadeloupe', venue_id: venue, lat: null, lng: null, ...extra });
+test('calendrier : jour en heure de Guadeloupe, conflits de lieu et de région, annulés ignorés', () => {
+  assert.equal(dayKey('2026-10-18T02:00:00Z'), '2026-10-17');   // 22 h le samedi à Pointe-à-Pitre
+  assert.equal(dayKey('2026-10-18T05:00:00Z'), '2026-10-18');
+  const c = findConflicts([calEv('a', '2026-10-18T01:00:00Z'), calEv('b', '2026-10-17T23:00:00Z'), calEv('c', '2026-10-17T23:30:00Z', 'v2'), calEv('d', '2026-10-25T01:00:00Z')]);
+  assert.equal(c.filter((x) => x.kind === 'venue').length, 1); assert.deepEqual(c.find((x) => x.kind === 'venue').slugs.sort(), ['a', 'b']);
+  assert.deepEqual(c.find((x) => x.kind === 'region').slugs.sort(), ['a', 'b', 'c']);
+  const lv = conflictLevels(c); assert.equal(lv.get('a'), 'venue'); assert.equal(lv.get('c'), 'region'); assert.equal(lv.has('d'), false);
+  assert.deepEqual(findConflicts([calEv('a', '2026-10-18T01:00:00Z'), calEv('b', '2026-10-18T01:00:00Z', 'v1', { status: 'cancelled' })]), []);
+  assert.deepEqual(findConflicts([calEv('a', '2026-10-18T01:00:00Z'), calEv('a', '2026-10-18T03:00:00Z')]), []);   // deux sessions du même évènement
+});
+test('calendrier : grille du mois et semaine (lundi en premier)', () => {
+  const g = monthGrid(2026, 9);   // octobre 2026 : le 1er est un jeudi
+  assert.equal(g[0].filter(Boolean).length, 4); assert.equal(g[0][3], '2026-10-01'); assert.ok(g.every((w) => w.length === 7));
+  assert.equal(g.flat().filter(Boolean).length, 31);
+  assert.deepEqual(weekDays('2026-10-17')[0], '2026-10-12'); assert.equal(weekDays('2026-10-17')[6], '2026-10-18'); assert.equal(weekDays('2026-10-12')[0], '2026-10-12');
+  assert.ok(isRegion('sxm')); assert.ok(!isRegion('mars')); assert.ok(!isRegion(undefined));
 });

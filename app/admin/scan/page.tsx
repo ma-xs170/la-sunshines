@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { redirect } from 'next/navigation';
+import { forbidden, redirect } from 'next/navigation';
 import { getSession, hasRole } from '@/lib/auth/roles';
 import { supabaseConfigured } from '@/lib/supabase/config';
 import { createSupabaseAdminClient, supabaseAdminConfigured } from '@/lib/supabase/admin';
@@ -15,7 +15,7 @@ export default async function ScanPage() {
   if (!supabaseConfigured() || !supabaseAdminConfigured()) return wrap(<p className="admin-hint">Supabase n’est pas configuré.</p>);
   const session = await getSession();
   if (!session) redirect('/connexion?next=/admin/scan');
-  if (!hasRole(session.profile.role, 'staff')) return wrap(<p className="admin-hint">Accès refusé : réservé au personnel de porte.</p>);
+  if (!hasRole(session.profile.role, 'staff')) forbidden();
 
   const db = createSupabaseAdminClient();
   const { data } = await db

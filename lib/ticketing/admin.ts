@@ -46,7 +46,7 @@ export function mapDbError(e: DbError): AdminFailure {
     case 'UNKNOWN_SETTING':
       return { status: 404, message: 'Réglage inconnu.' };
   }
-  if (e.code === '23514') return { status: 400, message: 'Valeurs invalides (prix minimum 0,50 €, dates cohérentes…).' };
+  if (e.code === '23514') return { status: 400, message: 'Valeurs invalides (prix à 0 € ou d’au moins 0,50 €, dates cohérentes…).' };
   if (e.code === '23505') return { status: 409, message: 'Un tarif porte déjà ce nom pour cet événement.' };
   console.error('[ticketing/admin] erreur inattendue :', e);
   return { status: 500, message: 'Erreur inattendue. Réessaie.' };
@@ -87,6 +87,7 @@ export async function adminSaveTier(actor: string, slug: string, v: TierSaveInpu
     p_sales_end: v.sales_end,
     p_is_active: v.is_active,
     p_sort_order: v.sort_order,
+    p_max_per_account: v.max_per_account ?? null,
   });
   if (error) return { ok: false, error: mapDbError(error) };
   return { ok: true, data: data as string };
@@ -118,6 +119,7 @@ export interface AdminTier {
   price_cents: number;
   quantity_total: number;
   max_per_order: number;
+  max_per_account: number;
   sales_start: string | null;
   sales_end: string | null;
   is_active: boolean;

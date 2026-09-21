@@ -8,6 +8,8 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { getStripe, connectOptions } from '@/lib/stripe';
 import { siteUrl } from '@/lib/mail';
 import type { CheckoutInput } from './schemas';
+import { newTicketCode } from './tokens';
+import { randomUUID } from 'crypto';
 import type { TicketingSettings } from './settings';
 
 export const CHECKOUT_ERRORS: Record<string, { status: number; message: string }> = {
@@ -22,6 +24,9 @@ export const CHECKOUT_ERRORS: Record<string, { status: number; message: string }
   QUANTITY_LIMIT: { status: 400, message: 'Quantité maximale par commande dépassée.' },
   SOLD_OUT_TIER: { status: 409, message: 'Plus assez de places pour ce tarif. Actualise la page.' },
   SOLD_OUT_EVENT: { status: 409, message: 'Plus assez de places pour cet événement.' },
+  EMAIL_NOT_CONFIRMED: { status: 403, message: 'Confirme l’adresse e-mail de ton compte (lien reçu à l’inscription) pour réserver des billets gratuits.' },
+  ACCOUNT_LIMIT: { status: 409, message: 'Tu as atteint le nombre maximum de billets gratuits autorisés par compte pour ce tarif.' },
+  PRICE_CHANGED: { status: 409, message: 'Les tarifs ont changé. Actualise la page et recommence.' },
 };
 
 export interface ReservedOrder {
@@ -66,6 +71,61 @@ export async function reserveOrder(
   return { ok: true, order: row };
 }
 
+/** Tarifs demandés : 'free' si TOUS sont à 0 €, sinon 'paid' (panier payant ou mixte). Lecture seule, sans verrou :
+ *  la décision définitive est reprise en base (reserve_free_order refuse tout total ≠ 0). */
+export async function checkoutKind(db: SupabaseClient, input: CheckoutInput): Promise<'free' | 'paid' | 'unknown'> {
+  const ids = input.items.map((i) => i.tier_id);
+  const { data, error } = await db.from('ticket_tiers').select('id, price_cents, ticketed_events!inner(event_slug)').in('id', ids).eq('ticketed_events.event_slug', input.slug);
+  if (error || !data || data.length !== new Set(ids).size) return 'unknown';
+  return data.every((t) => (t.price_cents as number) === 0) ? 'free' : 'paid';
+}
+
+export interface FreeOrder { order_id: string; order_number: string }
+
+/**
+ * Achat 100 % gratuit : réservation du stock + confirmation (fulfill_order) dans UNE SEULE transaction SQL
+ * (reserve_free_order). Aucune session Stripe. Les billets (codes HMAC) sont générés ici, un par place.
+ */
+export async function reserveFreeOrder(
+  db: SupabaseClient,
+  args: {
+    input: CheckoutInput;
+    userId: string;
+    eventTitle: string;
+    buyer: { email: string; first_name: string; last_name: string; phone: string };
+    settings: TicketingSettings;
+  },
+): Promise<{ ok: true; order: FreeOrder } | { ok: false; status: number; message: string }> {
+  const tickets = args.input.items.flatMap((it) =>
+    it.participants.map((p) => ({
+      tier_id: it.tier_id,
+      id: randomUUID(),
+      code: newTicketCode(),
+      first_name: p.first_name,
+      last_name: p.last_name,
+    })),
+  );
+  const { data, error } = await db.rpc('reserve_free_order', {
+    p_slug: args.input.slug,
+    p_user: args.userId,
+    p_event_title: args.eventTitle,
+    p_items: args.input.items,
+    p_buyer: args.buyer,
+    p_terms_version: args.settings.termsVersion || 'v1',
+    p_guardian_consent: args.input.guardian_consent,
+    p_tickets: tickets,
+  });
+  if (error) {
+    const known = CHECKOUT_ERRORS[error.message];
+    if (known) return { ok: false, ...known };
+    console.error('[checkout] reserve_free_order a échoué :', error);
+    return { ok: false, status: 500, message: 'Réservation impossible pour le moment. Réessaie.' };
+  }
+  const row = (Array.isArray(data) ? data[0] : data) as FreeOrder | undefined;
+  if (!row) return { ok: false, status: 500, message: 'Réservation impossible pour le moment. Réessaie.' };
+  return { ok: true, order: row };
+}
+
 /** Libère (au mieux) des sessions Checkout devenues inutiles. Le stock, lui, n'en dépend pas. */
 export async function expireSessions(ids: string[]): Promise<void> {
   if (ids.length === 0) return;
@@ -89,7 +149,8 @@ export async function createCheckoutSession(
     .eq('order_id', order.order_id);
   if (error || !items?.length) throw new Error('Lignes de commande introuvables.');
 
-  const lineItems = items.map((it) => ({
+  // Panier mixte : Stripe n'encaisse QUE la partie payante (une ligne à 0 € est refusée par Stripe).
+  const lineItems = items.filter((it) => (it.unit_price_cents as number) > 0).map((it) => ({
     quantity: it.quantity as number,
     price_data: {
       currency: 'eur',
@@ -97,6 +158,7 @@ export async function createCheckoutSession(
       product_data: { name: `${it.event_title} — ${it.tier_name}` },
     },
   }));
+  if (lineItems.length === 0 || order.total_cents <= 0) throw new Error('Commande gratuite : aucune session Stripe.');
   if (order.fee_cents > 0) {
     lineItems.push({
       quantity: 1,

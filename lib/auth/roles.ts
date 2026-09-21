@@ -7,6 +7,7 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { supabaseConfigured } from '@/lib/supabase/config';
+import { createSupabaseAdminClient, supabaseAdminConfigured } from '@/lib/supabase/admin';
 
 export type Role = 'customer' | 'staff' | 'admin';
 
@@ -21,6 +22,8 @@ export interface Session {
   userId: string;
   email: string;
   profile: Profile;
+  /** Admin dont le mot de passe provisoire n'a pas encore été changé : accès bloqué jusqu'au changement. */
+  mustChangePassword: boolean;
 }
 
 /** Session courante (ou null). À appeler côté serveur uniquement. */
@@ -37,16 +40,13 @@ export async function getSession(): Promise<Session | null> {
     .eq('id', user.id)
     .maybeSingle();
 
-  return {
-    userId: user.id,
-    email: user.email ?? '',
-    profile: (profile as Profile | null) ?? {
-      first_name: '',
-      last_name: '',
-      phone: '',
-      role: 'customer',
-    },
-  };
+  const p = (profile as Profile | null) ?? { first_name: '', last_name: '', phone: '', role: 'customer' as Role };
+  let mustChangePassword = false;
+  if (p.role === 'admin' && supabaseAdminConfigured()) {
+    const st = await createSupabaseAdminClient().rpc('admin_account_state', { p_user: user.id });
+    mustChangePassword = (st.data as { must_change_password?: boolean } | null)?.must_change_password === true;
+  }
+  return { userId: user.id, email: user.email ?? '', profile: p, mustChangePassword };
 }
 
 /** Hiérarchie : admin ⊃ staff ⊃ customer. */
@@ -73,6 +73,9 @@ export async function requireApiRole(needed: Role = 'customer'): Promise<ApiGuar
       ok: false,
       res: NextResponse.json({ error: 'Connexion requise.' }, { status: 401 }),
     };
+  }
+  if (session.mustChangePassword && needed !== 'customer') {
+    return { ok: false, res: NextResponse.json({ error: 'Change ton mot de passe provisoire avant de continuer.', code: 'PASSWORD_CHANGE_REQUIRED' }, { status: 403 }) };
   }
   if (!hasRole(session.profile.role, needed)) {
     return {

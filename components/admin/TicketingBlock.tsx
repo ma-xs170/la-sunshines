@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import type { AdminEventView, AdminTier } from '@/lib/ticketing/admin';
-import { euroToCents, formatEuro, gpLocalToIso, isoToGpLocal } from '@/lib/ticketing/time';
+import { euroToCents, formatEuro, gpLocalToIso, isoToGpLocal, priceError } from '@/lib/ticketing/time';
+import FreeBadge from '@/components/ticketing/FreeBadge';
 
 type Edition = { slug: string; name: string; dateISO: string | null; timeLabel: string | null; venue: string };
 type Settings = { mode: 'bizouk' | 'native'; dbMode: 'bizouk' | 'native'; forced: boolean };
@@ -247,18 +248,18 @@ function EventForm({ data, slug, onSaved, setMsg }: { data: Loaded; slug: string
 /* ------------------------------------------------------------------ */
 type Draft = {
   id: string | null;
-  name: string; description: string; price: string; quantity: string; max: string;
+  name: string; description: string; price: string; quantity: string; max: string; maxAccount: string;
   start: string; end: string; active: boolean; sort: string;
   sold: number; reserved: number; archived: boolean;
 };
 const fromTier = (t: AdminTier): Draft => ({
   id: t.id, name: t.name, description: t.description, price: String(t.price_cents / 100).replace('.', ','),
-  quantity: String(t.quantity_total), max: String(t.max_per_order),
+  quantity: String(t.quantity_total), max: String(t.max_per_order), maxAccount: String(t.max_per_account ?? 2),
   start: isoToGpLocal(t.sales_start), end: isoToGpLocal(t.sales_end),
   active: t.is_active, sort: String(t.sort_order), sold: t.sold, reserved: t.reserved, archived: t.archived_at !== null,
 });
 const blank = (n: number): Draft => ({
-  id: null, name: '', description: '', price: '', quantity: '', max: '6', start: '', end: '',
+  id: null, name: '', description: '', price: '', quantity: '', max: '6', maxAccount: '2', start: '', end: '',
   active: true, sort: String(n), sold: 0, reserved: 0, archived: false,
 });
 
@@ -284,7 +285,7 @@ function Tiers({ data, slug, reload, setMsg }: { data: Loaded; slug: string; rel
           <summary>{archived.length} tarif(s) archivé(s)</summary>
           <ul>
             {archived.map((t) => (
-              <li key={t.id}>{t.name} — {formatEuro(t.price_cents)} — {t.sold} vendu(s)</li>
+              <li key={t.id}>{t.name} — {t.price_cents === 0 ? <FreeBadge /> : formatEuro(t.price_cents)} — {t.sold} vendu(s)</li>
             ))}
           </ul>
         </details>
@@ -306,14 +307,15 @@ function TierRow({ draft, slug, reload, setMsg, onCancel }: { draft: Draft; slug
     setErr('');
     setMsg('');
     const price = euroToCents(d.price);
-    if (!Number.isFinite(price) || price < 50) return setErr('Le prix minimum d’un tarif est de 0,50 €.');
+    const pe = priceError(price);
+    if (pe) return setErr(pe);
     const quantity = Number(d.quantity);
     if (!Number.isInteger(quantity) || quantity < 0) return setErr('Quantité invalide.');
     if (quantity < floor) return setErr(`La quantité doit être d’au moins ${floor} (vendues + réservations en cours).`);
     setBusy(true);
     const r = await call(`/api/billetterie/admin/events/${slug}/tiers`, 'PUT', {
       id: d.id, name: d.name, description: d.description, price_cents: price, quantity_total: quantity,
-      max_per_order: Number(d.max), sales_start: gpLocalToIso(d.start), sales_end: gpLocalToIso(d.end),
+      max_per_order: Number(d.max), ...(price === 0 ? { max_per_account: Number(d.maxAccount) || 2 } : {}), sales_start: gpLocalToIso(d.start), sales_end: gpLocalToIso(d.end),
       is_active: d.active, sort_order: Number(d.sort) || 0,
     });
     setBusy(false);
@@ -338,9 +340,12 @@ function TierRow({ draft, slug, reload, setMsg, onCancel }: { draft: Draft; slug
     <form className="tb-tier" onSubmit={save}>
       <div className="tb-grid">
         <label className="admin-field"><span>Nom</span><input value={d.name} onChange={set('name')} maxLength={80} required /></label>
-        <label className="admin-field"><span>Prix (€) — min 0,50</span><input inputMode="decimal" value={d.price} onChange={set('price')} required /></label>
+        <label className="admin-field"><span>Prix (€) — 0 pour un tarif gratuit</span><input inputMode="decimal" value={d.price} onChange={set('price')} required /></label>
         <label className="admin-field"><span>Quantité totale{floor > 0 && ` (min ${floor})`}</span><input inputMode="numeric" value={d.quantity} onChange={set('quantity')} required /></label>
         <label className="admin-field"><span>Max par commande</span><input inputMode="numeric" value={d.max} onChange={set('max')} required /></label>
+        {euroToCents(d.price) === 0 && (
+          <label className="admin-field"><span>Max par compte (gratuit)</span><input inputMode="numeric" value={d.maxAccount} onChange={set('maxAccount')} /></label>
+        )}
         <label className="admin-field"><span>Début de vente</span><input type="datetime-local" value={d.start} onChange={set('start')} /></label>
         <label className="admin-field"><span>Fin de vente</span><input type="datetime-local" value={d.end} onChange={set('end')} /></label>
         <label className="admin-field"><span>Description</span><input value={d.description} onChange={set('description')} maxLength={300} /></label>
