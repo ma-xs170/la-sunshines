@@ -20,7 +20,7 @@ Phase 2 — après la migration 002, dans cet ordre :
 - `002_rls_ticketing.sql` : un client ne lit ni ne modifie les commandes / lignes / billets d'un autre,
   aucune écriture directe sur aucune table de billetterie, fonctions sensibles réservées au service_role.
 - `002_rules.sql` : réservation (prix relu en base, expiration 15 min, snapshot, frais), fenêtres de vente,
-  capacité du tarif ET de l'événement, expiration sans cron, plancher de stock, archivage, audit, prix ≥ 0,50 €.
+  capacité du tarif ET de l'événement, expiration sans cron, plancher de stock, archivage, audit, prix = 0 (gratuit, jamais envoyé à Stripe) ou ≥ 0,50 €.
 - `002_concurrency.mjs` : 50 connexions réelles en parallèle (jamais plus de places que de stock).
   Écrit puis supprime des données : à lancer sur une base de TEST, jamais en production.
   `cd supabase/tests && npm i --no-save pg && DATABASE_URL=… node 002_concurrency.mjs`

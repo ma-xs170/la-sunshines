@@ -121,7 +121,7 @@ async function main() {
    end $r$;
    grant anon, authenticated, service_role to authenticator;
    create schema auth;
-   create table auth.users (id uuid primary key, email text, raw_user_meta_data jsonb default '{}');
+   create table auth.users (id uuid primary key, email text, raw_user_meta_data jsonb default '{}', email_confirmed_at timestamptz);
    create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claims', true)::jsonb ->> 'sub','')::uuid $$;
    grant usage on schema public, auth to anon, authenticated, service_role;
    grant execute on function auth.uid() to anon, authenticated, service_role;
@@ -130,7 +130,7 @@ async function main() {
    alter default privileges in schema public grant all on functions to anon, authenticated, service_role;`);
   for (const f of fs.readdirSync(ROOT + '/supabase/migrations').sort()) await c.query(fs.readFileSync(ROOT + '/supabase/migrations/' + f, 'utf8'));
   for (const u of Object.values(USERS)) {
-    await c.query('insert into auth.users (id, email) values ($1,$2)', [u.id, u.email]);
+    await c.query('insert into auth.users (id, email, email_confirmed_at) values ($1,$2, now())', [u.id, u.email]);
     await c.query('update public.profiles set first_name=$2, last_name=$3, phone=$4, role=$5 where id=$1', [u.id, u.first, u.last, u.phone, u.role]);
   }
   await c.end();

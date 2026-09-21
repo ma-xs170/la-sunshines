@@ -11,6 +11,7 @@ export const dynamic = 'force-dynamic';
 
 const REFUND_ERRORS: Record<string, { status: number; message: string }> = {
   ORDER_NOT_FOUND: { status: 404, message: 'Commande introuvable.' },
+  FREE_ORDER: { status: 409, message: 'Commande gratuite : aucun paiement à rembourser (tu peux annuler les billets à la place).' },
   NOT_REFUNDABLE: { status: 409, message: 'Cette commande n’est pas remboursable (non payée ou déjà intégralement remboursée).' },
   REFUND_EXCEEDS: { status: 409, message: 'Le montant dépasse ce qui reste remboursable.' },
 };
@@ -23,7 +24,6 @@ const REFUND_ERRORS: Record<string, { status: number; message: string }> = {
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const guard = await requireBilletterieAdmin();
   if (!guard.ok) return guard.res;
-  if (!stripeConfigured()) return fail('Stripe n’est pas configuré.', 503);
   const { id } = await params;
   if (!z.uuid().safeParse(id).success) return fail('Commande invalide.');
   const parsed = await parseBody(req, refundSchema);
@@ -31,6 +31,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const { request_id, amount_cents, reason, cancel_ticket_ids } = parsed.data;
 
   const db = createSupabaseAdminClient();
+
+  // commande à 0 € : jamais d'appel Stripe (rien n'a été encaissé)
+  const { data: ord } = await db.from('orders').select('total_cents').eq('id', id).maybeSingle();
+  if (ord && ord.total_cents === 0) return fail(REFUND_ERRORS.FREE_ORDER.message, REFUND_ERRORS.FREE_ORDER.status);
+  if (!stripeConfigured()) return fail('Stripe n’est pas configuré.', 503);
 
   // les billets à annuler doivent appartenir à CETTE commande
   if (cancel_ticket_ids.length) {
