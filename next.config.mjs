@@ -2,6 +2,10 @@
 const nextConfig = {
   reactStrictMode: true,
 
+  // Dossier de sortie séparé pour les builds lancés à la main (NEXT_DIST_DIR=.next-build),
+  // afin de ne jamais corrompre le .next du serveur de dev. Par défaut (Vercel) : .next.
+  distDir: process.env.NEXT_DIST_DIR || '.next',
+
   // data/content.json est lu à l'exécution via un chemin calculé
   // (path.join(process.cwd(), 'data', 'content.json')) que le file-tracer de
   // Next ne détecte pas seul. On force son inclusion dans TOUTES les fonctions
