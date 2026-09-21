@@ -54,3 +54,24 @@ Scripts hors dépôt (scratchpad) : `db.mjs` (connexion, lit `.env.local`), `bac
 - **Évènement de test** : supprimé de la base (sauvegarde `~/sunshines-backups/avant-suppression-test-billetterie`) ; rien dans `data/content.json` (défini dans le code, actif seulement en mode test hors production) ; `/editions/test-billetterie` → 404 en ligne.
 - **Publication** (migration 026 appliquée) : voir ORGA-RAPPORT.md ; s17 (42 contrôles) + SQL 026 + unitaires.
 - URLs téléphone : /admin/gestion/publications, /organisateur/evenements/<slug> (panneau « Publication »), /organisateur/evenements/<slug>/visuel, /editions/<slug> après validation.
+## Page super-admin « Clients » (2026-09-21) — branche `feat/admin-clients`, worktree `../la-sunshines-clients`
+Travail dans un worktree séparé (une 2e session tourne sur les ports 3130 / 543xx) : banc e2e décalé par `E2E_PORT_OFFSET=100`, `test:db` par `TESTDB_PORT=54439`, build dans `NEXT_DIST_DIR=.next-build`.
+
+### Bloc 1 — audit : ce qui existait / ce qui manquait
+| Donnée | Où | État |
+|---|---|---|
+| Prénom, nom, téléphone, rôle | `profiles` (first_name, last_name, phone ≤ 25, role customer/staff/admin) | existait |
+| E-mail | `auth.users.email` seulement | **copié dans `profiles.email`** (synchronisé par trigger) |
+| 2e téléphone | — | **`profiles.phone2`** |
+| Date de naissance | — (seul `orders.guardian_consent_at` pour les mineurs) | **`profiles.birth_date`** (vide = « Non renseigné ») |
+| Statut du compte | — (`auth.users.banned_until` seul) | **`profiles.account_status` (active/suspended/anonymized) + `status_reason` + `anonymized_at`** |
+| Inscription / dernière connexion | `auth.users.created_at` / `last_sign_in_at` | existait (lu par la fonction de fiche) |
+| Référence de compte | admins : `ADM.xxxxxxxx` ; clients : aucune | **`CLI.` + 10 hex de l'id**, calculée (aucune colonne) |
+| Commandes, billets, évènements | `orders.user_id` → `order_items` (snapshot titre/date/tarif) → `tickets` (`reference` LS-XXXXXX) ; `ticketed_events.starts_at` | existait : à venir / passés = commandes payées ou partiellement remboursées selon `starts_at` |
+| Autorisations parentales, consentements | `orders.guardian_consent_at`, `orders.terms_accepted_at/terms_version`, `order_consents` (texte exact accepté) | existait, rien d'autre à inventer |
+| Droits admin délégués | `admin_accounts` (level super/admin) sans permissions | **`admin_accounts.permissions`** (`clients.lire`, `clients.modifier`, vides par défaut) |
+| Journal | `audit_log` (entity/entity_id/before/after/meta) | réutilisé : entity `customer`, actions `customer.view/update/suspend/reactivate/anonymize/export/password_reset/sessions_revoked`, `customers.export` |
+
+Migration **027** (`20260921000100_admin_clients.sql`) : ADDITIVE, `down/027_down.sql`, `tests/027_verify.sql`, `tests/027_admin_clients.sql` (branché dans `npm run test:db`). Sécurité en base : toutes les fonctions `admin_*` sont SECURITY DEFINER, exécutables par `service_role` seul, et revérifient le rôle à chaque appel (`_assert_clients` : super-admin actif, ou permission explicite) ; colonnes sensibles de `profiles` retirées du SELECT direct de `authenticated`.
+Recherche : `norm_text` (sans accents ni casse) + `phone_key` (0690…, +590 690… se retrouvent) + colonne `search_text` maintenue par trigger + index trigramme (GIN). Compteurs d'évènements calculés sur les 20 lignes de la page seulement (pas de N+1).
+Migration **NON appliquée** sur la base réelle : l'accès à la base de production a été refusé par les permissions de la session (voir rapport). Le code reste inerte tant que la fonction `admin_clients_access` n'existe pas (entrée de menu masquée, aucune page cassée).
