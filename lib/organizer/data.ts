@@ -47,6 +47,15 @@ const MESSAGES: Record<string, OrgFailure> = {
   NOT_DRAFT: { status: 409, message: 'Seul un évènement en brouillon peut faire l’objet d’une demande de publication.' },
   NO_PENDING: { status: 404, message: 'Aucune demande en attente.' },
   REPLY_TO_MISSING: { status: 409, message: 'L’organisateur n’a pas d’adresse de réponse : [À COMPLÉTER] dans les informations de l’organisateur.' },
+  ALREADY_CANCELLED: { status: 409, message: 'Cet évènement est déjà annulé.' },
+  NOT_CANCELLABLE: { status: 409, message: 'Cet évènement ne peut plus être annulé (déjà passé, brouillon ou fermé).' },
+  BAD_CANCEL_MODE: { status: 400, message: 'Choisis « annuler » ou « remplacer ».' },
+  BAD_REASON: { status: 400, message: 'Choisis une raison valide.' },
+  DETAIL_REQUIRED: { status: 400, message: 'Précise la raison (5 caractères minimum).' },
+  MESSAGE_TOO_LONG: { status: 400, message: 'Le message est trop long (2000 caractères maximum).' },
+  BAD_REPLACEMENT: { status: 400, message: 'Choisis un évènement de remplacement publié de ta même organisation.' },
+  NOT_CANCELLED: { status: 404, message: 'Cet évènement n’a pas été annulé.' },
+  BAD_TEMPLATE: { status: 400, message: 'Objet ou message de modèle invalide.' },
 };
 
 export function mapOrgError(e: { message?: string } | null | undefined): OrgFailure {

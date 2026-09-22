@@ -31,7 +31,7 @@ export function adminMenu(): AdminGroup[] {
       { label: 'Demandes de contact', href: `${CONTENT}?onglet=tickets` }, { label: 'Actualités organisateurs', href: '/admin/actualites' },
     ] },
     { id: 'audit', label: 'Journal d’audit', icon: 'history', items: [{ label: 'Journal d’audit', href: '/admin/gestion/audit' }] },
-    { id: 'settings', label: 'Réglages', icon: 'filter', items: [{ label: 'Réglages', href: '/admin/gestion/reglages' }] },
+    { id: 'settings', label: 'Réglages', icon: 'filter', items: [{ label: 'Réglages', href: '/admin/gestion/reglages' }, { label: 'Modèles d’annulation', href: '/admin/gestion/reglages/annulation' }] },
   ];
 }
 
@@ -52,7 +52,7 @@ export function activeAdminGroup(groups: AdminGroup[], pathname: string, params:
   return groups.find((g) => g.items.some((i) => isAdminActive(i.href, pathname, params)))?.id ?? null;
 }
 
-const CRUMB: Record<string, string> = { gestion: 'Gestion', organisateurs: 'Organisateurs', evenements: 'Évènements', transfert: 'Transfert', publications: 'Publications à valider', administrateurs: 'Administrateurs', support: 'Support', calendrier: 'Calendrier', audit: 'Journal d’audit', reglages: 'Réglages', billetterie: 'Billetterie', commandes: 'Commandes', invitations: 'Invitations', aide: 'Aide', contenu: 'Contenu du site', actualites: 'Actualités', scan: 'Scan' };
+const CRUMB: Record<string, string> = { gestion: 'Gestion', organisateurs: 'Organisateurs', evenements: 'Évènements', transfert: 'Transfert', publications: 'Publications à valider', administrateurs: 'Administrateurs', support: 'Support', calendrier: 'Calendrier', audit: 'Journal d’audit', reglages: 'Réglages', billetterie: 'Billetterie', commandes: 'Commandes', invitations: 'Invitations', aide: 'Aide', contenu: 'Contenu du site', actualites: 'Actualités', scan: 'Scan', annulation: 'Modèles d’annulation' };
 export function adminCrumbs(pathname: string): { label: string; href?: string }[] {
   const parts = pathname.replace(/^\/admin\/?/, '').split('/').filter((p) => p && p !== 'gestion');
   const out: { label: string; href?: string }[] = [{ label: 'Administration', href: '/admin' }];

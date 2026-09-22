@@ -52,6 +52,7 @@ export function eventMenu(slug: string): MenuGroup[] {
       { label: 'Lieux', href: `${base}/lieux`, cap: 'manage' }, { label: 'Sessions', href: `${base}/sessions`, cap: 'manage' },
       { label: 'Formulaires', href: `${base}/formulaires`, cap: 'manage' }, { label: 'Lineup', cap: 'manage' },
       { label: 'Conditions générales', href: `${base}/conditions`, cap: 'manage' }, { label: 'Consentements RGPD', href: `${base}/consentements`, cap: 'manage' },
+      { label: 'Annuler l’évènement', href: `${base}/annuler`, cap: 'owner' },
     ] },
     { id: 'ev-tickets', label: 'Billetterie', icon: 'ticket', items: [
       { label: 'Méthode de billetterie', href: `${base}/billetterie`, cap: 'manage' }, { label: 'Tarifs', href: tab('tarifs'), cap: 'manage' }, { label: 'Codes de réduction', href: `${base}/promos`, cap: 'manage' }, { label: 'Remboursements', href: `${base}/remboursements`, cap: 'manage' }, { label: 'Frais et paiement', cap: 'manage' },
@@ -112,7 +113,7 @@ export function activeGroupId(groups: MenuGroup[], pathname: string, onglet: str
 const CRUMB: Record<string, string> = {
   evenements: 'Mes évènements', nouveau: 'Nouvel évènement', participants: 'Participants', analyse: 'Analyse', paiements: 'Paiements',
   parametres: 'Informations légales', actualites: 'Actualités', aide: 'Centre d’aide',
-  finance: 'Finance', versements: 'Versements', billetterie: 'Méthode de billetterie', visuel: 'Visuel', stats: 'Ventes', notifications: 'Notifications', commandes: 'Commandes', remboursements: 'Remboursements', scans: 'Historique des scans', invitations: 'Invitations', suivi: 'Suivi', promos: 'Codes de réduction', description: 'Description', flyer: 'Décliner le flyer', lieux: 'Lieux', sessions: 'Sessions', formulaires: 'Formulaires', conditions: 'Conditions générales', consentements: 'Consentements RGPD', apercu: 'Aperçu',
+  finance: 'Finance', versements: 'Versements', billetterie: 'Méthode de billetterie', visuel: 'Visuel', stats: 'Ventes', notifications: 'Notifications', commandes: 'Commandes', remboursements: 'Remboursements', scans: 'Historique des scans', invitations: 'Invitations', suivi: 'Suivi', promos: 'Codes de réduction', description: 'Description', flyer: 'Décliner le flyer', lieux: 'Lieux', sessions: 'Sessions', formulaires: 'Formulaires', conditions: 'Conditions générales', consentements: 'Consentements RGPD', apercu: 'Aperçu', annuler: 'Annuler l’évènement',
 };
 
 /** Fil d'Ariane à partir du chemin (l'évènement s'affiche « Évènement » : son titre est dans l'en-tête de la page). */
