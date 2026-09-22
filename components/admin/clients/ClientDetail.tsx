@@ -74,6 +74,9 @@ function InfoTab({ id, profile, onSaved }: { id: string; profile: ClientDetail['
   const [errors, setErrors] = useState<Partial<Record<keyof EditForm, string>>>({});
   const [confirm, setConfirm] = useState<{ before: Record<string, unknown>; after: Record<string, unknown>; ageWarning: boolean } | null>(null);
   const [busy, setBusy] = useState(false); const [msg, setMsg] = useState(''); const [err, setErr] = useState('');
+  const confirmRef = useRef<HTMLDialogElement>(null);
+  // <dialog>.showModal() : piège du focus, fermeture au clavier (Échap) et fond du site rendu inerte — pas un simple <dialog open>.
+  useEffect(() => { const d = confirmRef.current; if (!d) return; if (confirm && !d.open) d.showModal(); if (!confirm && d.open) d.close(); }, [confirm]);
 
   function startEdit() { setF({ first_name: profile.first_name, last_name: profile.last_name, phone: profile.phone, phone2: profile.phone2, email: profile.email, birth_date: profile.birth_date ?? '', reason: '' }); setErrors({}); setErr(''); setMsg(''); setEditing(true); }
 
@@ -140,18 +143,20 @@ function InfoTab({ id, profile, onSaved }: { id: string; profile: ClientDetail['
           </div>
         </>
       )}
-      {confirm && (
-        <dialog open className="clients-dialog" aria-labelledby="conf-title">
-          <h2 id="conf-title">Confirmer les modifications</h2>
-          <table className="clients-diff"><thead><tr><th>Champ</th><th>Avant</th><th>Après</th></tr></thead>
-            <tbody>{Object.keys(confirm.after).map((k) => <tr key={k}><td>{FIELD_LABEL[k] ?? k}</td><td>{fmtValue(k, confirm.before[k])}</td><td><strong>{fmtValue(k, confirm.after[k])}</strong></td></tr>)}</tbody></table>
-          {confirm.ageWarning && <p className="ef-warn" role="alert">Attention : l’âge obtenu avec cette date de naissance sort de la fourchette 12–100 ans. Vérifie la saisie avant de continuer.</p>}
-          <div className="ef-row">
-            <button type="button" className="btn btn--amber" disabled={busy} onClick={commit}>{busy ? 'Enregistrement…' : 'Confirmer'}</button>
-            <button type="button" className="ef-link" onClick={() => setConfirm(null)}>Retour</button>
-          </div>
-        </dialog>
-      )}
+      <dialog ref={confirmRef} className="clients-dialog" aria-labelledby="conf-title" onClose={() => setConfirm(null)}>
+        {confirm && (
+          <>
+            <h2 id="conf-title">Confirmer les modifications</h2>
+            <table className="clients-diff"><thead><tr><th>Champ</th><th>Avant</th><th>Après</th></tr></thead>
+              <tbody>{Object.keys(confirm.after).map((k) => <tr key={k}><td>{FIELD_LABEL[k] ?? k}</td><td>{fmtValue(k, confirm.before[k])}</td><td><strong>{fmtValue(k, confirm.after[k])}</strong></td></tr>)}</tbody></table>
+            {confirm.ageWarning && <p className="ef-warn" role="alert">Attention : l’âge obtenu avec cette date de naissance sort de la fourchette 12–100 ans. Vérifie la saisie avant de continuer.</p>}
+            <div className="ef-row">
+              <button type="button" className="btn btn--amber" disabled={busy} onClick={commit}>{busy ? 'Enregistrement…' : 'Confirmer'}</button>
+              <button type="button" className="ef-link" onClick={() => setConfirm(null)}>Retour</button>
+            </div>
+          </>
+        )}
+      </dialog>
     </section>
   );
 }
