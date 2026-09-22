@@ -1,13 +1,11 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import { fromAddress } from '@/lib/mail';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 const TO = 'themouv2.0971@gmail.com';
-// Expéditeur : domaine partagé Resend (aucune vérification de domaine requise
-// pour démarrer). À remplacer par une adresse de ton domaine une fois vérifié.
-const FROM = 'LA SUNSHINES <onboarding@resend.dev>';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -58,7 +56,7 @@ export async function POST(req: Request) {
   try {
     const resend = new Resend(apiKey);
     const { error } = await resend.emails.send({
-      from: FROM,
+      from: fromAddress(),
       to: [TO],
       replyTo: email,
       subject: `[Contact site] ${subject}`,

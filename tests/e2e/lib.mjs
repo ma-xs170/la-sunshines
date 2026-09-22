@@ -58,6 +58,7 @@ export const sessionCompleted = (order, o = {}) => ({ id: o.session ?? order.str
 export const stripeState = async () => (await fetch(STRIPE + '/__state')).json();
 export const authState = async (reset = false) => (await fetch(`http://127.0.0.1:${54330 + OFF}/__auth${reset ? '?reset=1' : ''}`)).json();
 export const mailState = async () => (await fetch(MAIL + '/__state')).json();
+export const setMailDomain = async (name, status) => (await fetch(`${MAIL}/__domains?name=${encodeURIComponent(name)}&status=${encodeURIComponent(status)}`)).json();
 export const resetMocks = async () => { await fetch(STRIPE + '/__reset'); await fetch(MAIL + '/__reset'); };
 
 export async function resetDb() {

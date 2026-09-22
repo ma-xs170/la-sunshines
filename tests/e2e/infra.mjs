@@ -75,12 +75,15 @@ const stripeSrv = http.createServer(async (req, res) => {
 });
 
 // ---------- faux Resend
-export const mailState = { sent: [], fail: false };
+export const mailState = { sent: [], fail: false, domains: [{ id: 'dom_1', name: 'test.local', status: 'verified', created_at: '2026-01-01T00:00:00Z', region: 'eu-west-1' }] };
 const resendSrv = http.createServer(async (req, res) => {
   const u = new URL(req.url, 'http://x');
   if (u.pathname === '/__state') return json(res, 200, mailState);
-  if (u.pathname === '/__reset') { mailState.sent = []; mailState.fail = false; return json(res, 200, {}); }
+  if (u.pathname === '/__reset') { mailState.sent = []; mailState.fail = false; mailState.domains = [{ id: 'dom_1', name: 'test.local', status: 'verified', created_at: '2026-01-01T00:00:00Z', region: 'eu-west-1' }]; return json(res, 200, {}); }
   if (u.pathname === '/__fail') { mailState.fail = u.searchParams.get('on') === '1'; return json(res, 200, {}); }
+  // __domains?name=…&status=verified|pending|not_started : règle le statut simulé du domaine (diagnostic e-mail admin)
+  if (u.pathname === '/__domains') { const name = u.searchParams.get('name'), status = u.searchParams.get('status'); const d = mailState.domains.find((x) => x.name === name); if (d && status) d.status = status; else if (name && status) mailState.domains.push({ id: 'dom_' + (mailState.domains.length + 1), name, status, created_at: new Date().toISOString(), region: 'eu-west-1' }); return json(res, 200, mailState.domains); }
+  if (u.pathname === '/domains' && req.method === 'GET') return json(res, 200, { data: mailState.domains, object: 'list', has_more: false });
   if (u.pathname === '/emails' && req.method === 'POST') {
     const b = JSON.parse((await read(req)).toString());
     if (mailState.fail) return json(res, 422, { name: 'validation_error', message: 'The domain is not verified (simulé)', statusCode: 422 });
@@ -110,6 +113,16 @@ const gw = http.createServer(async (req, res) => {
   // --- API d'administration Auth simulée (page Clients) : changement d'e-mail, blocage, suppression douce, e-mail de réinitialisation. Aucun mot de passe n'est conservé.
   if (u.pathname === '/__auth') { if (u.searchParams.get('reset')) { authState.recovers = []; authState.updates = []; authState.deleted = []; authState.failUpdate = false; } if (u.searchParams.get('fail')) authState.failUpdate = u.searchParams.get('fail') === '1'; return json(res, 200, authState); }
   if (u.pathname === '/auth/v1/recover' && req.method === 'POST') { const b = JSON.parse((await read(req)).toString() || '{}'); authState.recovers.push(b.email); return json(res, 200, {}); }
+  // Création d'un compte (espace admin > Administrateurs, mot de passe provisoire) : le mot de passe n'est jamais conservé côté banc.
+  if (u.pathname === '/auth/v1/admin/users' && req.method === 'POST') {
+    const b = JSON.parse((await read(req)).toString() || '{}');
+    if (!b.email) return json(res, 400, { code: 400, msg: 'email requis' });
+    const dup = (await dbq('select 1 from auth.users where lower(email) = lower($1)', [b.email])).rows[0];
+    if (dup) return json(res, 422, { code: 422, error_code: 'email_exists', msg: 'A user with this email address has already been registered' });
+    const row = (await dbq('insert into auth.users (id, email, email_confirmed_at, raw_user_meta_data) values (gen_random_uuid(), $1, $2, $3) returning id, email',
+      [b.email, b.email_confirm ? new Date().toISOString() : null, JSON.stringify(b.user_metadata ?? {})])).rows[0];
+    return json(res, 200, { id: row.id, aud: 'authenticated', role: 'authenticated', email: row.email, email_confirmed_at: b.email_confirm ? new Date().toISOString() : null, app_metadata: {}, user_metadata: b.user_metadata ?? {}, created_at: '2026-01-01T00:00:00Z' });
+  }
   const am = u.pathname.match(/^\/auth\/v1\/admin\/users\/([0-9a-f-]{36})$/);
   if (am) {
     const id = am[1]; const row = (await dbq('select id, email from auth.users where id = $1', [id])).rows[0];

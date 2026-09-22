@@ -4,15 +4,13 @@
 import 'server-only';
 import { Resend } from 'resend';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
-import { mailLayout, mailButton, mailScript, siteUrl } from '@/lib/mail';
+import { fromAddress, mailLayout, mailButton, mailScript, siteUrl } from '@/lib/mail';
 import { esc } from '@/lib/ticketing/order-mail';
 import { loadTicketPages } from '@/lib/ticketing/pdf/data';
 import { renderTicketsPdf } from '@/lib/ticketing/pdf/render';
 import { formatGp } from '@/lib/ticketing/time';
 export { containsLink } from './message-rules';
-
-const FALLBACK_FROM = 'LA SUNSHINES <onboarding@resend.dev>';
-export const fromAddress = () => process.env.MAIL_FROM || FALLBACK_FROM;
+export { fromAddress };
 export const resendConfigured = () => Boolean(process.env.RESEND_API_KEY);
 
 export interface OrgMessageInput {

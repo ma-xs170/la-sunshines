@@ -17,7 +17,7 @@ export async function sendArtistMagicLink(
   const email = emailOverride || (await getArtistEmail(artist.slug));
   if (!email) return false;
   const url = `${siteUrl()}/api/artist/login?token=${encodeURIComponent(token)}`;
-  return sendMail({
+  const r = await sendMail({
     to: email,
     subject: 'Ton lien de connexion — espace artiste LA SUNSHINES',
     html: mailLayout(
@@ -36,4 +36,5 @@ export async function sendArtistMagicLink(
        </p>`,
     ),
   });
+  return r.ok;
 }

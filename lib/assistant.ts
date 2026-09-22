@@ -6,13 +6,13 @@ import { Resend } from 'resend';
 import { getAllEditions } from './content';
 import { isEditionUpcoming } from './editions';
 import { formatEditionDate } from './format';
+import { fromAddress } from './mail';
 import { newId, type StoredTicket } from './store';
 import { createSupportTicket } from './supportTickets';
 import { getTicketingSettings } from './ticketing/settings';
 
 const MODEL = 'mistral-small-latest';
 const TICKET_TO = 'themouv2.0971@gmail.com';
-const FROM = 'LA SUNSHINES <onboarding@resend.dev>';
 
 export const MAX_TURNS = 24; // limite de messages par session (client + serveur)
 
@@ -145,7 +145,7 @@ async function createTicket(args: Record<string, unknown>, native: boolean): Pro
     try {
       const resend = new Resend(apiKey);
       await resend.emails.send({
-        from: FROM,
+        from: fromAddress(),
         to: [TICKET_TO],
         replyTo: email,
         subject: `[Assistant] ${subject}`,
@@ -159,7 +159,7 @@ async function createTicket(args: Record<string, unknown>, native: boolean): Pro
           `Ticket #${ticket.id} — à traiter dans /admin.`,
       });
       await resend.emails.send({
-        from: FROM,
+        from: fromAddress(),
         to: [email],
         subject: 'On a bien reçu ta demande — LA SUNSHINES',
         text:

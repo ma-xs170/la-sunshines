@@ -4,7 +4,11 @@
 
 import { Resend } from 'resend';
 
-const FROM = 'LA SUNSHINES <onboarding@resend.dev>';
+// Expéditeur par défaut tant que MAIL_FROM n'est pas réglé : un domaine Resend « bac à sable » qui n'envoie
+// qu'à l'adresse du compte Resend lui-même (aucune livraison réelle aux destinataires). MAIL_FROM (ex.
+// "LA SUNSHINES <billets@la-sunshines.fr>") doit pointer vers un domaine VÉRIFIÉ dans Resend pour livrer partout.
+export const FALLBACK_FROM = 'LA SUNSHINES <onboarding@resend.dev>';
+export const fromAddress = () => process.env.MAIL_FROM || FALLBACK_FROM;
 
 export function mailConfigured(): boolean {
   return Boolean(process.env.RESEND_API_KEY);
@@ -17,24 +21,37 @@ export async function sendMail(opts: {
   /** ex. List-Unsubscribe pour les emails d'abonnement. */
   headers?: Record<string, string>;
   replyTo?: string;
-}): Promise<boolean> {
+  /** Expéditeur explicite (par défaut : MAIL_FROM, ou le domaine bac à sable si non réglé). */
+  from?: string;
+}): Promise<{ ok: true } | { ok: false; message: string }> {
   const key = process.env.RESEND_API_KEY;
-  if (!key) return false;
+  if (!key) return { ok: false, message: 'RESEND_API_KEY absente.' };
   try {
-    const resend = new Resend(key);
-    await resend.emails.send({
-      from: FROM,
+    const { error } = await new Resend(key).emails.send({
+      from: opts.from || fromAddress(),
       to: [opts.to],
       subject: opts.subject,
       html: opts.html,
       headers: opts.headers,
       replyTo: opts.replyTo,
     });
-    return true;
+    if (error) { console.error('[mail] échec envoi :', error.name, error.message); return { ok: false, message: readableMailError(error) }; }
+    return { ok: true };
   } catch (e) {
-    console.error('[mail] échec envoi :', e);
-    return false;
+    console.error('[mail] échec envoi :', e instanceof Error ? e.message : e);
+    return { ok: false, message: 'Erreur inattendue lors de l’envoi.' };
   }
+}
+
+/** Message d'erreur lisible pour l'admin (jamais le détail brut de l'API, jamais de secret). */
+export function readableMailError(error: { name?: string; message?: string } | null | undefined): string {
+  const m = (error?.message ?? '').toLowerCase();
+  if (error?.name === 'validation_error' && m.includes('domain')) return 'Domaine d’envoi non vérifié dans Resend : vérifie MAIL_FROM et le domaine associé sur resend.com/domains.';
+  if (error?.name === 'invalid_api_key' || m.includes('api key')) return 'Clé Resend invalide ou expirée : vérifie RESEND_API_KEY.';
+  if (error?.name === 'rate_limit_exceeded' || m.includes('rate limit') || m.includes('too many')) return 'Limite d’envoi Resend atteinte pour le moment : réessaie dans quelques minutes.';
+  if (m.includes('from') && (m.includes('not verified') || m.includes('domain'))) return 'L’adresse d’expédition (MAIL_FROM) n’est pas vérifiée dans Resend.';
+  if (error?.name || error?.message) return `Envoi refusé par Resend (${error.name ?? 'erreur'}).`;
+  return 'Envoi impossible pour le moment.';
 }
 
 /**

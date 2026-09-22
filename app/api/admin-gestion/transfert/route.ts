@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { adminRpc, requireAdminApi } from '@/lib/adminSpace';
-import { mailConfigured, sendMail } from '@/lib/mail';
+import { mailConfigured, mailLayout, mailScript, sendMail } from '@/lib/mail';
 import { revalidatePublicSite } from '@/lib/revalidate';
 import { SLUG_RE } from '@/lib/ticketing/schemas';
 
@@ -29,8 +29,13 @@ export async function POST(req: Request) {
   if (mailConfigured()) {
     for (const [party, other, kind] of [[r.data.from, r.data.to, 'cédé'], [r.data.to, r.data.from, 'reçu']] as const) {
       if (!party.email) continue;
-      const ok = await sendMail({ to: party.email, subject: `Transfert d’évènement : ${slug}`, html: `<p>Bonjour,</p><p>L’évènement <strong>${slug}</strong> a été ${kind === 'cédé' ? 'transféré de' : 'transféré vers'} votre organisation (${party.reference}) ${kind === 'cédé' ? 'vers' : 'depuis'} ${other.name} (${other.reference}), à la demande de l’organisateur. Les commandes, billets et l’historique sont conservés.</p><p>Si vous n’êtes pas à l’origine de cette demande, contactez LA SUNSHINES.</p>` });
-      if (ok) mails++;
+      const r2 = await sendMail({ to: party.email, subject: `Transfert d’évènement : ${slug}`, html: mailLayout(
+        `${mailScript('Transfert d’évènement')}<h2>${slug}</h2>
+         <p>L’évènement <strong>${slug}</strong> a été ${kind === 'cédé' ? 'transféré de' : 'transféré vers'} votre organisation (<strong>${party.reference}</strong>) ${kind === 'cédé' ? 'vers' : 'depuis'} <strong>${other.name}</strong> (${other.reference}), à la demande de l’organisateur.</p>
+         <p>Les commandes, billets et l’historique sont conservés.</p>
+         <p style="font-size:13px;color:#8a8378">Si vous n’êtes pas à l’origine de cette demande, contactez LA SUNSHINES.</p>`,
+      ) });
+      if (r2.ok) mails++;
     }
   }
   return NextResponse.json({ ok: true, ...r.data, mails });

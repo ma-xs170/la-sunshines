@@ -11,14 +11,12 @@
 import 'server-only';
 import { Resend } from 'resend';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { mailLayout, mailButton, mailScript, siteUrl } from '@/lib/mail';
+import { fromAddress, mailLayout, mailButton, mailScript, siteUrl } from '@/lib/mail';
 import { formatCode } from './tokens';
 import { qrPng } from './qr';
 import { loadTicketPages } from './pdf/data';
 import { renderTicketsPdf } from './pdf/render';
 import { formatEuro, formatGp, formatPrice } from './time';
-
-const FALLBACK_FROM = 'LA SUNSHINES <onboarding@resend.dev>';
 
 export const esc = (s: string): string =>
   s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
@@ -151,7 +149,7 @@ export async function sendOrderEmail(db: SupabaseClient, orderId: string, opts: 
         }
       }
       const { error } = await new Resend(key).emails.send({
-        from: process.env.MAIL_FROM || FALLBACK_FROM,
+        from: fromAddress(),
         to: [order.buyer_email],
         subject: mail.subject,
         html: mail.html,
