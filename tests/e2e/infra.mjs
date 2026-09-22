@@ -29,6 +29,7 @@ export const USERS = {
   cust2: { id: 'c2000000-0000-4000-8000-000000000002', email: 'cust2@test.local', password: 'Passw0rd!', role: 'customer', first: 'Denis',   last: 'Autre',  phone: '0690222222' },
   admin: { id: 'ad000000-0000-4000-8000-0000000000ad', email: 'admin@test.local', password: 'Passw0rd!', role: 'admin',    first: 'Alex',    last: 'Admin',  phone: '0690333333' },
   staff: { id: '57000000-0000-4000-8000-000000000057', email: 'staff@test.local', password: 'Passw0rd!', role: 'staff',    first: 'Sam',     last: 'Porte',  phone: '0690444444' },
+  deleg: { id: 'de000000-0000-4000-8000-0000000000de', email: 'deleg@test.local', password: 'Passw0rd!', role: 'admin',    first: 'Dora',    last: 'Delegue', phone: '0690666666' },
   orgb:  { id: '0b000000-0000-4000-8000-0000000000b2', email: 'orgb@test.local',  password: 'Passw0rd!', role: 'customer', first: 'Olivia',  last: 'Autre-Orga', phone: '0690555555' },
 };
 const userJson = (u) => ({ id: u.id, aud: 'authenticated', role: 'authenticated', email: u.email, email_confirmed_at: '2026-01-01T00:00:00Z', app_metadata: {}, user_metadata: {}, created_at: '2026-01-01T00:00:00Z' });
@@ -88,6 +89,8 @@ const resendSrv = http.createServer(async (req, res) => {
   json(res, 404, { message: 'mock' });
 });
 
+const authState = { recovers: [], updates: [], deleted: [], failUpdate: false };
+let apool; const dbq = (sql, params) => (apool ||= new pg.Pool({ connectionString: `postgresql://postgres:pw@localhost:${PORTS.pg}/main`, max: 2 })).query(sql, params);
 // ---------- passerelle « Supabase » : /rest/v1 → PostgREST, /auth/v1 → faux GoTrue
 const gw = http.createServer(async (req, res) => {
   const u = new URL(req.url, 'http://x');
@@ -104,6 +107,25 @@ const gw = http.createServer(async (req, res) => {
     if (g === 'refresh_token') { const usr = Object.values(USERS).find((x) => 'rt_' + x.id === b.refresh_token); return usr ? json(res, 200, session(usr)) : json(res, 400, { code: 400, msg: 'bad refresh' }); }
   }
   if (u.pathname === '/auth/v1/logout') { await read(req); res.writeHead(204); return res.end(); }
+  // --- API d'administration Auth simulée (page Clients) : changement d'e-mail, blocage, suppression douce, e-mail de réinitialisation. Aucun mot de passe n'est conservé.
+  if (u.pathname === '/__auth') { if (u.searchParams.get('reset')) { authState.recovers = []; authState.updates = []; authState.deleted = []; authState.failUpdate = false; } if (u.searchParams.get('fail')) authState.failUpdate = u.searchParams.get('fail') === '1'; return json(res, 200, authState); }
+  if (u.pathname === '/auth/v1/recover' && req.method === 'POST') { const b = JSON.parse((await read(req)).toString() || '{}'); authState.recovers.push(b.email); return json(res, 200, {}); }
+  const am = u.pathname.match(/^\/auth\/v1\/admin\/users\/([0-9a-f-]{36})$/);
+  if (am) {
+    const id = am[1]; const row = (await dbq('select id, email from auth.users where id = $1', [id])).rows[0];
+    if (!row) { await read(req); return json(res, 404, { code: 404, error_code: 'user_not_found', msg: 'User not found' }); }
+    const asUser = (r) => ({ id: r.id, aud: 'authenticated', role: 'authenticated', email: r.email, app_metadata: {}, user_metadata: {}, created_at: '2026-01-01T00:00:00Z' });
+    if (req.method === 'GET') return json(res, 200, asUser(row));
+    const b = JSON.parse((await read(req)).toString() || '{}');
+    if (req.method === 'PUT') {
+      authState.updates.push({ id, keys: Object.keys(b) });
+      if (authState.failUpdate) return json(res, 500, { code: 500, msg: 'boom (simulé)' });
+      if (b.email) { const dup = (await dbq('select 1 from auth.users where lower(email) = lower($1) and id <> $2', [b.email, id])).rows[0]; if (dup) return json(res, 422, { code: 422, error_code: 'email_exists', msg: 'A user with this email address has already been registered' }); await dbq('update auth.users set email = $2 where id = $1', [id, b.email]); }
+      if (b.ban_duration) await dbq("update auth.users set banned_until = case when $2 = 'none' then null else now() + interval '100 years' end where id = $1", [id, b.ban_duration]);
+      return json(res, 200, asUser((await dbq('select id, email from auth.users where id = $1', [id])).rows[0]));
+    }
+    if (req.method === 'DELETE') { authState.deleted.push({ id, soft: !!b.should_soft_delete }); if (b.should_soft_delete) await dbq("update auth.users set email = 'deleted-' || left(id::text, 8) || '@deleted.invalid', raw_user_meta_data = '{}' where id = $1", [id]); else await dbq('delete from auth.users where id = $1', [id]); return json(res, 200, {}); }
+  }
   json(res, 404, { msg: 'gateway: ' + u.pathname });
 });
 

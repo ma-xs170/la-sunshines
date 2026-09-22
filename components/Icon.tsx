@@ -33,6 +33,7 @@ export type IconName =
   | 'archive'
   | 'inbox'
   | 'help'
+  | 'users'
   | 'grid'
   | 'list'
   | 'search'

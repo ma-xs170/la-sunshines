@@ -134,8 +134,8 @@ begin
   upd := (d -> 'profile' ->> 'updated_at')::timestamptz;
   perform pg_temp.expect('CONFLICT', format('select public.admin_customer_update(%L, %L, %L, %L, %L, %L, %L, null, %L, %L)', sup, elo, 'Élodie', 'Dupont', '0690123456', '', 'elodie.dupont@test.local', 'x', upd - interval '1 second'));
   perform pg_temp.expect('NO_CHANGE', format('select public.admin_customer_update(%L, %L, %L, %L, %L, %L, %L, %L, %L, %L)', sup, elo, 'Élodie', 'Dupont', '0690123456', '', 'elodie.dupont@test.local', date '1990-05-04', '', upd));
-  perform pg_temp.expect('REASON_REQUIRED', format('select public.admin_customer_update(%L, %L, %L, %L, %L, %L, %L, %L, %L, %L)', sup, elo, 'Élodie', 'Dupont', '0690123456', '', 'nouveau@test.local', date '1990-05-04', '', upd));
-  perform pg_temp.expect('REASON_REQUIRED', format('select public.admin_customer_update(%L, %L, %L, %L, %L, %L, %L, %L, %L, %L)', sup, elo, 'Élodie', 'Dupont', '0690123456', '', 'elodie.dupont@test.local', date '1991-05-04', 'ok', upd));
+  perform pg_temp.expect('CLIENT_REASON_REQUIRED', format('select public.admin_customer_update(%L, %L, %L, %L, %L, %L, %L, %L, %L, %L)', sup, elo, 'Élodie', 'Dupont', '0690123456', '', 'nouveau@test.local', date '1990-05-04', '', upd));
+  perform pg_temp.expect('CLIENT_REASON_REQUIRED', format('select public.admin_customer_update(%L, %L, %L, %L, %L, %L, %L, %L, %L, %L)', sup, elo, 'Élodie', 'Dupont', '0690123456', '', 'elodie.dupont@test.local', date '1991-05-04', 'ok', upd));
   perform pg_temp.expect('EMAIL_TAKEN', format('select public.admin_customer_update(%L, %L, %L, %L, %L, %L, %L, %L, %L, %L)', sup, elo, 'Élodie', 'Dupont', '0690123456', '', 'JEAN.MARTIN@test.local', date '1990-05-04', 'correction demandée', upd));
   perform pg_temp.expect('BAD_EMAIL', format('select public.admin_customer_update(%L, %L, %L, %L, %L, %L, %L, %L, %L, %L)', sup, elo, 'Élodie', 'Dupont', '0690123456', '', 'pas-un-mail', date '1990-05-04', 'correction demandée', upd));
   perform pg_temp.expect('BAD_BIRTH_DATE', format('select public.admin_customer_update(%L, %L, %L, %L, %L, %L, %L, %L, %L, %L)', sup, elo, 'Élodie', 'Dupont', '0690123456', '', 'elodie.dupont@test.local', current_date + 1, 'correction demandée', upd));
@@ -169,7 +169,7 @@ begin
   if (select last_name from public.profiles where id = jea) <> 'Martin-Leblanc' then raise exception 'FAIL 5i : modification par admin délégué'; end if;
 
   -- ===== 6. Suspension / sessions =====
-  perform pg_temp.expect('REASON_REQUIRED', format('select public.admin_customer_set_status(%L, %L, %L, %L)', sup, jea, 'suspended', ''));
+  perform pg_temp.expect('CLIENT_REASON_REQUIRED', format('select public.admin_customer_set_status(%L, %L, %L, %L)', sup, jea, 'suspended', ''));
   perform pg_temp.expect('BAD_STATUS', format('select public.admin_customer_set_status(%L, %L, %L, %L)', sup, jea, 'anonymized', 'motif valable'));
   perform pg_temp.expect('ADMIN_TARGET', format('select public.admin_customer_set_status(%L, %L, %L, %L)', sup, del, 'suspended', 'motif valable'));
   perform public.admin_customer_set_status(sup, jea, 'suspended', 'Fraude suspectée');
