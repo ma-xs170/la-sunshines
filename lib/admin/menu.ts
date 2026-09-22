@@ -1,7 +1,7 @@
 // Menu de l'espace admin (mêmes principes que lib/organizer/menu.ts : PUR, testable). Le contrôle réel reste côté serveur.
 import type { IconName } from '@/components/Icon';
 
-export interface AdminLeaf { label: string; href: string; superOnly?: boolean; badge?: 'support' | 'pending' | 'publications'; external?: boolean }
+export interface AdminLeaf { label: string; href: string; superOnly?: boolean; needsClients?: boolean; badge?: 'support' | 'pending' | 'publications'; external?: boolean }
 export interface AdminGroup { id: string; label: string; icon: IconName; items: AdminLeaf[] }
 
 const SUP = '/admin/gestion/support';
@@ -14,6 +14,7 @@ export function adminMenu(): AdminGroup[] {
     { id: 'events', label: 'Évènements', icon: 'ticket', items: [
       { label: 'Tous les évènements', href: '/admin/gestion/evenements' }, { label: 'Publications à valider', href: '/admin/gestion/publications', badge: 'publications' }, { label: 'Transférer un évènement', href: '/admin/gestion/transfert' },
     ] },
+    { id: 'clients', label: 'Clients', icon: 'users', items: [{ label: 'Clients', href: '/admin/clients', needsClients: true }] },
     { id: 'admins', label: 'Administrateurs', icon: 'phone', items: [{ label: 'Administrateurs', href: '/admin/gestion/administrateurs', superOnly: true }] },
     { id: 'support', label: 'Support', icon: 'help', items: [
       { label: 'Tous', href: SUP, badge: 'support' }, { label: 'Problème technique', href: `${SUP}?categorie=technical` }, { label: 'Gestion du compte', href: `${SUP}?categorie=account` },
@@ -35,8 +36,9 @@ export function adminMenu(): AdminGroup[] {
   ];
 }
 
-export function visibleAdminMenu(groups: AdminGroup[], isSuper: boolean): AdminGroup[] {
-  return groups.map((g) => ({ ...g, items: g.items.filter((i) => !i.superOnly || isSuper) })).filter((g) => g.items.length > 0);
+/** « Clients » : super-admin, ou admin à qui le super-admin a accordé clients.lire / clients.modifier (canClients). Le contrôle réel reste côté serveur. */
+export function visibleAdminMenu(groups: AdminGroup[], isSuper: boolean, canClients = isSuper): AdminGroup[] {
+  return groups.map((g) => ({ ...g, items: g.items.filter((i) => (!i.superOnly || isSuper) && (!i.needsClients || canClients)) })).filter((g) => g.items.length > 0);
 }
 
 /** Entrée active : même chemin ; si l'entrée porte une requête (?onglet=, ?categorie=, ?vue=), elle doit correspondre ; sinon la page ne doit porter aucun de ces paramètres. */
@@ -52,7 +54,7 @@ export function activeAdminGroup(groups: AdminGroup[], pathname: string, params:
   return groups.find((g) => g.items.some((i) => isAdminActive(i.href, pathname, params)))?.id ?? null;
 }
 
-const CRUMB: Record<string, string> = { gestion: 'Gestion', organisateurs: 'Organisateurs', evenements: 'Évènements', transfert: 'Transfert', publications: 'Publications à valider', administrateurs: 'Administrateurs', support: 'Support', calendrier: 'Calendrier', audit: 'Journal d’audit', reglages: 'Réglages', billetterie: 'Billetterie', commandes: 'Commandes', invitations: 'Invitations', aide: 'Aide', contenu: 'Contenu du site', actualites: 'Actualités', scan: 'Scan' };
+const CRUMB: Record<string, string> = { gestion: 'Gestion', organisateurs: 'Organisateurs', evenements: 'Évènements', transfert: 'Transfert', publications: 'Publications à valider', administrateurs: 'Administrateurs', clients: 'Clients', support: 'Support', calendrier: 'Calendrier', audit: 'Journal d’audit', reglages: 'Réglages', billetterie: 'Billetterie', commandes: 'Commandes', invitations: 'Invitations', aide: 'Aide', contenu: 'Contenu du site', actualites: 'Actualités', scan: 'Scan' };
 export function adminCrumbs(pathname: string): { label: string; href?: string }[] {
   const parts = pathname.replace(/^\/admin\/?/, '').split('/').filter((p) => p && p !== 'gestion');
   const out: { label: string; href?: string }[] = [{ label: 'Administration', href: '/admin' }];

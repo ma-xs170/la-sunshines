@@ -22,3 +22,12 @@ test('entrée active selon le chemin et les paramètres', () => {
 test('fil d’Ariane', () => {
   assert.deepEqual(adminCrumbs('/admin/gestion/organisateurs').map((c) => c.label), ['Administration', 'Organisateurs']);
 });
+
+test('Clients : visible pour le super-admin ou un admin avec permission, jamais par défaut pour un admin délégué', () => {
+  assert.ok(visibleAdminMenu(adminMenu(), true).some((g) => g.id === 'clients'));
+  assert.ok(!visibleAdminMenu(adminMenu(), false).some((g) => g.id === 'clients'));
+  assert.ok(!visibleAdminMenu(adminMenu(), false, false).some((g) => g.id === 'clients'));
+  assert.ok(visibleAdminMenu(adminMenu(), false, true).some((g) => g.id === 'clients'));
+  assert.equal(activeAdminGroup(adminMenu(), '/admin/clients', new URLSearchParams('q=jean&page=2')), 'clients');
+  assert.deepEqual(adminCrumbs('/admin/clients').map((c) => c.label), ['Administration', 'Clients']);
+});

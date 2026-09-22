@@ -8,5 +8,5 @@ import '../organizer-shell.css';
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const d = await getAdminShellData().catch(() => null);
   if (!d) return <>{children}</>;
-  return <AdminShell firstName={d.firstName} reference={d.reference} isSuper={d.isSuper} pending={d.pending} support={d.support} publications={d.publications}>{children}</AdminShell>;
+  return <AdminShell firstName={d.firstName} reference={d.reference} isSuper={d.isSuper} canClients={d.canClients} pending={d.pending} support={d.support} publications={d.publications}>{children}</AdminShell>;
 }

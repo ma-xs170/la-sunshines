@@ -10,10 +10,10 @@ import GlobalSearch from './GlobalSearch';
 import { activeAdminGroup, adminCrumbs, adminMenu, isAdminActive, visibleAdminMenu } from '@/lib/admin/menu';
 
 /** Cadre de l'espace admin : MÊMES classes et même disposition que l'espace organisateur (menu latéral plat pleine hauteur, en-tête, pied de page). */
-export default function AdminShell({ firstName, reference, isSuper, pending, support, publications, children }: { firstName: string; reference: string | null; isSuper: boolean; pending: number; support: number; publications: number; children: ReactNode }) {
+export default function AdminShell({ firstName, reference, isSuper, canClients, pending, support, publications, children }: { firstName: string; reference: string | null; isSuper: boolean; canClients: boolean; pending: number; support: number; publications: number; children: ReactNode }) {
   const pathname = usePathname();
   const params = useSearchParams();
-  const groups = useMemo(() => visibleAdminMenu(adminMenu(), isSuper), [isSuper]);
+  const groups = useMemo(() => visibleAdminMenu(adminMenu(), isSuper, canClients), [isSuper, canClients]);
   const activeGroup = activeAdminGroup(groups, pathname, params);
   const [openId, setOpenId] = useState<string | null>(activeGroup);
   const [drawer, setDrawer] = useState(false);

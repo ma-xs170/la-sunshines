@@ -1,0 +1,76 @@
+/* Page « Clients » : mêmes tokens que /admin et /organisateur (crème, encre, ambre). Panneau plat, aucun gros rond / ovale. */
+.clients{padding-bottom:var(--s-40);}
+.clients-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--s-16);}
+.clients-export{display:inline-flex;align-items:center;gap:8px;}
+.clients-export .icon{width:16px;height:16px;}
+
+.clients-search{position:relative;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:0 var(--s-12);padding:14px var(--s-16);margin:var(--s-16) 0 var(--s-8);border-radius:var(--r-md);}
+.clients-search:focus-within{outline:2px solid var(--amber);outline-offset:2px;}
+.clients-search__ico{width:20px;height:20px;color:var(--gray);}
+.clients-search__input{width:100%;border:0;background:transparent;font:inherit;font-size:16px;font-weight:600;color:var(--ink);padding:8px 0;outline:none;min-width:0;}
+.clients-search__input::placeholder{color:var(--gray);font-weight:500;}
+.clients-search__input::-webkit-search-cancel-button{display:none;}
+.clients-search__clear{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border:0;border-radius:var(--r-sm);background:rgba(25,20,16,.06);color:var(--ink);cursor:pointer;}
+.clients-search__clear:hover{background:rgba(25,20,16,.12);}
+.clients-search__clear .icon{width:16px;height:16px;}
+.clients-search__help{grid-column:1/-1;margin:6px 0 0;font-size:12.5px;line-height:1.45;color:var(--gray);font-weight:500;}
+.clients-search__help.is-warn{color:#a12525;font-weight:700;}
+
+.clients-filters{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-12) var(--s-24);margin:var(--s-8) 0 var(--s-8);}
+.clients-tabs{display:flex;flex-wrap:wrap;gap:4px;padding:4px;border:1px solid var(--panel-border);border-radius:var(--r-sm);background:var(--panel);}
+.clients-tab{padding:8px 14px;border-radius:var(--r-sm);font-size:14px;font-weight:700;color:var(--ink);}
+.clients-tab:hover{background:rgba(25,20,16,.06);}
+.clients-tab.is-active{background:rgba(255,178,56,.22);box-shadow:inset 0 -2px 0 var(--amber);}
+.clients-filter{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--gray);}
+.clients-filter select{font:inherit;font-size:14px;font-weight:600;color:var(--ink);padding:8px 10px;border:1px solid var(--panel-border-strong);border-radius:var(--r-sm);background:#fff;}
+.clients-count{margin:var(--s-8) 0 var(--s-12);font-size:14px;font-weight:700;color:var(--gray);min-height:1.4em;}
+
+.clients-table{margin-bottom:var(--s-16);}
+.clients-table table{min-width:980px;}
+.clients-table th a{color:inherit;text-decoration:none;}
+.clients-table th a:hover{color:var(--ink);}
+.clients-sort{white-space:nowrap;}
+.clients-row{cursor:pointer;}
+.clients-row:hover td{background:rgba(255,178,56,.09);}
+.clients-name{font-weight:800;letter-spacing:.02em;color:var(--ink);text-decoration:none;}
+.clients-name:hover,.clients-name:focus-visible{text-decoration:underline;text-underline-offset:3px;}
+.clients-mail{overflow-wrap:anywhere;}
+.clients-phones{display:flex;flex-direction:column;gap:2px;white-space:nowrap;}
+.clients-age{color:var(--gray);font-weight:600;white-space:nowrap;}
+.clients-num{font-variant-numeric:tabular-nums;text-align:center;}
+.clients-empty{color:var(--gray);font-style:italic;font-weight:500;}
+.clients-badges{display:flex;flex-wrap:wrap;gap:4px;}
+.clients-skel{display:block;height:14px;width:80%;border-radius:4px;background:linear-gradient(90deg,rgba(25,20,16,.07),rgba(25,20,16,.14),rgba(25,20,16,.07));background-size:200% 100%;animation:clients-shimmer 1.2s linear infinite;}
+@keyframes clients-shimmer{to{background-position:-200% 0;}}
+@media (prefers-reduced-motion:reduce){.clients-skel{animation:none;}}
+
+/* pagination : « Précédent 1 2 3 4 5 … 67 Suivant ». Deux fenêtres de numéros CALCULÉES (rayon 2 large, rayon 1 réduite) : la bascule
+   mobile n'est jamais un simple display:none sur un numéro du milieu (ça casserait la suite 1 2 3…), c'est une vraie liste réduite. */
+.clients-pager__row{list-style:none;margin:var(--s-16) 0 0;padding:0;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;}
+.clients-pager__num,.clients-pager__nav{display:inline-flex;align-items:center;justify-content:center;min-width:40px;height:40px;padding:0 12px;border:1px solid var(--panel-border-strong);border-radius:var(--r-sm);background:#fff;color:var(--ink);font-size:14px;font-weight:700;text-decoration:none;}
+a.clients-pager__num:hover,a.clients-pager__nav:hover{background:rgba(255,178,56,.16);}
+.clients-pager__num.is-active{background:var(--ink);border-color:var(--ink);color:#fff;}
+.clients-pager__nav.is-disabled{opacity:.4;cursor:not-allowed;}
+.clients-pager__gap{min-width:24px;text-align:center;color:var(--gray);font-weight:700;}
+.clients-pager a:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
+.clients-pager__num--narrow{display:none;}
+
+@media (max-width:760px){
+  .clients-table table{min-width:0;}
+  .clients-row{position:relative;}
+  .clients-table tr.clients-row td.clients-first,.clients-table tr.clients-row td.clients-last{display:inline-flex;width:auto;padding:0 6px 6px 0;font-size:16px;font-weight:800;}
+  .clients-table tr.clients-row td.clients-first::before,.clients-table tr.clients-row td.clients-last::before{display:none;}
+  .clients-phones{align-items:flex-end;}
+  .clients-pager__num--wide{display:none;}
+  .clients-pager__num--narrow{display:inline-flex;}
+  .clients-pager__num,.clients-pager__nav{min-width:44px;height:44px;}
+  .clients-filters{gap:var(--s-12);}
+  .clients-tabs{width:100%;}
+  .clients-tab{flex:1;text-align:center;padding:10px 6px;}
+}
+
+/* fenêtre d'export / de confirmation */
+.clients-dialog{width:min(560px,calc(100vw - 32px));padding:var(--s-24);border:1px solid var(--panel-border-strong);border-radius:var(--r-md);background:#fff;color:var(--ink);box-shadow:0 24px 60px rgba(25,20,16,.28);}
+.clients-dialog::backdrop{background:rgba(25,20,16,.45);}
+.clients-dialog h2{font-size:20px;margin:0 0 var(--s-16);}
+.clients-dialog .ef-check{margin-top:var(--s-12);}

@@ -15,6 +15,16 @@ const nextConfig = {
   // serverless → readStore()/readStoreSync() fonctionnent aussi pour le rendu à
   // la demande (nouvelles éditions /editions/[slug], API /admin) sans attendre
   // un rebuild qui rebundlerait le fichier.
+  // Page « Clients » : jamais de cache, jamais indexée, aucun référent envoyé (les URL portent la recherche : nom, e-mail, téléphone).
+  async headers() {
+    const priv = [
+      { key: 'Cache-Control', value: 'no-store, max-age=0' },
+      { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
+      { key: 'Referrer-Policy', value: 'no-referrer' },
+    ];
+    return [{ source: '/admin/clients/:path*', headers: priv }, { source: '/admin/clients', headers: priv }, { source: '/api/admin-clients/:path*', headers: priv }, { source: '/api/admin-clients', headers: priv }];
+  },
+
   outputFileTracingIncludes: {
     '/**': ['./data/content.json'],
     // billets PDF : polices du site (assets/fonts), logo et flyers lus à l'exécution (chemins calculés, invisibles du tracer)

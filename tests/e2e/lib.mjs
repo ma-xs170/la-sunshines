@@ -11,6 +11,7 @@ export const USERS = {
   cust:  { id: 'c1000000-0000-4000-8000-000000000001', email: 'cust@test.local',  password: 'Passw0rd!' },
   cust2: { id: 'c2000000-0000-4000-8000-000000000002', email: 'cust2@test.local', password: 'Passw0rd!' },
   admin: { id: 'ad000000-0000-4000-8000-0000000000ad', email: 'admin@test.local', password: 'Passw0rd!' },
+  deleg: { id: 'de000000-0000-4000-8000-0000000000de', email: 'deleg@test.local', password: 'Passw0rd!' },
   orgb:  { id: '0b000000-0000-4000-8000-0000000000b2', email: 'orgb@test.local',  password: 'Passw0rd!' },
   staff: { id: '57000000-0000-4000-8000-000000000057', email: 'staff@test.local', password: 'Passw0rd!' },
 };
@@ -55,6 +56,7 @@ export async function webhook(type, object, { id, sigOverride, secret = 'whsec_e
 export const sessionCompleted = (order, o = {}) => ({ id: o.session ?? order.stripe_checkout_session_id ?? 'cs_x', object: 'checkout.session', client_reference_id: order.id, payment_status: 'paid', amount_total: order.total_cents, payment_intent: o.pi ?? 'pi_' + order.id, metadata: { order_id: order.id }, ...o.extra });
 
 export const stripeState = async () => (await fetch(STRIPE + '/__state')).json();
+export const authState = async (reset = false) => (await fetch(`http://127.0.0.1:${54330 + OFF}/__auth${reset ? '?reset=1' : ''}`)).json();
 export const mailState = async () => (await fetch(MAIL + '/__state')).json();
 export const resetMocks = async () => { await fetch(STRIPE + '/__reset'); await fetch(MAIL + '/__reset'); };
 

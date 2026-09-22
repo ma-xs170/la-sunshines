@@ -331,7 +331,7 @@ begin
   if em is distinct from lower(p.email) then b := b || jsonb_build_object('email', p.email); a := a || jsonb_build_object('email', em); sensitive := true; end if;
   if p_birth is distinct from p.birth_date then b := b || jsonb_build_object('birth_date', p.birth_date); a := a || jsonb_build_object('birth_date', p_birth); sensitive := true; end if;
   if a = '{}'::jsonb then raise exception 'NO_CHANGE'; end if;
-  if sensitive and char_length(btrim(coalesce(p_reason, ''))) < 5 then raise exception 'REASON_REQUIRED'; end if;
+  if sensitive and char_length(btrim(coalesce(p_reason, ''))) < 5 then raise exception 'CLIENT_REASON_REQUIRED'; end if;
   return jsonb_build_object('before', b, 'after', a, 'email_changed', a ? 'email', 'old_email', p.email);
 end $$;
 
@@ -372,7 +372,7 @@ begin
   if not found then raise exception 'USER_NOT_FOUND'; end if;
   if p.role = 'admin' then raise exception 'ADMIN_TARGET'; end if;
   if p.account_status = 'anonymized' then raise exception 'ANONYMIZED'; end if;
-  if char_length(r) < 5 then raise exception 'REASON_REQUIRED'; end if;
+  if char_length(r) < 5 then raise exception 'CLIENT_REASON_REQUIRED'; end if;
   if p.account_status = p_status then raise exception 'NO_CHANGE'; end if;
   update public.profiles set account_status = p_status, status_reason = case when p_status = 'suspended' then left(r, 300) else '' end where id = p_id;
   update auth.users set banned_until = case when p_status = 'suspended' then now() + interval '100 years' else null end where id = p_id;
