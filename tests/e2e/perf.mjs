@@ -31,7 +31,7 @@ const chrome = await launch({
 });
 const results = {};
 for (const p of PAGES) {
-  const { lhr } = await lighthouse(`http://localhost:3130${p.path}`, {
+  const { lhr } = await lighthouse(`${L.BASE}${p.path}`, {
     port: chrome.port, output: 'json', onlyCategories: ['performance'],
     extraHeaders: { Cookie: p.cookie },
     formFactor: 'desktop',
