@@ -7,6 +7,7 @@ import { editorial, orgRpc } from '@/lib/organizer/data';
 import { avgTicketCents, parsePeriod, PERIODS, type AnalyticsData, type Period } from '@/lib/organizer/analytics';
 import { can } from '@/lib/organizer/roles';
 import { formatEuro, formatGp } from '@/lib/ticketing/time';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Analyse · Espace organisateur', robots: { index: false, follow: false } };
@@ -31,7 +32,7 @@ export default async function AnalysisPage({ searchParams }: { searchParams: Pro
         </div>
         <div className="org-chips" role="group" aria-label="Période">
           {(Object.keys(PERIODS) as Period[]).map((p) => (
-            <a key={p} href={`?periode=${p}`} className={'org-chip' + (key === p ? ' is-active' : '')} aria-current={key === p ? 'true' : undefined}>{PERIODS[p]}</a>
+            <Link key={p} href={`?periode=${p}`} className={'org-chip' + (key === p ? ' is-active' : '')} aria-current={key === p ? 'true' : undefined}>{PERIODS[p]}</Link>
           ))}
         </div>
       </div>
@@ -63,7 +64,7 @@ export default async function AnalysisPage({ searchParams }: { searchParams: Pro
                         <td data-label="Vendus (période)">{e.sold}</td>
                         <td data-label="Chiffre d’affaires">{formatEuro(e.revenue_cents)}</td>
                         <td data-label="Remplissage" className="org-table__bar"><ProgressBar sold={e.sold_total} reserved={0} capacity={e.capacity} compact /></td>
-                        <td data-label=""><a className="btn btn--outline" href={`/organisateur/evenements/${e.slug}`}>Tableau de bord</a></td>
+                        <td data-label=""><Link className="btn btn--outline" href={`/organisateur/evenements/${e.slug}`}>Tableau de bord</Link></td>
                       </tr>
                     ))}
                   </tbody>

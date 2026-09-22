@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { orgEventRpc } from '@/lib/organizer/event-data';
 import { ROLE_MATRIX, STAFF_ROLE_LABEL, type StaffRow } from '@/lib/organizer/staff';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Rôles de l’évènement · Espace organisateur', robots: { index: false, follow: false } };
@@ -24,7 +25,7 @@ export default async function EventRolesPage({ params }: { params: Promise<{ slu
           );
         })}
       </ul>
-      <p><a className="btn btn--outline" href="/organisateur/organisation/membres">Gérer les membres et leurs rôles</a></p>
+      <p><Link className="btn btn--outline" href="/organisateur/organisation/membres">Gérer les membres et leurs rôles</Link></p>
     </main>
   );
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { adminRpc, requireAdminPage } from '@/lib/adminSpace';
 import { one } from '@/lib/organizer/event-data';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Organisateurs · Gestion', robots: { index: false, follow: false } };
@@ -20,7 +21,7 @@ export default async function OrganizersPage({ searchParams }: { searchParams: P
       </form>
       {!r.ok ? <p className="admin-error" role="alert">{r.message}</p> : r.data.length === 0 ? <div className="glass org-empty"><h3>Aucun organisateur</h3><p>Aucune organisation ne correspond à cette recherche.</p></div> : (
         <div className="org-table glass"><table><thead><tr><th>Référence</th><th>Structure</th><th>E-mail</th><th>Statut</th><th /></tr></thead>
-          <tbody>{r.data.map((o) => <tr key={o.id}><td data-label="Référence"><code>{o.reference ?? '—'}</code></td><td data-label="Structure">{o.name}</td><td data-label="E-mail">{o.contact_email || '—'}</td><td data-label="Statut">{STATUS[o.account_status]}</td><td><a className="btn btn--outline" href={`/admin/gestion/organisateurs/${o.id}`}>Voir</a></td></tr>)}</tbody></table></div>)}
+          <tbody>{r.data.map((o) => <tr key={o.id}><td data-label="Référence"><code>{o.reference ?? '—'}</code></td><td data-label="Structure">{o.name}</td><td data-label="E-mail">{o.contact_email || '—'}</td><td data-label="Statut">{STATUS[o.account_status]}</td><td><Link className="btn btn--outline" href={`/admin/gestion/organisateurs/${o.id}`}>Voir</Link></td></tr>)}</tbody></table></div>)}
     </>
   );
 }

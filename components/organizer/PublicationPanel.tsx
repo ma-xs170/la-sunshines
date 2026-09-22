@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { CHECK_LABEL, STATUS_LABEL, checkHref, type CheckKey, type Checklist, type PubStatus } from '@/lib/organizer/publication';
@@ -25,11 +27,11 @@ export default function PublicationPanel({ slug, state }: { slug: string; state:
   return (
     <section className="glass org-panel" aria-labelledby="pub-h">
       <h2 id="pub-h">Publication</h2>
-      {published ? <p role="status">✔ {STATUS_LABEL.approved} : la page de l’évènement est en ligne (<a href={`/editions/${slug}`}>voir la page</a>).</p> : (
+      {published ? <p role="status">✔ {STATUS_LABEL.approved} : la page de l’évènement est en ligne (<Link href={`/editions/${slug}`}>voir la page</Link>).</p> : (
         <>
           <ul className="ef-list" style={{ listStyle: 'none', padding: 0 }}>
             {(Object.keys(CHECK_LABEL) as CheckKey[]).map((k) => (
-              <li key={k}><span>{state.checklist[k] ? '✔' : '○'} {CHECK_LABEL[k]}</span>{state.checklist[k] ? <span className="org-muted">Fait</span> : <a href={checkHref(k, slug, state.mode)}>Compléter</a>}</li>
+              <li key={k}><span>{state.checklist[k] ? '✔' : '○'} {CHECK_LABEL[k]}</span>{state.checklist[k] ? <span className="org-muted">Fait</span> : <Link href={checkHref(k, slug, state.mode)}>Compléter</Link>}</li>
             ))}
           </ul>
           {!state.org_approved && <p className="ef-warn">L’organisation doit être approuvée avant de demander une publication.</p>}

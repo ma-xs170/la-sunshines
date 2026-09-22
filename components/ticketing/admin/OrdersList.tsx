@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import { useCallback, useEffect, useState } from 'react';
 import { formatEuro, formatPrice } from '@/lib/ticketing/time';
 
@@ -50,7 +52,7 @@ export default function OrdersList({ events }: { events: { slug: string; name: s
           <tbody>
             {(data?.orders ?? []).map((o) => (
               <tr key={o.id}>
-                <td><a className="admin-link" href={`/admin/billetterie/commandes/${o.id}`}>{o.order_number}</a><br /><small>{new Date(o.created_at).toLocaleString('fr-FR', { timeZone: 'America/Guadeloupe' })}</small></td>
+                <td><Link className="admin-link" href={`/admin/billetterie/commandes/${o.id}`}>{o.order_number}</Link><br /><small>{new Date(o.created_at).toLocaleString('fr-FR', { timeZone: 'America/Guadeloupe' })}</small></td>
                 <td>{o.buyer_first_name} {o.buyer_last_name}<br /><small>{o.buyer_email}</small></td>
                 <td>{o.order_items.map((i) => `${i.quantity} × ${i.tier_name}`).join(', ')}{o.source === 'manual' && <><br /><small>Invitation</small></>}</td>
                 <td>{formatPrice(o.total_cents)}{o.refunded_cents > 0 && <><br /><small>remb. {formatEuro(o.refunded_cents)}</small></>}</td>

@@ -8,6 +8,7 @@ import { orgEventRpc } from '@/lib/organizer/event-data';
 import { orgRpc, type OrgStats, type OrgTiers } from '@/lib/organizer/data';
 import { countryName, SOURCE_LABEL } from '@/lib/organizer/audience';
 import { formatEuro, formatGp } from '@/lib/ticketing/time';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Statistiques · Espace organisateur', robots: { index: false, follow: false } };
@@ -48,8 +49,8 @@ export default async function StatsViewPage({ params }: { params: Promise<{ slug
     <main className="org org-page">
       <h1 className="org-head__title">{VUES[vue]}</h1><p className="script">{title}</p>
       <nav className="org-subnav" aria-label="Statistiques">
-        {Object.entries(VUES).map(([k, l]) => <a key={k} href={`/organisateur/evenements/${slug}/statistiques/${k}`} className={'org-subnav__link' + (k === vue ? ' is-active' : '')} aria-current={k === vue ? 'page' : undefined}>{l}</a>)}
-        <a className="org-subnav__link" href={`/organisateur/evenements/${slug}/stats`}>Ventes</a>
+        {Object.entries(VUES).map(([k, l]) => <Link key={k} href={`/organisateur/evenements/${slug}/statistiques/${k}`} className={'org-subnav__link' + (k === vue ? ' is-active' : '')} aria-current={k === vue ? 'page' : undefined}>{l}</Link>)}
+        <Link className="org-subnav__link" href={`/organisateur/evenements/${slug}/stats`}>Ventes</Link>
       </nav>
 
       {vue === 'vue-densemble' && (<>

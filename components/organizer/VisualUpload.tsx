@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { upload } from '@vercel/blob/client';
@@ -49,7 +51,7 @@ export default function VisualUpload({ slug, current, title }: { slug: string; c
         </div>
         {err && <p className="wiz__err" role="alert">{err}</p>}
         {msg && <p className="wiz__hint" role="status">{msg}</p>}
-        <div className="wiz__nav"><a className="btn btn--outline" href={`/organisateur/evenements/${slug}`}>← Retour à l’évènement</a>{current && <button type="button" className="btn btn--outline" disabled={busy} onClick={remove}>Retirer le visuel</button>}</div>
+        <div className="wiz__nav"><Link className="btn btn--outline" href={`/organisateur/evenements/${slug}`}>← Retour à l’évènement</Link>{current && <button type="button" className="btn btn--outline" disabled={busy} onClick={remove}>Retirer le visuel</button>}</div>
       </section>
     </div>
   );

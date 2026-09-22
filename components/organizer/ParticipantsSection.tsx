@@ -1,6 +1,7 @@
 import ParticipantsPanel from './ParticipantsPanel';
 import type { MessageRow } from './MessageComposer';
 import { orgRpc, type OrgParticipant } from '@/lib/organizer/data';
+import Link from 'next/link';
 
 const PAGE = 25;
 const SORTS: Record<string, string> = { date: 'Date d’achat', name: 'Nom', tier: 'Tarif', status: 'Statut', ref: 'Référence' };
@@ -45,7 +46,7 @@ export default async function ParticipantsSection({ slug, sp, userId, manage, ti
     <section aria-labelledby="org-part-h" className="org-part">
       <div className="org-part__head">
         <h2 id="org-part-h">{title} <span className="org-count">{parts.total}</span></h2>
-        {manage && <a className="btn btn--outline" href={exportHref}>Exporter (CSV)</a>}
+        {manage && <Link className="btn btn--outline" href={exportHref}>Exporter (CSV)</Link>}
       </div>
       {!pr.ok && <p className="admin-error" role="alert">Impossible de charger les participants pour l’instant.</p>}
       <form className="org-filters glass" method="get">
@@ -59,16 +60,16 @@ export default async function ParticipantsSection({ slug, sp, userId, manage, ti
           <select name="sort" defaultValue={sort}>{Object.entries(SORTS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></label>
         <label className="admin-field"><span>Ordre</span>
           <select name="dir" defaultValue={dir}><option value="desc">Décroissant</option><option value="asc">Croissant</option></select></label>
-        <div className="org-filters__actions"><button className="btn btn--amber">Filtrer</button>{(q || tier || status) && <a className="btn btn--outline" href={qs({ q: '', tier: '', status: '', sort: 'date', dir: 'desc', page: 1 })}>Effacer</a>}</div>
+        <div className="org-filters__actions"><button className="btn btn--amber">Filtrer</button>{(q || tier || status) && <Link className="btn btn--outline" href={qs({ q: '', tier: '', status: '', sort: 'date', dir: 'desc', page: 1 })}>Effacer</Link>}</div>
       </form>
 
       <ParticipantsPanel slug={slug} rows={parts.rows} canManage={manage} tiers={tierOptions} history={ml.ok ? ml.data : []} replyTo={replyTo} />
 
       {pages > 1 && (
         <div className="org-pager" role="navigation" aria-label="Pagination">
-          {page > 1 ? <a className="btn btn--outline" href={qs({ page: page - 1 })}>← Précédent</a> : <span />}
+          {page > 1 ? <Link className="btn btn--outline" href={qs({ page: page - 1 })}>← Précédent</Link> : <span />}
           <span>Page {page} / {pages}</span>
-          {page < pages ? <a className="btn btn--outline" href={qs({ page: page + 1 })}>Suivant →</a> : <span />}
+          {page < pages ? <Link className="btn btn--outline" href={qs({ page: page + 1 })}>Suivant →</Link> : <span />}
         </div>
       )}
     </section>

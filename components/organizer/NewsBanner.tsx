@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import Icon from '../Icon';
 import type { NewsItem } from '@/lib/organizer/news';
 import { NEWS_CATEGORIES } from '@/lib/news/text';
@@ -9,11 +10,11 @@ export default function NewsBanner({ items }: { items: NewsItem[] }) {
   return (
     <div className="org-banners" role="region" aria-label="Annonces importantes">
       {pinned.map((n) => (
-        <a key={n.id} className={`org-banner org-banner--${n.category}`} href={`/organisateur/actualites#${n.id}`}>
+        <Link key={n.id} className={`org-banner org-banner--${n.category}`} href={`/organisateur/actualites#${n.id}`}>
           <Icon name={n.category === 'maintenance' ? 'clock' : 'bell'} />
           <span><strong>{NEWS_CATEGORIES[n.category]} · {n.title}</strong></span>
           <Icon name="arrow-right" className="icon org-banner__go" />
-        </a>
+        </Link>
       ))}
     </div>
   );

@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import { useEffect, useRef, useState } from 'react';
 import { Field, Stepper } from './WizardBits';
 import { BIZOUK_SANDBOX, parseBizoukCode } from '@/lib/bizoukEmbed';
@@ -106,7 +108,7 @@ export default function EventWizard({ orgs: initialOrgs, isAdmin, aiAvailable, d
                   </label>
                 );
               })}
-              <a className="wiz__pick wiz__pick--new" href="/devenir-organisateur"><strong>+ Nouvelle organisation</strong><span className="wiz__hint">Dépose le dossier de ta structure. Elle devra être approuvée par l’équipe avant de créer un évènement.</span></a>
+              <Link className="wiz__pick wiz__pick--new" href="/devenir-organisateur"><strong>+ Nouvelle organisation</strong><span className="wiz__hint">Dépose le dossier de ta structure. Elle devra être approuvée par l’équipe avant de créer un évènement.</span></Link>
             </div>
             {errs.org && <p className="wiz__err" role="alert">{errs.org}</p>}
             {isAdmin && (
@@ -169,7 +171,7 @@ export default function EventWizard({ orgs: initialOrgs, isAdmin, aiAvailable, d
         )}
 
         <div className="wiz__nav">
-          {step > 0 ? <button type="button" className="btn btn--outline" onClick={() => { setErrs({}); setStep((n) => n - 1); }}>← Retour</button> : <a className="btn btn--outline" href="/organisateur/evenements">Annuler</a>}
+          {step > 0 ? <button type="button" className="btn btn--outline" onClick={() => { setErrs({}); setStep((n) => n - 1); }}>← Retour</button> : <Link className="btn btn--outline" href="/organisateur/evenements">Annuler</Link>}
           <span className="wiz__saved" aria-live="polite">Brouillon enregistré sur cet appareil.</span>
           {step < 2 ? <button type="button" className="btn btn--amber" onMouseDown={(e) => e.preventDefault()} onClick={next}>Continuer</button> : <button type="button" className="btn btn--amber" onMouseDown={(e) => e.preventDefault()} onClick={submit} disabled={busy}>{busy ? 'Création…' : 'Créer le brouillon'}</button>}
         </div>

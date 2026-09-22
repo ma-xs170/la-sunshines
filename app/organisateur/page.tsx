@@ -11,6 +11,7 @@ import { can } from '@/lib/organizer/roles';
 import { orgRpc } from '@/lib/organizer/data';
 import { variation } from '@/lib/organizer/variation';
 import { formatEuro } from '@/lib/ticketing/time';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Espace organisateur · LA SUNSHINES', robots: { index: false, follow: false } };
@@ -38,7 +39,7 @@ export default async function OrganizerHome() {
           <h1 className="org-head__title">Bienvenue</h1>
           <p className="script">{s.firstName ? `Content de te revoir, ${s.firstName}.` : 'Content de te revoir.'}</p>
         </div>
-        {manage && <a className="btn btn--amber btn--lg" href="/organisateur/evenements/nouveau"><Icon name="plus" />Créer un événement</a>}
+        {manage && <Link className="btn btn--amber btn--lg" href="/organisateur/evenements/nouveau"><Icon name="plus" />Créer un événement</Link>}
       </div>
 
       {dash?.ok && (

@@ -5,6 +5,7 @@ import { one } from '@/lib/organizer/event-data';
 import { fold } from '@/lib/dresscodeColors';
 import { getAllEditions } from '@/lib/content';
 import { formatGp } from '@/lib/ticketing/time';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Évènements · Gestion', robots: { index: false, follow: false } };
@@ -24,8 +25,8 @@ export default async function AllEventsPage({ searchParams }: { searchParams: Pr
       {rows.length === 0 ? <div className="glass org-empty"><h3>Aucun évènement</h3><p>Aucun évènement de billetterie ne correspond à ces filtres.</p></div> : (
         <div className="org-table glass"><table><thead><tr><th>Évènement</th><th>Date</th><th>Organisateur</th><th>Statut</th><th>Vendus</th><th /></tr></thead>
           <tbody>{rows.map((e) => <tr key={e.slug}><td data-label="Évènement">{names.get(e.slug) ?? e.slug}<br /><span className="org-muted">{e.slug}</span></td><td data-label="Date">{formatGp(e.starts_at)}</td>
-            <td data-label="Organisateur"><a href={`/admin/gestion/organisateurs/${e.organizer_id}`}>{e.organizer}</a><br /><code>{e.organizer_reference ?? ''}</code></td><td data-label="Statut">{ST[e.status]}</td><td data-label="Vendus">{e.sold} / {e.capacity}</td>
-            <td><a className="btn btn--outline" href={`/admin/gestion/transfert?slug=${e.slug}`}>Transférer</a></td></tr>)}</tbody></table></div>)}
+            <td data-label="Organisateur"><Link href={`/admin/gestion/organisateurs/${e.organizer_id}`}>{e.organizer}</Link><br /><code>{e.organizer_reference ?? ''}</code></td><td data-label="Statut">{ST[e.status]}</td><td data-label="Vendus">{e.sold} / {e.capacity}</td>
+            <td><Link className="btn btn--outline" href={`/admin/gestion/transfert?slug=${e.slug}`}>Transférer</Link></td></tr>)}</tbody></table></div>)}
       <LinkedEventsList />
     </>
   );

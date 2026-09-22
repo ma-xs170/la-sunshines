@@ -5,6 +5,7 @@ import EventBrowser from '@/components/organizer/EventBrowser';
 import { loadCardEvents } from '@/lib/organizer/cards';
 import { getOrgContext } from '@/lib/organizer/context';
 import { can } from '@/lib/organizer/roles';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Mes évènements · Espace organisateur', robots: { index: false, follow: false } };
@@ -23,7 +24,7 @@ export default async function OrganizerEventsPage() {
           <h1 className="org-head__title">Mes évènements</h1>
           <p className="script">{current.name}</p>
         </div>
-        {manage && <a className="btn btn--amber btn--lg" href="/organisateur/evenements/nouveau"><Icon name="plus" />Créer un évènement</a>}
+        {manage && <Link className="btn btn--amber btn--lg" href="/organisateur/evenements/nouveau"><Icon name="plus" />Créer un évènement</Link>}
       </div>
       {!ok && <p className="admin-error" role="alert">Impossible de charger les évènements pour l’instant.</p>}
       <EventBrowser events={events} canManage={manage} canCreate={manage} />

@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import { useState } from 'react';
 
 interface Org { id: string; status: 'pending' | 'approved' | 'suspended'; name: string; legal_form: string; siret: string; responsible_name: string; address: string; contact_email: string }
@@ -23,7 +25,7 @@ export default function OrgAdminActions({ org, events }: { org: Org; events: str
           {org.status === 'pending' && <button className="btn btn--amber" disabled={busy} onClick={() => status('approve', `Approuver « ${org.name} » ? Sa référence ORG est créée.`, 'Approuvé.')}>Approuver</button>}
           {org.status === 'approved' && <button className="btn btn--outline" disabled={busy} onClick={() => status('suspend', `Suspendre « ${org.name} » ? Elle ne pourra plus vendre ni publier.`, 'Suspendu.')}>Suspendre</button>}
           {org.status === 'suspended' && <button className="btn btn--amber" disabled={busy} onClick={() => status('reactivate', `Réactiver « ${org.name} » ?`, 'Réactivé.')}>Réactiver</button>}
-          {events.length > 0 && <a className="btn btn--outline" href={`/admin/gestion/transfert?from=${org.id}`}>Transférer un évènement</a>}
+          {events.length > 0 && <Link className="btn btn--outline" href={`/admin/gestion/transfert?from=${org.id}`}>Transférer un évènement</Link>}
         </div>
         {msg && <p className="ef-help" role="status">{msg}</p>}
       </section>

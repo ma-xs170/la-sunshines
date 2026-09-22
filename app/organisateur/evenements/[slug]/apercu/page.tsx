@@ -7,6 +7,7 @@ import { getAllEditions } from '@/lib/content';
 import CopyLink from '@/components/organizer/CopyLink';
 import FreeBadge from '@/components/ticketing/FreeBadge';
 import { formatEuro, formatGp } from '@/lib/ticketing/time';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Aperçu · Espace organisateur', robots: { index: false, follow: false } };
@@ -22,13 +23,13 @@ export default async function PreviewPage({ params }: { params: Promise<{ slug: 
   const venue = data.venues.find((v) => v.id === data.sessions[0]?.venue_id) ?? data.venues[0];
   return (
     <main className="org org-page">
-      <p className="org__back"><a href={`/organisateur/evenements/${slug}`}>← Retour au tableau de bord</a></p>
+      <p className="org__back"><Link href={`/organisateur/evenements/${slug}`}>← Retour au tableau de bord</Link></p>
       <p><span className="preview-badge">Aperçu</span> <span className="org-muted">Visible seulement des membres de l’organisation et des admins. Le public ne voit rien tant que l’évènement n’est pas publié.</span></p>
       <h1 className="org-head__title">{title}</h1>
       {d.subtitle && <p className="script">{d.subtitle}</p>}
       <p className="org-muted">{formatGp(data.event.starts_at)}{venue ? ` · ${venue.name}${venue.city ? ', ' + venue.city : ''}` : ''}</p>
       {flyer && <Image src={flyer} alt={`Affiche de ${title}`} width={480} height={600} style={{ maxWidth: '100%', height: 'auto', borderRadius: 12 }} unoptimized />}
-      {d.description ? <section className="glass org-panel"><h2>Description</h2><p style={{ whiteSpace: 'pre-wrap' }}>{d.description}</p></section> : <section className="glass org-empty"><h3>Pas encore de description</h3><p><a href={`/organisateur/evenements/${slug}/description`}>Ajouter une description</a></p></section>}
+      {d.description ? <section className="glass org-panel"><h2>Description</h2><p style={{ whiteSpace: 'pre-wrap' }}>{d.description}</p></section> : <section className="glass org-empty"><h3>Pas encore de description</h3><p><Link href={`/organisateur/evenements/${slug}/description`}>Ajouter une description</Link></p></section>}
       <section className="glass org-panel">
         <h2>Billets</h2>
         {tiers.length === 0 ? <p className="org-muted">Aucun tarif en vente pour le moment.</p> : (

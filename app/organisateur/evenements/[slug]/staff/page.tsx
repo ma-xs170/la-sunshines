@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { orgEventRpc } from '@/lib/organizer/event-data';
 import { STAFF_ROLE_LABEL, type StaffRow } from '@/lib/organizer/staff';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Liste du staff · Espace organisateur', robots: { index: false, follow: false } };
@@ -18,9 +19,9 @@ export default async function StaffPage({ params }: { params: Promise<{ slug: st
         {members.length === 0 ? <p className="org-muted">Aucun membre.</p> : (
           <div className="org-table"><table><thead><tr><th>Nom</th><th>E-mail</th><th>Rôle</th></tr></thead>
             <tbody>{members.map((m) => <tr key={m.user_id}><td data-label="Nom">{m.name || '—'}</td><td data-label="E-mail">{m.email}</td><td data-label="Rôle">{STAFF_ROLE_LABEL[m.role ?? ''] ?? m.role}</td></tr>)}</tbody></table></div>)}
-        <p><a className="btn btn--outline" href="/organisateur/organisation/membres">Ajouter ou modifier des membres</a>{!s.isAdmin && <span className="org-muted"> (réservé aux propriétaires)</span>}</p>
+        <p><Link className="btn btn--outline" href="/organisateur/organisation/membres">Ajouter ou modifier des membres</Link>{!s.isAdmin && <span className="org-muted"> (réservé aux propriétaires)</span>}</p>
       </section>
-      <p><a href={`/organisateur/evenements/${slug}/staff/qr`}>QR code de connexion pour le staff →</a></p>
+      <p><Link href={`/organisateur/evenements/${slug}/staff/qr`}>QR code de connexion pour le staff →</Link></p>
     </main>
   );
 }

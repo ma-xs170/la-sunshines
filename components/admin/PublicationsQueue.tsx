@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import { Fragment, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { CHECK_LABEL, STATUS_LABEL, type CheckKey, type Checklist, type PubStatus } from '@/lib/organizer/publication';
@@ -29,7 +31,7 @@ export default function PublicationsQueue({ rows }: { rows: PubRow[] }) {
         <Fragment key={r.id}>
           <tr>
             <td data-label="Évènement"><strong>{r.title}</strong><br /><span className="org-muted">{r.slug} · {r.mode === 'bizouk' ? 'Bizouk' : r.mode === 'internal' ? 'Billetterie interne' : 'Sans billetterie'}</span></td>
-            <td data-label="Organisation"><a href={`/admin/gestion/organisateurs/${r.organizer_id}`}>{r.organizer}</a><br /><code>{r.organizer_reference ?? ''}</code></td>
+            <td data-label="Organisation"><Link href={`/admin/gestion/organisateurs/${r.organizer_id}`}>{r.organizer}</Link><br /><code>{r.organizer_reference ?? ''}</code></td>
             <td data-label="Demandé le">{when(r.created_at)}<br /><span className="org-muted">{r.requester_email ?? ''}</span></td>
             <td data-label="Statut">{STATUS_LABEL[r.status]}{r.status === 'rejected' && r.reason ? <><br /><span className="org-muted">Motif : {r.reason}</span></> : null}</td>
             <td>{r.status === 'pending' && <button type="button" className="btn btn--outline" aria-expanded={open === r.id} onClick={() => { setOpen(open === r.id ? null : r.id); setErr(''); setReason(''); }}>Examiner</button>}</td>

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { ORDER_STATUS, one, orgEventRpc } from '@/lib/organizer/event-data';
 import { formatEuro, formatGp, formatPrice } from '@/lib/ticketing/time';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Commandes · Espace organisateur', robots: { index: false, follow: false } };
@@ -31,13 +32,13 @@ export default async function OrdersPage({ params, searchParams }: { params: Pro
         <div className="org-table glass"><table>
           <thead><tr><th>Commande</th><th>Acheteur</th><th>Billets</th><th>Total</th><th>Statut</th><th>Date</th></tr></thead>
           <tbody>{data.rows.map((r) => (
-            <tr key={r.id}><td data-label="Commande"><a href={`/organisateur/evenements/${slug}/commandes/${r.id}`}><code>{r.order_number}</code></a>{r.source === 'manual' && <span className="org-muted"> · invitation</span>}</td>
+            <tr key={r.id}><td data-label="Commande"><Link href={`/organisateur/evenements/${slug}/commandes/${r.id}`}><code>{r.order_number}</code></Link>{r.source === 'manual' && <span className="org-muted"> · invitation</span>}</td>
               <td data-label="Acheteur">{r.buyer_first_name} {r.buyer_last_name}<br /><span className="org-muted">{r.buyer_email}</span></td>
               <td data-label="Billets">{r.tickets}</td><td data-label="Total">{formatPrice(r.total_cents)}{r.refunded_cents > 0 && <span className="org-muted"> (−{formatEuro(r.refunded_cents)})</span>}</td>
               <td data-label="Statut">{ORDER_STATUS[r.status] ?? r.status}</td><td data-label="Date">{formatGp(r.created_at)}</td></tr>))}</tbody>
         </table></div>)}
       <nav className="org-pager" aria-label="Pagination"><span className="org-muted">{data.total} commande{data.total > 1 ? 's' : ''} · page {page} / {pages}</span>
-        {page > 1 && <a className="btn btn--outline" href={link({ page: page - 1 })}>Précédente</a>}{page < pages && <a className="btn btn--outline" href={link({ page: page + 1 })}>Suivante</a>}</nav>
+        {page > 1 && <Link className="btn btn--outline" href={link({ page: page - 1 })}>Précédente</Link>}{page < pages && <Link className="btn btn--outline" href={link({ page: page + 1 })}>Suivante</Link>}</nav>
     </main>
   );
 }

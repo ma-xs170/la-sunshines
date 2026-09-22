@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import { useMemo, useState } from 'react';
 import { REGIONS, REGION_LABEL, conflictLevels, dayKey, findConflicts, monthGrid, weekDays, type CalEvent, type Region } from '@/lib/calendar';
 import { mapsLink } from '@/lib/organizer/event-pages';
@@ -28,7 +30,7 @@ export default function RegionalCalendar({ region, events, admin, names }: { reg
   return (
     <div className="ef">
       <section className="glass ef-card">
-        <div className="ef-row" role="group" aria-label="Région">{REGIONS.map((r) => <a key={r} className={'filter' + (r === region ? ' is-active' : '')} aria-current={r === region ? 'page' : undefined} href={`?region=${r}`}>{REGION_LABEL[r]}</a>)}</div>
+        <div className="ef-row" role="group" aria-label="Région">{REGIONS.map((r) => <Link key={r} className={'filter' + (r === region ? ' is-active' : '')} aria-current={r === region ? 'page' : undefined} href={`?region=${r}`}>{REGION_LABEL[r]}</Link>)}</div>
         <div className="ef-row" role="group" aria-label="Vue">{([['month', 'Mois'], ['week', 'Semaine'], ['list', 'Liste']] as const).map(([k, l]) => <button key={k} type="button" className={'filter' + (view === k ? ' is-active' : '')} aria-pressed={view === k} onClick={() => setView(k)}>{l}</button>)}
           {admin && <select aria-label="Statut" value={status} onChange={(e) => setStatus(e.target.value)}><option value="">Tous les statuts</option>{Object.entries(STATUS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>}</div>
         <p className="ef-help">Contour orange : deux évènements le même soir dans la région ; contour rouge : même soir au même lieu. Simple avertissement, rien n’est bloqué.</p>

@@ -3,6 +3,7 @@ import { orgRpc } from '@/lib/organizer/data';
 import { nextSteps, type TicketingMode } from '@/lib/organizer/create-event';
 import type { EventPageData } from '@/lib/organizer/event-page-data';
 import PublicationPanel, { type PubState } from './PublicationPanel';
+import Link from 'next/link';
 
 /** Checklist « Prochaines étapes » d'un évènement en brouillon (données lues après le contrôle d'accès de la page). */
 export default async function NextSteps({ slug, userId, hasTiers, published, fresh, hasFlyer }: { slug: string; userId: string; hasTiers: boolean; published: boolean; fresh: boolean; hasFlyer: boolean }) {
@@ -24,7 +25,7 @@ export default async function NextSteps({ slug, userId, hasTiers, published, fre
       <h2 id="next-h">Prochaines étapes</h2>
       <p className="org-muted">{left === 0 ? 'Tout est prêt.' : `${left} étape${left > 1 ? 's' : ''} restante${left > 1 ? 's' : ''}.`}</p>
       <ol className="ef-list" style={{ listStyle: 'none', padding: 0 }}>
-        {steps.map((s) => <li key={s.key}><span>{s.done ? '✔' : '○'} <a href={s.href}>{s.label}</a></span><span className="org-muted">{s.done ? 'Fait' : 'À faire'}</span></li>)}
+        {steps.map((s) => <li key={s.key}><span>{s.done ? '✔' : '○'} <Link href={s.href}>{s.label}</Link></span><span className="org-muted">{s.done ? 'Fait' : 'À faire'}</span></li>)}
       </ol>
       {pub.ok && <PublicationPanel slug={slug} state={pub.data} />}
     </section>

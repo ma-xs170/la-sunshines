@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import { useEffect, useRef, useState } from 'react';
 
 interface Org { id: string; reference: string | null; name: string; account_status: 'pending' | 'approved' | 'suspended'; region: string | null }
@@ -41,13 +43,13 @@ export default function GlobalSearch() {
           {empty && <p className="ef-help">Aucun résultat pour « {q} ».</p>}
           {res?.organizers.length ? <section><h3>Organisateurs</h3>{res.organizers.map((o) => (
             <div className="gsearch__row" key={o.id}><div><code>{o.reference ?? 'sans référence'}</code> <strong>{o.name}</strong><br /><span className="ef-help">{STATUS[o.account_status]}{o.region ? ` · ${REGION[o.region] ?? o.region}` : ''}</span></div>
-              <a className="btn btn--outline" href={`/admin/gestion/organisateurs/${o.id}`}>Voir</a></div>))}</section> : null}
-          {res?.admins.length ? <section><h3>Administrateurs</h3>{res.admins.map((a) => <div className="gsearch__row" key={a.user_id}><div><code>{a.reference}</code> {a.first_name} {a.last_name}</div><a className="btn btn--outline" href="/admin/gestion/administrateurs">Voir</a></div>)}</section> : null}
-          {res?.orders.length ? <section><h3>Commandes</h3>{res.orders.map((o) => <div className="gsearch__row" key={o.id}><div><code>{o.order_number}</code> {o.buyer_first_name} {o.buyer_last_name}<br /><span className="ef-help">{o.event_slug}</span></div><a className="btn btn--outline" href={`/admin/billetterie/commandes/${o.id}`}>Voir</a></div>)}</section> : null}
-          {res?.tickets.length ? <section><h3>Tickets support</h3>{res.tickets.map((t) => <div className="gsearch__row" key={t.id}><div><code>{t.reference}</code> {t.subject}</div><a className="btn btn--outline" href={`/admin/gestion/support/${t.id}`}>Voir</a></div>)}</section> : null}
+              <Link className="btn btn--outline" href={`/admin/gestion/organisateurs/${o.id}`}>Voir</Link></div>))}</section> : null}
+          {res?.admins.length ? <section><h3>Administrateurs</h3>{res.admins.map((a) => <div className="gsearch__row" key={a.user_id}><div><code>{a.reference}</code> {a.first_name} {a.last_name}</div><Link className="btn btn--outline" href="/admin/gestion/administrateurs">Voir</Link></div>)}</section> : null}
+          {res?.orders.length ? <section><h3>Commandes</h3>{res.orders.map((o) => <div className="gsearch__row" key={o.id}><div><code>{o.order_number}</code> {o.buyer_first_name} {o.buyer_last_name}<br /><span className="ef-help">{o.event_slug}</span></div><Link className="btn btn--outline" href={`/admin/billetterie/commandes/${o.id}`}>Voir</Link></div>)}</section> : null}
+          {res?.tickets.length ? <section><h3>Tickets support</h3>{res.tickets.map((t) => <div className="gsearch__row" key={t.id}><div><code>{t.reference}</code> {t.subject}</div><Link className="btn btn--outline" href={`/admin/gestion/support/${t.id}`}>Voir</Link></div>)}</section> : null}
           {res && (res.events.length || res.editions.length) ? <section><h3>Évènements</h3>
-            {res.events.map((e) => <div className="gsearch__row" key={e.slug}><div>{e.slug}<br /><span className="ef-help">{e.organizer}</span></div><a className="btn btn--outline" href={`/admin/gestion/evenements?q=${e.slug}`}>Voir</a></div>)}
-            {res.editions.map((e) => <div className="gsearch__row" key={e.slug}><div>{e.name}</div><a className="btn btn--outline" href={`/admin/gestion/evenements?q=${e.slug}`}>Voir</a></div>)}</section> : null}
+            {res.events.map((e) => <div className="gsearch__row" key={e.slug}><div>{e.slug}<br /><span className="ef-help">{e.organizer}</span></div><Link className="btn btn--outline" href={`/admin/gestion/evenements?q=${e.slug}`}>Voir</Link></div>)}
+            {res.editions.map((e) => <div className="gsearch__row" key={e.slug}><div>{e.name}</div><Link className="btn btn--outline" href={`/admin/gestion/evenements?q=${e.slug}`}>Voir</Link></div>)}</section> : null}
         </div>
       )}
     </div>

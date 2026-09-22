@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { orgEventRpc } from '@/lib/organizer/event-data';
 import { formatEuro } from '@/lib/ticketing/time';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Finance · Espace organisateur', robots: { index: false, follow: false } };
@@ -15,7 +16,7 @@ export default async function FinancePage({ params }: { params: Promise<{ slug: 
     <main className="org org-page">
       <h1 className="org-head__title">Récapitulatif financier</h1><p className="script">{title}</p>
       <section className="org-kpis" aria-label="Chiffres financiers">{cards.map(([k, v, s]) => <div className="glass org-kpi" key={k}><span className="kicker">{k}</span><strong>{formatEuro(v)}</strong><span>{s}</span></div>)}</section>
-      <p className="org-muted">Les versements sont faits à la main par l’équipe LA SUNSHINES, jamais automatiquement. Les invitations n’ont aucune recette. <a href={`/api/organisateur/events/${slug}/finance`}>Exporter en CSV</a> · <a href={`/organisateur/evenements/${slug}/finance/versements`}>Voir les versements</a></p>
+      <p className="org-muted">Les versements sont faits à la main par l’équipe LA SUNSHINES, jamais automatiquement. Les invitations n’ont aucune recette. <a href={`/api/organisateur/events/${slug}/finance`}>Exporter en CSV</a> · <Link href={`/organisateur/evenements/${slug}/finance/versements`}>Voir les versements</Link></p>
     </main>
   );
 }
