@@ -10,8 +10,15 @@
 --  * Impression de lots de billets : org_print_ticket_ids.
 --  * Statistiques : org_stats_extra (commandes, canaux, acheteurs, performance), event_views (compteurs AGRÉGÉS anonymes : jour,
 --    canal, pays — aucune adresse IP, aucun identifiant) + track_event_view / org_event_views.
+--  * Correctif : org_orders et org_order_detail (migration 016, déjà en prod) sont déclarées « stable » alors qu'elles journalisent
+--    (_org_audit, une écriture). PostgREST exécute les fonctions stable/immutable dans une transaction EN LECTURE SEULE (même en
+--    POST) : l'écriture échouait (« cannot execute INSERT in a read-only transaction »), masqué par le throttle de l'audit (l'échec
+--    ne se voyait que hors de sa fenêtre). Page « Commandes » de l'organisateur, trouvé par le parcours Playwright du menu.
 -- Additive : aucune donnée existante modifiée ni supprimée.
 -- =====================================================================
+
+alter function public.org_orders(uuid, text, text, text, int, int) volatile;
+alter function public.org_order_detail(uuid, text, uuid) volatile;
 
 alter table public.ticketed_events
   add column if not exists fee_mode text not null default 'customer' check (fee_mode in ('customer', 'included')),
@@ -62,8 +69,12 @@ language sql volatile security definer set search_path = public, pg_temp as $$
 $$;
 
 -- Finance : les frais « inclus dans le prix » (fee_absorbed_cents) sont pris sur la part de l'organisateur.
+-- NON « stable » : la fonction journalise (_org_audit, une écriture) ; PostgREST exécute les fonctions stable/immutable
+-- dans une transaction EN LECTURE SEULE (POST compris), ce qui ferait échouer l'écriture (« cannot execute INSERT in
+-- a read-only transaction »), masqué par le throttle de l'audit (échec seulement hors de la fenêtre de 30 min). Corrige
+-- aussi les deux définitions antérieures de org_finance (017, 021), déjà appliquées en prod avec le même défaut.
 create or replace function public.org_finance(p_actor uuid, p_slug text) returns jsonb
-language plpgsql stable security definer set search_path = public, pg_temp as $$
+language plpgsql security definer set search_path = public, pg_temp as $$
 declare ev public.ticketed_events; gross bigint; fees bigint; refunded bigint; net bigint; paid bigint;
 begin
   ev := public._org_access(p_actor, p_slug, 'owner');

@@ -224,7 +224,10 @@ for (const [fn, tok, body] of [['reserve_tickets', jC, { p_slug: SLUG, p_user: U
 }
 x = await L.rest(`/profiles?id=eq.${USERS.cust.id}`, { method: 'PATCH', token: jC, body: { role: 'admin' } }); ok(x.status >= 400, `client : s'auto-promouvoir admin refusé (${x.status})`);
 ok((await one('select role from public.profiles where id=$1', [USERS.cust.id])).role === 'customer', 'son rôle est toujours « customer »');
-x = await L.rest(`/profiles?id=eq.${USERS.cust.id}`, { method: 'PATCH', token: jC, body: { first_name: 'Camille2' } }); ok(x.status === 200, 'mais il peut modifier son prénom');
+// select= explicite (comme app/api/account/profile/route.ts) : le SELECT direct sur profiles est volontairement limité à quelques
+// colonnes (migration 027, colonnes sensibles retirées) ; sans select=, PostgREST renvoie la ligne complète (Prefer: representation)
+// et échoue puisque authenticated n'a plus SELECT sur toutes les colonnes — ce n'est pas ce que fait l'application réelle.
+x = await L.rest(`/profiles?id=eq.${USERS.cust.id}&select=first_name`, { method: 'PATCH', token: jC, body: { first_name: 'Camille2' } }); ok(x.status === 200, 'mais il peut modifier son prénom');
 await q(`update public.profiles set first_name = 'Camille' where id = $1`, [USERS.cust.id]);
 x = await L.rest('/audit_log?select=id', { token: jC }); ok(x.data.length === 0, 'client : audit_log illisible');
 x = await L.rest('/stripe_events?select=id', { token: jS }); ok(x.data.length === 0, 'staff : stripe_events illisible');

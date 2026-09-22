@@ -33,7 +33,9 @@ for (const [dev, vp] of [['desktop', { width: 1280, height: 900 }], ['mobile', {
   }
   for (const href of [...links]) {
     const errStart = errors.length;
-    let res; try { res = await page.goto(L.BASE + href, { waitUntil: 'load', timeout: 45000 }); } catch (e) { fail(`${dev} ${href} : ${e.message.slice(0, 80)}`); continue; }
+    let res;
+    try { res = await page.goto(L.BASE + href, { waitUntil: 'load', timeout: 45000 }); }
+    catch (e) { if (/Download is starting/.test(e.message)) continue; fail(`${dev} ${href} : ${e.message.slice(0, 80)}`); continue; } // fichier téléchargé (export CSV / PDF) : navigation interrompue par le navigateur, pas une erreur
     await page.waitForTimeout(600);
     const status = res?.status() ?? 0;
     const info = await page.evaluate(() => ({

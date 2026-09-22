@@ -2123,7 +2123,7 @@ footer{
 }
 .admin-field input[type="file"]{padding:8px;background:transparent;border-style:dashed;}
 
-.admin-form__actions{display:flex;gap:var(--s-8);margin-top:var(--s-4);}
+.admin-form__actions{display:flex;flex-wrap:wrap;gap:var(--s-8);margin-top:var(--s-4);}
 .admin-form .btn{padding:11px 20px;font-size:13px;}
 
 .admin-preview{
@@ -3365,6 +3365,7 @@ nav .acct-links button.link{
 /* participants */
 .org-part{margin-top:var(--s-40);}
 .org-filters{display:grid;grid-template-columns:2fr repeat(4,1fr) auto;gap:var(--s-12);align-items:end;padding:var(--s-16);margin:var(--s-8) 0 var(--s-24);}
+.org-filters>*{min-width:0;}
 .org-filters__actions{display:flex;gap:var(--s-8);}
 .org-filters__actions .btn{padding:12px 20px;}
 @media (max-width:1000px){.org-filters{grid-template-columns:1fr 1fr;}.org-filters .admin-field:first-child{grid-column:1/-1;}.org-filters__actions{grid-column:1/-1;}}
@@ -3386,6 +3387,9 @@ nav .acct-links button.link{
   .org-table{background:none;border:0;box-shadow:none;backdrop-filter:none;}
   .org-table table,.org-table tbody,.org-table tr,.org-table td{display:block;}
   .org-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);}
+  /* les th/tr d'un thead masqué restent en display:table-cell par défaut et ignorent le clip du parent quand
+     l'intitulé des colonnes est large (débordement horizontal) : on les blockifie aussi. */
+  .org-table thead tr,.org-table thead th{display:block;}
   .org-table tr{background:var(--panel);border:1px solid var(--panel-border);border-radius:var(--r-md);padding:var(--s-12) var(--s-16);margin-bottom:var(--s-12);box-shadow:0 8px 20px rgba(25,20,16,.06);}
   .org-table td{display:flex;justify-content:space-between;gap:var(--s-16);border:0;padding:6px 0;text-align:right;overflow-wrap:anywhere;}
   .org-table td::before{content:attr(data-label);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);text-align:left;flex:none;}
