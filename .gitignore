@@ -11,3 +11,8 @@ next-env.d.ts
 
 # Captures de référence (données réelles, dont un IBAN) : ne jamais commiter
 docs/inspiration/
+
+# binaire PostgREST du banc e2e (téléchargé à la main, voir tests/e2e/README.md)
+tests/e2e/.bin/
+tests/e2e/env.json
+.next-perf
