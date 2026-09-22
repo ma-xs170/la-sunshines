@@ -185,6 +185,8 @@ begin
   perform pg_temp.expect('BAD_ACTION', format('select public.admin_customer_log(%L, %L, %L)', sup, jea, 'customer.delete_all'));
   perform public.admin_customer_log(sup, jea, 'customer.password_reset', '{"password":"secret123","via":"email"}');
   if exists (select 1 from public.audit_log where meta::text like '%secret123%') then raise exception 'FAIL 6f : un mot de passe a été journalisé'; end if;
+  perform public.admin_customer_log(sup, jea, 'customer.email_sync_failed', '{"error":"boom"}');
+  if not exists (select 1 from public.audit_log where action = 'customer.email_sync_failed' and entity_id = jea::text) then raise exception 'FAIL 6g : échec de synchronisation e-mail non journalisé'; end if;
   raise notice 'OK 6 : suspension, réactivation, déconnexion, journal sans mot de passe';
 
   -- ===== 7. Anonymisation =====

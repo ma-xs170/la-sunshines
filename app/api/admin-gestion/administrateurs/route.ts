@@ -12,6 +12,7 @@ export const dynamic = 'force-dynamic';
 const create = z.object({ email: z.string().trim().toLowerCase().pipe(z.email('Adresse e-mail invalide.')), first_name: z.string().trim().min(1, 'Prénom requis.').max(60), last_name: z.string().trim().min(1, 'Nom requis.').max(60),
   phone: z.string().trim().max(30).regex(/^[+0-9 ().-]*$/, 'Numéro de téléphone invalide.'), level: z.enum(['super', 'admin']) });
 const action = z.object({ user_id: z.string().uuid(), action: z.enum(['disable', 'enable', 'reset', 'resend']) });
+const permissions = z.object({ user_id: z.string().uuid(), action: z.literal('permissions'), permissions: z.array(z.enum(['clients.lire', 'clients.modifier'])) });
 
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
 
@@ -63,7 +64,14 @@ export async function POST(req: Request) {
 
 export async function PATCH(req: Request) {
   const g = await requireAdminApi(); if (!g.ok) return g.res;
-  const p = action.safeParse(await req.json().catch(() => null));
+  const body = await req.json().catch(() => null);
+  if (body?.action === 'permissions') {
+    const pp = permissions.safeParse(body);
+    if (!pp.success) return NextResponse.json({ error: 'Requête invalide.' }, { status: 400 });
+    const r = await adminRpc('admin_account_set_permissions', { p_actor: g.s.userId, p_user: pp.data.user_id, p_permissions: pp.data.permissions });
+    return r.ok ? NextResponse.json({ ok: true }) : NextResponse.json({ error: r.message }, { status: r.status });
+  }
+  const p = action.safeParse(body);
   if (!p.success) return NextResponse.json({ error: 'Requête invalide.' }, { status: 400 });
   const { user_id, action: act } = p.data;
   if (act === 'disable' || act === 'enable') {
