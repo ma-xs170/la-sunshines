@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { getOrgContext } from '@/lib/organizer/context';
 import { can } from '@/lib/organizer/roles';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Aide · Espace organisateur', robots: { index: false, follow: false } };
@@ -34,7 +35,7 @@ export default async function HelpPage() {
       <section className="glass org-panel">
         <h2>Une autre question ?</h2>
         <p className="org-muted">Écris à l’équipe LA SUNSHINES : nous répondons dès que possible.</p>
-        <p><a className="btn btn--amber" href="/contact">Contacter l’équipe</a></p>
+        <p><Link className="btn btn--amber" href="/contact">Contacter l’équipe</Link></p>
       </section>
     </main>
   );

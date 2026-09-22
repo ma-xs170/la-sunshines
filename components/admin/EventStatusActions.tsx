@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -20,7 +21,7 @@ export default function EventStatusActions({ slug, status }: { slug: string; sta
   }
 
   if (status === 'cancelled') return null;
-  if (status === 'draft') return <p className="org-muted">Première publication : <a href="/admin/gestion/publications">file « Publications à valider »</a>.</p>;
+  if (status === 'draft') return <p className="org-muted">Première publication : <Link href="/admin/gestion/publications">file « Publications à valider »</Link>.</p>;
   return (
     <div className="admin-form__actions">
       {status === 'published' && <button className="admin-mini" disabled={busy} onClick={() => set('closed', 'ARRÊT D’URGENCE : ferme immédiatement les ventes de cet évènement.\n\nMotif (obligatoire) :')}>Fermer les ventes</button>}

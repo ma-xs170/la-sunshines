@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { requireAdminPage } from '@/lib/adminSpace';
 import { one } from '@/lib/organizer/event-data';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Journal d’audit · Admin', robots: { index: false, follow: false } };
@@ -33,7 +34,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
       {error ? <p className="admin-error" role="alert">Impossible de charger le journal.</p> : !(data ?? []).length ? <div className="glass org-empty"><h3>Aucune entrée</h3><p>Aucune action ne correspond.</p></div> : (
         <div className="org-table glass"><table><thead><tr><th>Date</th><th>Auteur</th><th>Action</th><th>Objet</th></tr></thead>
           <tbody>{(data ?? []).map((l) => <tr key={l.id as number}><td data-label="Date">{when(l.created_at as string)}</td><td data-label="Auteur">{names.get(l.actor_id as string) ?? 'Système'}</td><td data-label="Action"><code>{l.action as string}</code></td><td data-label="Objet">{l.entity as string}{l.entity_id ? <><br /><span className="org-muted">{String(l.entity_id).slice(0, 40)}</span></> : null}</td></tr>)}</tbody></table></div>)}
-      {pages > 1 && <p className="org-muted">Page {page} / {pages} {page > 1 && <a href={href(page - 1)}>← Précédente</a>} {page < pages && <a href={href(page + 1)}>Suivante →</a>}</p>}
+      {pages > 1 && <p className="org-muted">Page {page} / {pages} {page > 1 && <Link href={href(page - 1)}>← Précédente</Link>} {page < pages && <Link href={href(page + 1)}>Suivante →</Link>}</p>}
     </>
   );
 }

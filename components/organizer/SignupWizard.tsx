@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import { useEffect, useRef, useState } from 'react';
 import { Field, Stepper } from './WizardBits';
 import { DOC_KINDS, DOC_MAX_BYTES, LEGAL_FORMS, LEGAL_FORM_LABEL, REGIONS_ORG, docOk, stepErrors, submitSchema, type SignupData } from '@/lib/organizer/signup';
@@ -71,7 +73,7 @@ export default function SignupWizard({ email, firstName }: { email: string; firs
       <section className="wiz wiz__card glass" role="status">
         <h2 ref={head} tabIndex={-1}>Dossier envoyé</h2>
         <p className="wiz__lead">Merci ! L’équipe LA SUNSHINES examine ton dossier. Ta référence ORG.XXXXXXXX te sera attribuée à l’approbation. Tant que l’organisation n’est pas approuvée, tu peux préparer ton espace mais tu ne peux pas créer d’évènement.</p>
-        <div className="wiz__nav"><a className="btn btn--amber" href="/organisateur">Ouvrir mon espace organisateur</a></div>
+        <div className="wiz__nav"><Link className="btn btn--amber" href="/organisateur">Ouvrir mon espace organisateur</Link></div>
       </section>
     );
   }
@@ -157,7 +159,7 @@ export default function SignupWizard({ email, firstName }: { email: string; firs
         )}
 
         <div className="wiz__nav">
-          {step > 0 ? <button type="button" className="btn btn--outline" onClick={() => { setErrs({}); setStep((n) => n - 1); }}>← Retour</button> : <a className="btn btn--outline" href="/organisateur">Annuler</a>}
+          {step > 0 ? <button type="button" className="btn btn--outline" onClick={() => { setErrs({}); setStep((n) => n - 1); }}>← Retour</button> : <Link className="btn btn--outline" href="/organisateur">Annuler</Link>}
           <span className="wiz__saved" aria-live="polite">{saved}</span>
           {step < 4 ? <button type="button" className="btn btn--amber" onMouseDown={(e) => e.preventDefault()} onClick={next}>Continuer</button> : <button type="button" className="btn btn--amber" onMouseDown={(e) => e.preventDefault()} onClick={submit} disabled={busy}>{busy ? 'Envoi…' : 'Envoyer mon dossier'}</button>}
         </div>

@@ -3,6 +3,7 @@ import { requireAdminPage } from '@/lib/adminSpace';
 import { one } from '@/lib/organizer/event-data';
 import { CATEGORIES, CATEGORY_LABEL, PRIORITY_LABEL, statusText } from '@/lib/support';
 import { supportRpc } from '@/lib/supportServer';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Support · Gestion', robots: { index: false, follow: false } };
@@ -18,13 +19,13 @@ export default async function AdminSupportPage({ searchParams }: { searchParams:
     <>
       <h1 className="org-head__title">Support · organisateurs</h1>
       <div className="org-subnav" role="navigation" aria-label="Catégories">
-        {tabs.map(([k, v, , c]) => <a key={k} href={k ? `?categorie=${k}` : '?'} className={'org-subnav__link' + (!scope || scope === 'all' ? (cat === k ? ' is-active' : '') : '')}>{v}{r.ok && r.data.counts[c] > 0 && <b className="oside__badge" style={{ marginLeft: 6 }}>{r.data.counts[c]}</b>}</a>)}
-        <a href="?vue=mine" className={'org-subnav__link' + (scope === 'mine' ? ' is-active' : '')}>Mes tickets{r.ok && r.data.counts.mine > 0 && <b className="oside__badge" style={{ marginLeft: 6 }}>{r.data.counts.mine}</b>}</a>
-        <a href="?vue=closed" className={'org-subnav__link' + (scope === 'closed' ? ' is-active' : '')}>Fermés</a>
+        {tabs.map(([k, v, , c]) => <Link key={k} href={k ? `?categorie=${k}` : '?'} className={'org-subnav__link' + (!scope || scope === 'all' ? (cat === k ? ' is-active' : '') : '')}>{v}{r.ok && r.data.counts[c] > 0 && <b className="oside__badge" style={{ marginLeft: 6 }}>{r.data.counts[c]}</b>}</Link>)}
+        <Link href="?vue=mine" className={'org-subnav__link' + (scope === 'mine' ? ' is-active' : '')}>Mes tickets{r.ok && r.data.counts.mine > 0 && <b className="oside__badge" style={{ marginLeft: 6 }}>{r.data.counts.mine}</b>}</Link>
+        <Link href="?vue=closed" className={'org-subnav__link' + (scope === 'closed' ? ' is-active' : '')}>Fermés</Link>
       </div>
       {!r.ok ? <p className="admin-error" role="alert">{r.message}</p> : r.data.rows.length === 0 ? <div className="glass org-empty"><h3>Aucun ticket</h3><p>Rien à traiter dans cette vue.</p></div> : (
         <div className="org-table glass"><table><thead><tr><th>Ticket</th><th>Organisateur</th><th>Objet</th><th>Priorité</th><th>Statut</th></tr></thead>
-          <tbody>{r.data.rows.map((t) => <tr key={t.id}><td data-label="Ticket"><a href={`/admin/gestion/support/${t.id}`}><code>{t.reference}</code></a><br /><span className="org-muted">{CATEGORY_LABEL[t.category]}</span></td>
+          <tbody>{r.data.rows.map((t) => <tr key={t.id}><td data-label="Ticket"><Link href={`/admin/gestion/support/${t.id}`}><code>{t.reference}</code></Link><br /><span className="org-muted">{CATEGORY_LABEL[t.category]}</span></td>
             <td data-label="Organisateur">{t.organizer}<br /><code>{t.organizer_reference}</code></td><td data-label="Objet">{t.subject}</td><td data-label="Priorité"><span className={PRIO_CLASS[t.priority]}>{PRIORITY_LABEL[t.priority]}</span></td><td data-label="Statut">{statusText(t.status, t.admin_name)}</td></tr>)}</tbody></table></div>)}
     </>
   );

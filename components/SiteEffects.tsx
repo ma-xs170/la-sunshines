@@ -27,8 +27,14 @@ import { usePathname } from 'next/navigation';
  *     `EventEmojiField` via `gsap.context()` + `revert()` + `kill()` défensif.
  *  5. Intro GSAP du hero scopée via `gsap.context()` et `revert()`ée par route.
  */
+// Effets purement décoratifs du site public (défilement, halos, intro du hero) : sans objet dans le
+// back-office (tableaux de données, pas de scroll storytelling), et coûteux à tort dans cet espace
+// (gsap + lenis chargés pour rien, MutationObserver sur tout le document, défilement « inertiel » qui
+// gêne la lecture d'un tableau). /admin et /organisateur n'en montent aucun.
+const isBackofficeUrl = (p: string) => p.startsWith('/admin') || p.startsWith('/organisateur');
+
 export default function SiteEffects() {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? '';
   const rescanRef = useRef<(() => void) | null>(null);
   // 'scroll' = révélation progressive au scroll ; 'now' = tout de suite
   const modeRef = useRef<'scroll' | 'now'>('scroll');
@@ -36,6 +42,7 @@ export default function SiteEffects() {
 
   /* -------- une seule fois : reveal (IO + MO) + Lenis + parallax -------- */
   useEffect(() => {
+    if (isBackofficeUrl(pathname)) return;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const hasIO = 'IntersectionObserver' in window;
 
@@ -168,6 +175,7 @@ export default function SiteEffects() {
 
   /* -------- à chaque route -------- */
   useEffect(() => {
+    if (isBackofficeUrl(pathname)) return;
     let raf1 = 0;
     let raf2 = 0;
     const timers: number[] = [];

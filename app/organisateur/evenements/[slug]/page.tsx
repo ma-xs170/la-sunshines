@@ -97,7 +97,7 @@ export default async function OrganizerEventPage({ params, searchParams }: { par
             <section aria-labelledby="org-gauges-h" className="org-part">
               <h2 id="org-gauges-h">Jauges par tarif</h2>
               {gauges.length === 0
-                ? <div className="glass org-empty"><h3>Aucun tarif</h3><p>Crée un tarif pour voir sa jauge ici.</p>{manage && <p><a className="btn btn--amber" href="?onglet=tarifs">Créer un tarif</a></p>}</div>
+                ? <div className="glass org-empty"><h3>Aucun tarif</h3><p>Crée un tarif pour voir sa jauge ici.</p>{manage && <p><Link className="btn btn--amber" href="?onglet=tarifs">Créer un tarif</Link></p>}</div>
                 : <ul className="tgauge-list">{gauges.map((t) => <TierGauge key={t.id} tier={t} />)}</ul>}
             </section>
 
@@ -121,9 +121,9 @@ export default async function OrganizerEventPage({ params, searchParams }: { par
         )}
 
         {tab !== null && <div id="onglets" className="org-subnav" role="navigation" aria-label="Sections de l’événement">
-          <a href="?" className="org-subnav__link">Tableau de bord</a>
+          <Link href="?" className="org-subnav__link">Tableau de bord</Link>
           {(Object.keys(TABS) as (keyof typeof TABS)[]).filter((k) => k !== 'tarifs' || manage).map((k) => (
-            <a key={k} href={`?onglet=${k}#onglets`} className={'org-subnav__link' + (tab === k ? ' is-active' : '')} aria-current={tab === k ? 'page' : undefined}>{TABS[k]}</a>
+            <Link key={k} href={`?onglet=${k}#onglets`} className={'org-subnav__link' + (tab === k ? ' is-active' : '')} aria-current={tab === k ? 'page' : undefined}>{TABS[k]}</Link>
           ))}
         </div>}
 

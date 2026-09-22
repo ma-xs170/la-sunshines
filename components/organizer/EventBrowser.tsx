@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Icon from '../Icon';
@@ -38,21 +40,21 @@ function Card({ e, list, canManage }: { e: CardEvent; list: boolean; canManage: 
   const flyer = e.external ? e.flyerSrc : `/api/organisateur/events/${e.slug}/flyer`;
   return (
     <article className={'org-card glass ' + (list ? 'org-card--row' : 'org-card--tile')}>
-      <a className="org-card__media" href={dash} tabIndex={-1} aria-hidden="true">
+      <Link className="org-card__media" href={dash} tabIndex={-1} aria-hidden="true">
         {e.hasFlyer && flyer ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={flyer} alt="" loading="lazy" />
         ) : (
           <span className="org-card__noflyer script">La Sunshines</span>
         )}
-      </a>
+      </Link>
       <div className="org-card__body">
         <div className="org-card__head">
           <span className={`org-state org-state--${e.external && e.state === 'on_sale' ? 'draft' : e.state}`}>{e.external && e.state === 'on_sale' ? 'À venir' : STATE_LABEL[e.state]}</span>
           {e.isTest && <span className="org-state org-state--draft">Test</span>}
           {canManage && !e.external && <ArchiveButton e={e} />}
         </div>
-        <h3 className="org-card__title"><a href={dash}>{e.title}</a></h3>
+        <h3 className="org-card__title"><Link href={dash}>{e.title}</Link></h3>
         <p className="org-card__meta"><Icon name="calendar" />{e.dateLabel}</p>
         <p className="org-card__meta"><Icon name="map-pin" />{e.venue || 'Lieu à préciser'}</p>
         {e.external ? (
@@ -70,14 +72,14 @@ function Card({ e, list, canManage }: { e: CardEvent; list: boolean; canManage: 
         )}
         <div className="org-card__actions">
           {e.external ? (
-            <a className="btn btn--outline" href={dash}>Voir la fiche</a>
+            <Link className="btn btn--outline" href={dash}>Voir la fiche</Link>
           ) : canManage ? (
             <>
-              <a className="btn btn--amber" href={dash}>Tableau de bord</a>
-              <a className="btn btn--outline" href={`${dash}?onglet=tarifs#onglets`}>Tarifs</a>
+              <Link className="btn btn--amber" href={dash}>Tableau de bord</Link>
+              <Link className="btn btn--outline" href={`${dash}?onglet=tarifs#onglets`}>Tarifs</Link>
             </>
           ) : (
-            <a className="btn btn--amber" href={`${dash}?onglet=scan#onglets`}><Icon name="scan" />Scanner</a>
+            <Link className="btn btn--amber" href={`${dash}?onglet=scan#onglets`}><Icon name="scan" />Scanner</Link>
           )}
         </div>
       </div>
@@ -108,7 +110,7 @@ export default function EventBrowser({ events, canManage, canCreate }: { events:
         <p className="script">Prêt à créer votre premier événement ?</p>
         <h2>Aucun événement</h2>
         <p>Les événements de votre organisation apparaîtront ici dès que leur billetterie sera configurée.</p>
-        {canCreate && <a className="btn btn--amber" href="/organisateur/evenements/nouveau"><Icon name="plus" />Créer un événement</a>}
+        {canCreate && <Link className="btn btn--amber" href="/organisateur/evenements/nouveau"><Icon name="plus" />Créer un événement</Link>}
       </div>
     );
   }

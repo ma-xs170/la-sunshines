@@ -1,4 +1,5 @@
 import { linkedEditionsOf } from '@/lib/eventLinks';
+import Link from 'next/link';
 
 /** Évènements rattachés à une organisation (table event_links) qui n'ont pas de session géolocalisée : ils ne peuvent pas figurer dans le calendrier régional, on les liste ici (sans région inventée). */
 export default async function LinkedEventsList({ orgId }: { orgId?: string }) {
@@ -10,7 +11,7 @@ export default async function LinkedEventsList({ orgId }: { orgId?: string }) {
       <ul className="ef-list">
         {list.map((e) => (
           <li key={e.slug}>
-            <span><a href={`/editions/${e.slug}`}><strong>{e.name}</strong></a>{e.isTest && <em> · test</em>}{e.hidden && <em> · brouillon</em>}<br /><span className="org-muted">{e.dateLabel || 'Date à préciser'}{e.venue ? ` · ${e.venue}` : ''}</span></span>
+            <span><Link href={`/editions/${e.slug}`}><strong>{e.name}</strong></Link>{e.isTest && <em> · test</em>}{e.hidden && <em> · brouillon</em>}<br /><span className="org-muted">{e.dateLabel || 'Date à préciser'}{e.venue ? ` · ${e.venue}` : ''}</span></span>
             <span className="org-muted">{e.past ? 'Passé' : 'À venir'}</span>
           </li>
         ))}

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 interface State { resendConfigured: boolean; from: string; domain: string | null; usingFallback: boolean; domainStatus: string | null; domainError: string | null }
@@ -45,7 +46,7 @@ export default function MailDiagPanel({ myEmail }: { myEmail: string }) {
             <button type="button" className="btn btn--amber" disabled={busy || !s.resendConfigured} onClick={test}>{busy ? 'Envoi…' : 'Envoyer un e-mail de test à mon adresse'}</button>
             <button type="button" className="btn btn--outline" onClick={load}>Revérifier</button>
           </div>
-          <p className="ef-help">Les mots de passe provisoires ne s’affichent jamais ici et ne sont jamais journalisés. « Renvoyer l’invitation » sur un administrateur en attente : rubrique <a href="/admin/gestion/administrateurs">Administrateurs</a>.</p>
+          <p className="ef-help">Les mots de passe provisoires ne s’affichent jamais ici et ne sont jamais journalisés. « Renvoyer l’invitation » sur un administrateur en attente : rubrique <Link href="/admin/gestion/administrateurs">Administrateurs</Link>.</p>
         </>
       )}
     </section>

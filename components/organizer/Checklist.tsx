@@ -1,5 +1,6 @@
 import Icon from '../Icon';
 import { checklist, type OrgAccount } from '@/lib/organizer/readiness';
+import Link from 'next/link';
 
 /** « Complétez votre compte pour pouvoir publier votre événement » — les étapes faites sont cochées. Seul le propriétaire peut les remplir. */
 export default function Checklist({ org, editable }: { org: OrgAccount; editable: boolean }) {
@@ -17,7 +18,7 @@ export default function Checklist({ org, editable }: { org: OrgAccount; editable
               {!s.done && <p>{s.hint}</p>}
             </div>
             {!s.done && (editable
-              ? <a className="btn btn--outline" href={s.href}>{s.cta}</a>
+              ? <Link className="btn btn--outline" href={s.href}>{s.cta}</Link>
               : <span className="org-muted">À faire par le propriétaire</span>)}
           </li>
         ))}

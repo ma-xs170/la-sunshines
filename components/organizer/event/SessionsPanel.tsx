@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import { useState } from 'react';
 import type { Venue } from './VenuesPanel';
 
@@ -42,7 +44,7 @@ export default function SessionsPanel({ slug, venues, initial }: { slug: string;
             <div className="ef-row"><button type="button" className="ef-link" onClick={() => setD({ id: s.id, venue_id: s.venue_id, label: s.label, starts_at: local(s.starts_at), ends_at: local(s.ends_at), capacity: s.capacity ? String(s.capacity) : '' })}>Modifier</button>
               <button type="button" className="ef-link" onClick={() => remove(s.id)}>Supprimer</button></div></li>))}</ul>
         {!d && <button type="button" className="btn btn--outline" onClick={() => setD({ venue_id: venues[0]?.id ?? null, label: '', starts_at: '', ends_at: '', capacity: '' })}>Ajouter une session</button>}
-        {venues.length === 0 && <p className="ef-help">Pas encore de lieu : <a className="ef-link" href={`/organisateur/evenements/${slug}/lieux`}>ajoute-en un</a> pour le relier aux sessions.</p>}
+        {venues.length === 0 && <p className="ef-help">Pas encore de lieu : <Link className="ef-link" href={`/organisateur/evenements/${slug}/lieux`}>ajoute-en un</Link> pour le relier aux sessions.</p>}
       </section>
       {d && (
         <section className="glass ef-card"><h2>{d.id ? 'Modifier la session' : 'Nouvelle session'}</h2>

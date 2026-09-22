@@ -49,11 +49,11 @@ export default async function AdminHome({ searchParams }: { searchParams: Promis
       </div>
 
       <section className="org-kpis" aria-label="Indicateurs">
-        <a className="glass org-kpi" href="/admin/gestion/organisateurs?statut=pending"><span className="kicker">Organisateurs en attente</span><strong>{pend.count ?? 0}</strong><span>à approuver</span></a>
-        <a className="glass org-kpi" href="/admin/gestion/organisateurs?statut=approved"><span className="kicker">Organisateurs actifs</span><strong>{act.count ?? 0}</strong><span>approuvés</span></a>
-        <a className="glass org-kpi" href="/admin/gestion/evenements"><span className="kicker">Évènements à venir</span><strong>{upc.count ?? 0}</strong><span>publiés</span></a>
-        <a className="glass org-kpi" href="/admin/gestion/publications"><span className="kicker">Publications à valider</span><strong>{d.publications}</strong><span>demandes en attente</span></a>
-        <a className="glass org-kpi" href="/admin/gestion/support"><span className="kicker">Tickets non pris en charge</span><strong>{sup.count ?? 0}</strong><span>ouverts</span></a>
+        <Link className="glass org-kpi" href="/admin/gestion/organisateurs?statut=pending"><span className="kicker">Organisateurs en attente</span><strong>{pend.count ?? 0}</strong><span>à approuver</span></Link>
+        <Link className="glass org-kpi" href="/admin/gestion/organisateurs?statut=approved"><span className="kicker">Organisateurs actifs</span><strong>{act.count ?? 0}</strong><span>approuvés</span></Link>
+        <Link className="glass org-kpi" href="/admin/gestion/evenements"><span className="kicker">Évènements à venir</span><strong>{upc.count ?? 0}</strong><span>publiés</span></Link>
+        <Link className="glass org-kpi" href="/admin/gestion/publications"><span className="kicker">Publications à valider</span><strong>{d.publications}</strong><span>demandes en attente</span></Link>
+        <Link className="glass org-kpi" href="/admin/gestion/support"><span className="kicker">Tickets non pris en charge</span><strong>{sup.count ?? 0}</strong><span>ouverts</span></Link>
         <div className="glass org-kpi"><span className="kicker">Ventes de la plateforme</span><strong>{formatEuro(gross)}</strong><span>30 derniers jours · dont {formatEuro(fees)} de frais de service</span></div>
       </section>
 
@@ -61,7 +61,7 @@ export default async function AdminHome({ searchParams }: { searchParams: Promis
         <section className="glass ef-card"><h2>Tickets support à traiter</h2>
           {!(supList.data ?? []).length ? <div className="org-empty"><h3>Aucun ticket ouvert</h3><p>Tout est pris en charge.</p></div> : (
             <div className="org-table"><table><thead><tr><th>Ticket</th><th>Organisateur</th><th>Objet</th><th>Priorité</th></tr></thead>
-              <tbody>{(supList.data ?? []).map((t) => <tr key={t.id as string}><td data-label="Ticket"><a href={`/admin/gestion/support/${t.id}`}><code>{t.reference as string}</code></a><br /><span className="org-muted">{CATEGORY_LABEL[t.category as string]}</span></td>
+              <tbody>{(supList.data ?? []).map((t) => <tr key={t.id as string}><td data-label="Ticket"><Link href={`/admin/gestion/support/${t.id}`}><code>{t.reference as string}</code></Link><br /><span className="org-muted">{CATEGORY_LABEL[t.category as string]}</span></td>
                 <td data-label="Organisateur">{one(t.organizers as { name: string } | { name: string }[] | null)?.name ?? '—'}</td><td data-label="Objet">{t.subject as string}</td><td data-label="Priorité">{PRIORITY_LABEL[t.priority as string]}</td></tr>)}</tbody></table></div>)}
           <p className="org-muted"><Link href="/admin/gestion/support">Voir tous les tickets</Link></p>
         </section>

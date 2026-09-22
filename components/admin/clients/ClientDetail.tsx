@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Icon from '../../Icon';
 import { fmtBirth, fmtDate, fmtDateTime, fmtEuros, fullName, NOT_SET, orderStatusLabel, TICKET_STATUS, upperName } from '@/lib/admin/clients/format';
@@ -38,7 +40,7 @@ export default function ClientDetailView({ id, initial, isSuper }: { id: string;
 
   return (
     <div className="clients-detail">
-      <a className="ef-link" href="/admin/clients">← Retour à la liste</a>
+      <Link className="ef-link" href="/admin/clients">← Retour à la liste</Link>
       <header className="clients-detail__head glass">
         <div>
           <h1 className="org-head__title">{fullName(p.first_name, p.last_name)}</h1>
@@ -166,11 +168,11 @@ function orderRow(o: ClientOrder) {
   const qty = o.items.reduce((n, i) => n + i.quantity, 0);
   return (
     <tr key={o.id}>
-      <td data-label="Évènement"><a href={`/editions/${o.event_slug}`}>{o.event_title}</a></td>
+      <td data-label="Évènement"><Link href={`/editions/${o.event_slug}`}>{o.event_title}</Link></td>
       <td data-label="Date">{fmtDate(o.starts_at)}</td>
       <td data-label="Tarif">{o.items.map((i) => i.tier_name).join(', ') || NOT_SET}</td>
       <td data-label="Billets" className="clients-num">{qty}</td>
-      <td data-label="Commande">{o.source === 'web' ? <a href={`/admin/billetterie/commandes/${o.id}`}><code>{o.order_number}</code></a> : <code>{o.order_number}</code>}</td>
+      <td data-label="Commande">{o.source === 'web' ? <Link href={`/admin/billetterie/commandes/${o.id}`}><code>{o.order_number}</code></Link> : <code>{o.order_number}</code>}</td>
       <td data-label="Statut">{orderStatusLabel(o.status, o.total_cents)}</td>
       <td data-label="Montant">{fmtEuros(o.total_cents)}</td>
     </tr>

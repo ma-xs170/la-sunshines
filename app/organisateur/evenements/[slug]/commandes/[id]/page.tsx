@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ORDER_STATUS, REFUND_STATUS, orgEventRpc } from '@/lib/organizer/event-data';
 import { formatEuro, formatGp, formatPrice } from '@/lib/ticketing/time';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Commande · Espace organisateur', robots: { index: false, follow: false } };
@@ -19,7 +20,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ sl
   const o = d.order;
   return (
     <main className="org org-page">
-      <p className="org__back"><a href={`/organisateur/evenements/${slug}/commandes`}>← Toutes les commandes</a></p>
+      <p className="org__back"><Link href={`/organisateur/evenements/${slug}/commandes`}>← Toutes les commandes</Link></p>
       <h1 className="org-head__title">Commande {String(o.order_number)}</h1><p className="script">{title}</p>
       <section className="glass ef-card"><h2>Résumé</h2>
         <p>{ORDER_STATUS[String(o.status)] ?? String(o.status)} · {formatGp(String(o.created_at))}{o.source === 'manual' ? ' · invitation' : ''}</p>

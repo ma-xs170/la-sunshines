@@ -9,6 +9,7 @@ import { formatGp } from '@/lib/ticketing/time';
 import AdminSettingsForm from '@/components/ticketing/AdminSettingsForm';
 import EventStats from '@/components/ticketing/admin/EventStats';
 import OrganizerForm, { type OrganizerInfo } from '@/components/ticketing/OrganizerForm';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Billetterie · Admin', robots: { index: false, follow: false } };
@@ -21,7 +22,7 @@ export default async function BilletterieAdminPage() {
     <main className="admin-shell admin-shell--wide">
       <div className="admin-top">
         <h1>Billetterie</h1>
-        <div className="admin-top__actions"><a className="admin-link" href="/admin/gestion">Espace de gestion (organisateurs, administrateurs, recherche)</a> <a className="admin-link" href="/admin">← Retour à l’admin</a></div>
+        <div className="admin-top__actions"><Link className="admin-link" href="/admin/gestion">Espace de gestion (organisateurs, administrateurs, recherche)</Link> <Link className="admin-link" href="/admin">← Retour à l’admin</Link></div>
       </div>
       {children}
     </main>
@@ -56,10 +57,10 @@ export default async function BilletterieAdminPage() {
       <AdminSettingsForm initial={settings} />
       {((orgs ?? []) as OrganizerInfo[]).map((o) => <OrganizerForm key={o.id} initial={o} />)}
       <div className="admin-form__actions">
-        <a className="btn btn--outline" href="/admin/billetterie/commandes">Commandes</a>
-        <a className="btn btn--outline" href="/admin/billetterie/invitations">Invitations</a>
-        <a className="btn btn--outline" href="/admin/scan">Scan à l’entrée</a>
-        <a className="btn btn--outline" href="/admin/billetterie/aide">Aide</a>
+        <Link className="btn btn--outline" href="/admin/billetterie/commandes">Commandes</Link>
+        <Link className="btn btn--outline" href="/admin/billetterie/invitations">Invitations</Link>
+        <Link className="btn btn--outline" href="/admin/scan">Scan à l’entrée</Link>
+        <Link className="btn btn--outline" href="/admin/billetterie/aide">Aide</Link>
       </div>
       <section className="admin-panel glass admin-panel--wide">
         <h2>Événements en billetterie</h2>
@@ -99,7 +100,7 @@ export default async function BilletterieAdminPage() {
                   )}
                   <div className="tb-evt__actions">
                     {known
-                      ? <a className="btn btn--outline" href={`/admin?edit=${encodeURIComponent(r.event_slug)}`}>Ouvrir l’évènement dans l’admin</a>
+                      ? <Link className="btn btn--outline" href={`/admin?edit=${encodeURIComponent(r.event_slug)}`}>Ouvrir l’évènement dans l’admin</Link>
                       : <span className="admin-hint">Lien indisponible : l’événement éditorial est introuvable sur ce site.</span>}
                     {known && <a className="btn btn--outline" href={`/editions/${encodeURIComponent(r.event_slug)}`} target="_blank" rel="noopener noreferrer">Voir la page publique</a>}
                   </div>

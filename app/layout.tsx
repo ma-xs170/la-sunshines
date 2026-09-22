@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 import './globals.css';
 import Sprite from '@/components/Sprite';
+import Glow from '@/components/Glow';
 import SiteEffects from '@/components/SiteEffects';
 import CookieBanner from '@/components/CookieBanner';
 import Metrics from '@/components/Metrics';
@@ -58,10 +59,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           }}
         />
 
-        <div className="glow" aria-hidden="true">
-          <span className="g1" />
-          <span className="g2" />
-        </div>
+        <Glow />
 
         <Sprite />
         {announcement && (

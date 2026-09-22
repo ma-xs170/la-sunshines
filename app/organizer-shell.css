@@ -222,7 +222,7 @@ body.is-scroll-locked{overflow:hidden;}
 .fees__preview{display:grid;gap:8px;margin:12px 0 0;}
 .fees__preview div{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--panel-border);}
 .fees__preview dt{color:var(--gray);font-weight:600;}
-.fees__preview dd{margin:0;font-weight:700;}
+.fees__preview dd{margin:0;font-weight:600;}
 .fees__preview .is-strong dd{font-size:1.15em;}
 
 /* ---- lineup ---- */
@@ -231,7 +231,7 @@ body.is-scroll-locked{overflow:hidden;}
 .lineup__row{padding:14px 16px;display:grid;gap:10px 14px;grid-template-columns:32px 1.4fr .8fr 1fr 1fr auto;align-items:end;}
 .lineup__row .admin-field{min-width:0;}
 .lineup__row input[type="datetime-local"]{width:100%;min-width:0;}
-.lineup__n{align-self:center;font-weight:800;color:var(--gray);}
+.lineup__n{align-self:center;font-weight:600;color:var(--gray);}
 .lineup__actions{display:flex;gap:4px;flex-wrap:wrap;}
 @media (max-width:900px){.lineup__row{grid-template-columns:1fr 1fr;}.lineup__n{display:none;}.lineup__row .admin-field:first-of-type{grid-column:1/-1;}.lineup__actions{grid-column:1/-1;}}
 

@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import { useCallback, useEffect, useState } from 'react';
 import type { AdminEventView, AdminTier } from '@/lib/ticketing/admin';
 import { euroToCents, formatEuro, gpLocalToIso, isoToGpLocal, priceError } from '@/lib/ticketing/time';
@@ -65,7 +67,7 @@ export default function TicketingBlock({ slug }: { slug: string }) {
       {phase === 'unauth' && (
         <p className="admin-hint">
           La billetterie exige un compte Supabase administrateur (le mot de passe de l’admin ne suffit pas).{' '}
-          <a className="admin-link" href="/connexion?next=/admin">Se connecter</a>
+          <Link className="admin-link" href="/connexion?next=/admin">Se connecter</Link>
         </p>
       )}
       {phase === 'forbidden' && <p className="admin-hint">Ton compte n’a pas le rôle « admin » billetterie.</p>}
