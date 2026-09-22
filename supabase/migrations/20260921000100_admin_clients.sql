@@ -399,7 +399,7 @@ create or replace function public.admin_customer_log(p_actor uuid, p_id uuid, p_
 language plpgsql volatile security definer set search_path = public, pg_temp as $$
 begin
   perform public._assert_clients(p_actor, 'modifier');
-  if p_action not in ('customer.password_reset', 'customer.email_notice', 'customer.anonymize_auth') then raise exception 'BAD_ACTION'; end if;
+  if p_action not in ('customer.password_reset', 'customer.email_notice', 'customer.email_sync_failed', 'customer.anonymize_auth') then raise exception 'BAD_ACTION'; end if;
   if not exists (select 1 from public.profiles where id = p_id) then raise exception 'USER_NOT_FOUND'; end if;
   perform public._audit(p_actor, p_action, 'customer', p_id::text, null, null, coalesce(p_meta, '{}'::jsonb) - 'password');
 end $$;

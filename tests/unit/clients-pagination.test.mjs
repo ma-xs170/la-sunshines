@@ -112,3 +112,41 @@ test('format : âge, mineur, hors 12–100, libellés', () => {
   assert.equal(fullName('Élodie', 'Dupont'), 'DUPONT Élodie'); assert.equal(fullName('', ''), NOT_SET); assert.equal(fmtBirth('1990-05-04'), '04/05/1990'); assert.equal(fmtBirth(null), NOT_SET);
   assert.equal(orderStatusLabel('paid', 1500), 'Payé'); assert.equal(orderStatusLabel('paid', 0), 'Gratuit'); assert.equal(orderStatusLabel('refunded', 1500), 'Remboursé'); assert.equal(orderStatusLabel('cancelled', 0), 'Annulé');
 });
+
+import { validateEditForm } from '../../lib/admin/clients/detail.ts';
+
+const base = { first_name: 'Élodie', last_name: 'Dupont', phone: '0690123456', phone2: '', email: 'elodie@test.local', birth_date: '1990-05-04', reason: '' };
+const current = { email: 'elodie@test.local', birth_date: '1990-05-04' };
+
+test('validation de la fiche : formulaire valide sans changement sensible, aucun motif requis', () => {
+  const r = validateEditForm(base, current);
+  assert.ok(r.ok); if (r.ok) { assert.equal(r.value.email, 'elodie@test.local'); assert.equal(r.ageWarning, false); }
+});
+test('validation : champs obligatoires', () => {
+  for (const bad of [{ ...base, first_name: '' }, { ...base, last_name: '  ' }, { ...base, first_name: 'x'.repeat(61) }]) {
+    const r = validateEditForm(bad, current); assert.equal(r.ok, false);
+  }
+});
+test('validation : e-mail et téléphone invalides', () => {
+  assert.equal(validateEditForm({ ...base, email: 'pas-un-mail' }, current).ok, false);
+  assert.equal(validateEditForm({ ...base, phone: '123' }, current).ok, false);
+  assert.equal(validateEditForm({ ...base, phone2: 'abc' }, current).ok, false);
+});
+test('validation : date de naissance future ou trop ancienne refusée', () => {
+  assert.equal(validateEditForm({ ...base, birth_date: '2099-01-01' }, current).ok, false);
+  assert.equal(validateEditForm({ ...base, birth_date: '1899-01-01' }, current).ok, false);
+  assert.equal(validateEditForm({ ...base, birth_date: '' }, current).ok, false);   // efface la date : c'est un changement sensible, motif requis
+  assert.equal(validateEditForm({ ...base, birth_date: '', reason: 'Correction demandée' }, current).ok, true);
+});
+test('validation : motif obligatoire seulement si e-mail ou date de naissance change', () => {
+  assert.equal(validateEditForm({ ...base, last_name: 'Durand' }, current).ok, true);
+  const r1 = validateEditForm({ ...base, email: 'nouveau@test.local' }, current); assert.equal(r1.ok, false); if (!r1.ok) assert.ok(r1.errors.reason);
+  assert.equal(validateEditForm({ ...base, email: 'nouveau@test.local', reason: 'ok' }, current).ok, false);   // motif < 5 caractères
+  assert.equal(validateEditForm({ ...base, email: 'nouveau@test.local', reason: 'Demande écrite' }, current).ok, true);
+  const r2 = validateEditForm({ ...base, birth_date: '1991-01-01' }, current); assert.equal(r2.ok, false); if (!r2.ok) assert.ok(r2.errors.reason);
+});
+test('validation : alerte (non bloquante) si l’âge sort de 12–100 ans', () => {
+  const young = validateEditForm({ ...base, birth_date: '2020-01-01', reason: 'Correction' }, current); assert.ok(young.ok); if (young.ok) assert.equal(young.ageWarning, true);
+  const old = validateEditForm({ ...base, birth_date: '1900-06-01', reason: 'Correction' }, current); assert.ok(old.ok); if (old.ok) assert.equal(old.ageWarning, true);
+  const ok12 = validateEditForm({ ...base, birth_date: new Date(Date.now() - 13 * 365.25 * 864e5).toISOString().slice(0, 10), reason: 'Correction' }, current); assert.ok(ok12.ok); if (ok12.ok) assert.equal(ok12.ageWarning, false);
+});
