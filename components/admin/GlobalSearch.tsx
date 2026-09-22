@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 
 interface Org { id: string; reference: string | null; name: string; account_status: 'pending' | 'approved' | 'suspended'; region: string | null }
-interface Res { organizers: Org[]; admins: { user_id: string; reference: string; first_name: string; last_name: string }[]; orders: { id: string; order_number: string; event_slug: string; buyer_last_name: string; buyer_first_name: string }[]; events: { slug: string; organizer: string; organizer_id: string }[]; editions: { slug: string; name: string }[]; tickets: { id: string; reference: string; subject: string }[] }
+interface Res { organizers: Org[]; admins: { user_id: string; reference: string; first_name: string; last_name: string }[]; orders: { id: string; order_number: string; event_slug: string; buyer_last_name: string; buyer_first_name: string }[]; events: { slug: string; organizer: string; organizer_id: string }[]; editions: { slug: string; name: string }[]; tickets: { id: string; reference: string; subject: string }[]; billets: { id: string; code: string; status: string; holder_first_name: string; holder_last_name: string; order_id: string; order_number: string }[] }
+const TSTATUS: Record<string, string> = { valid: 'Valide', used: 'Entré', cancelled: 'Annulé', refunded: 'Remboursé' };
 const STATUS = { pending: 'En attente', approved: 'Approuvé', suspended: 'Suspendu' } as const;
 const REGION: Record<string, string> = { france: 'France', martinique: 'Martinique', guadeloupe: 'Guadeloupe', sxm: 'SXM' };
 
@@ -26,8 +27,8 @@ export default function GlobalSearch() {
     return () => clearTimeout(t);
   }, [q]);
 
-  const first = res ? (res.organizers[0] && `/admin/gestion/organisateurs/${res.organizers[0].id}`) || (res.admins[0] && '/admin/gestion/administrateurs') || (res.events[0] && `/admin/gestion/evenements?q=${res.events[0].slug}`) || (res.editions[0] && `/admin/gestion/evenements?q=${res.editions[0].slug}`) : null;
-  const empty = res && !res.organizers.length && !res.admins.length && !res.orders.length && !res.events.length && !res.editions.length && !res.tickets.length;
+  const first = res ? (res.organizers[0] && `/admin/gestion/organisateurs/${res.organizers[0].id}`) || (res.admins[0] && '/admin/gestion/administrateurs') || (res.billets[0] && `/admin/billetterie/commandes/${res.billets[0].order_id}`) || (res.orders[0] && `/admin/billetterie/commandes/${res.orders[0].id}`) || (res.events[0] && `/admin/gestion/evenements?q=${res.events[0].slug}`) || (res.editions[0] && `/admin/gestion/evenements?q=${res.editions[0].slug}`) : null;
+  const empty = res && !res.organizers.length && !res.admins.length && !res.orders.length && !res.events.length && !res.editions.length && !res.tickets.length && !res.billets.length;
 
   return (
     <div className="gsearch" role="search">
@@ -44,6 +45,7 @@ export default function GlobalSearch() {
               <a className="btn btn--outline" href={`/admin/gestion/organisateurs/${o.id}`}>Voir</a></div>))}</section> : null}
           {res?.admins.length ? <section><h3>Administrateurs</h3>{res.admins.map((a) => <div className="gsearch__row" key={a.user_id}><div><code>{a.reference}</code> {a.first_name} {a.last_name}</div><a className="btn btn--outline" href="/admin/gestion/administrateurs">Voir</a></div>)}</section> : null}
           {res?.orders.length ? <section><h3>Commandes</h3>{res.orders.map((o) => <div className="gsearch__row" key={o.id}><div><code>{o.order_number}</code> {o.buyer_first_name} {o.buyer_last_name}<br /><span className="ef-help">{o.event_slug}</span></div><a className="btn btn--outline" href={`/admin/billetterie/commandes/${o.id}`}>Voir</a></div>)}</section> : null}
+          {res?.billets.length ? <section><h3>Billets (code scanné)</h3>{res.billets.map((b) => <div className="gsearch__row" key={b.id}><div><code>{b.code}</code> {b.holder_first_name} {b.holder_last_name}<br /><span className="ef-help">{TSTATUS[b.status] ?? b.status} · commande {b.order_number}</span></div><a className="btn btn--outline" href={`/admin/billetterie/commandes/${b.order_id}`}>Voir</a></div>)}</section> : null}
           {res?.tickets.length ? <section><h3>Tickets support</h3>{res.tickets.map((t) => <div className="gsearch__row" key={t.id}><div><code>{t.reference}</code> {t.subject}</div><a className="btn btn--outline" href={`/admin/gestion/support/${t.id}`}>Voir</a></div>)}</section> : null}
           {res && (res.events.length || res.editions.length) ? <section><h3>Évènements</h3>
             {res.events.map((e) => <div className="gsearch__row" key={e.slug}><div>{e.slug}<br /><span className="ef-help">{e.organizer}</span></div><a className="btn btn--outline" href={`/admin/gestion/evenements?q=${e.slug}`}>Voir</a></div>)}

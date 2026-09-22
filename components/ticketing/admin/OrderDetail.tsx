@@ -48,6 +48,7 @@ export default function OrderDetail({ id }: { id: string }) {
   const { order: o, tickets, refunds } = d;
   const remaining = o.total_cents - o.refunded_cents;
   const refundable = ['paid', 'partially_refunded'].includes(o.status) && o.stripe_payment_intent_id && remaining > 0;
+  const cancellable = !['cancelled', 'refunded'].includes(o.status) && !tickets.some((t) => t.status === 'used');
 
   function refund(full: boolean) {
     const cents = full ? undefined : Math.round(Number(amount.replace(',', '.')) * 100);
@@ -55,6 +56,22 @@ export default function OrderDetail({ id }: { id: string }) {
     const label = full ? `le TOTAL restant (${formatEuro(remaining)}, frais de service compris)` : formatEuro(cents!);
     if (!window.confirm(`Rembourser ${label} via Stripe ? Action irréversible.`)) return;
     act(() => call(`/api/billetterie/admin/orders/${id}/refund`, 'POST', { request_id: rid, amount_cents: cents, reason, cancel_ticket_ids: full ? [] : picked }), 'Remboursement effectué.');
+  }
+  function cancelOrder() {
+    const why = window.prompt('Annuler CETTE COMMANDE COMPLÈTE (tous ses billets non utilisés). Aucun remboursement Stripe : utilise « Rembourser » si de l’argent doit être rendu.\n\nMotif (obligatoire) :');
+    if (why === null) return;
+    if (why.trim().length < 3) return setErr('Le motif doit faire au moins 3 caractères.');
+    act(() => call(`/api/billetterie/admin/orders/${id}/cancel`, 'POST', { reason: why.trim() }), 'Commande annulée.');
+  }
+  function renameTicket(t: Detail['tickets'][number]) {
+    const first = window.prompt('Prénom du participant :', t.holder_first_name);
+    if (first === null) return;
+    const last = window.prompt('Nom du participant :', t.holder_last_name);
+    if (last === null) return;
+    const why = window.prompt('Motif de la correction (obligatoire) :');
+    if (why === null) return;
+    if (!first.trim() || !last.trim() || why.trim().length < 3) return setErr('Nom, prénom et motif (3 caractères min.) sont requis.');
+    act(() => call(`/api/billetterie/admin/tickets/${t.id}/rename`, 'POST', { first_name: first.trim(), last_name: last.trim(), reason: why.trim() }), 'Nom du participant corrigé.');
   }
 
   return (
@@ -69,6 +86,7 @@ export default function OrderDetail({ id }: { id: string }) {
           <tr><td><strong>Total</strong></td><td><strong>{formatPrice(o.total_cents)}</strong></td></tr>
           {o.refunded_cents > 0 && <tr><td>Remboursé</td><td>{formatEuro(o.refunded_cents)}</td></tr>}
         </tbody></table>
+        {cancellable && <div className="admin-form__actions"><button className="admin-mini" disabled={busy} onClick={cancelOrder}>Annuler la commande complète</button></div>}
       </section>
 
       <section className="admin-panel glass">
@@ -83,10 +101,11 @@ export default function OrderDetail({ id }: { id: string }) {
           {tickets.map((t) => (
             <li key={t.id} className="admin-list__item">
               <div><strong>{t.holder_first_name} {t.holder_last_name}</strong> — {TSTATUS[t.status] ?? t.status}{t.used_at && ` (${formatGp(t.used_at)})`}</div>
-              {t.status === 'valid' && (
+              {['valid', 'used'].includes(t.status) && (
                 <div className="admin-form__actions">
-                  {refundable && <label><input type="checkbox" checked={picked.includes(t.id)} onChange={(e) => setPicked((p) => e.target.checked ? [...p, t.id] : p.filter((x) => x !== t.id))} /> annuler avec le remb. partiel</label>}
-                  <button className="admin-mini" disabled={busy} onClick={() => window.confirm('Annuler ce billet (sans remboursement) ?') && act(() => call(`/api/billetterie/admin/tickets/${t.id}/cancel`, 'POST'), 'Billet annulé.')}>Annuler ce billet</button>
+                  {t.status === 'valid' && refundable && <label><input type="checkbox" checked={picked.includes(t.id)} onChange={(e) => setPicked((p) => e.target.checked ? [...p, t.id] : p.filter((x) => x !== t.id))} /> annuler avec le remb. partiel</label>}
+                  <button className="admin-mini" disabled={busy} onClick={() => renameTicket(t)}>Renommer</button>
+                  {t.status === 'valid' && <button className="admin-mini" disabled={busy} onClick={() => window.confirm('Annuler ce billet (sans remboursement) ?') && act(() => call(`/api/billetterie/admin/tickets/${t.id}/cancel`, 'POST'), 'Billet annulé.')}>Annuler ce billet</button>}
                 </div>
               )}
             </li>

@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(req: Request) {
   const g = await requireAdminApi(); if (!g.ok) return g.res;
   const q = (new URL(req.url).searchParams.get('q') ?? '').slice(0, 80);
-  const r = await adminRpc<{ organizers: unknown[]; admins: unknown[]; orders: unknown[]; events: { slug: string }[] }>('admin_global_search', { p_actor: g.s.userId, p_q: q });
+  const r = await adminRpc<{ organizers: unknown[]; admins: unknown[]; orders: unknown[]; events: { slug: string }[]; billets: unknown[] }>('admin_global_search', { p_actor: g.s.userId, p_q: q });
   if (!r.ok) return NextResponse.json({ error: r.message }, { status: r.status });
   const tk = await adminRpc<{ id: string; reference: string; subject: string; status: string }[]>('admin_support_search', { p_actor: g.s.userId, p_q: q });
   const f = fold(q);

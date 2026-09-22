@@ -159,6 +159,7 @@ export default function OrgShell({ orgs, currentId, unread, firstName, children 
           </div>
         </header>
 
+        {current.role === 'admin' && <p className="oshell__admin-banner" role="status"><Icon name="shield" className="icon" />Vous modifiez en tant qu’admin — cet espace appartient à « {current.name} », pas à votre compte.</p>}
         {note && <p className={'oshell__note oshell__note--' + current.status} role="status">{note}</p>}
         <div className="oshell__main" id="org-main" tabIndex={-1}>{children}</div>
 
