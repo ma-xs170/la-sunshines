@@ -114,6 +114,9 @@ export default function Assistant() {
     ? ({ '--asst-accent': theme.accent } as CSSProperties)
     : undefined;
 
+  // Assistant grand public (billetterie, infos pratiques...) : sans objet pour le staff en back-office.
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/organisateur')) return null;
+
   return (
     <>
       <button
