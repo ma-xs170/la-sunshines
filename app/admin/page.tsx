@@ -4,6 +4,7 @@ import { getAdminShellData } from '@/lib/admin/shell-data';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { CATEGORY_LABEL, PRIORITY_LABEL } from '@/lib/support';
 import { formatEuro } from '@/lib/ticketing/time';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Tableau de bord · Admin · LA SUNSHINES', robots: { index: false, follow: false } };
@@ -62,7 +63,7 @@ export default async function AdminHome({ searchParams }: { searchParams: Promis
             <div className="org-table"><table><thead><tr><th>Ticket</th><th>Organisateur</th><th>Objet</th><th>Priorité</th></tr></thead>
               <tbody>{(supList.data ?? []).map((t) => <tr key={t.id as string}><td data-label="Ticket"><a href={`/admin/gestion/support/${t.id}`}><code>{t.reference as string}</code></a><br /><span className="org-muted">{CATEGORY_LABEL[t.category as string]}</span></td>
                 <td data-label="Organisateur">{one(t.organizers as { name: string } | { name: string }[] | null)?.name ?? '—'}</td><td data-label="Objet">{t.subject as string}</td><td data-label="Priorité">{PRIORITY_LABEL[t.priority as string]}</td></tr>)}</tbody></table></div>)}
-          <p className="org-muted"><a href="/admin/gestion/support">Voir tous les tickets</a></p>
+          <p className="org-muted"><Link href="/admin/gestion/support">Voir tous les tickets</Link></p>
         </section>
 
         <section className="glass ef-card"><h2>Prochains évènements</h2>
@@ -74,7 +75,7 @@ export default async function AdminHome({ searchParams }: { searchParams: Promis
         <section className="glass ef-card"><h2>Dernières actions</h2>
           {!(log.data ?? []).length ? <div className="org-empty"><h3>Aucune action</h3><p>Le journal est vide pour l’instant.</p></div> : (
             <ul className="ef-list">{(log.data ?? []).map((l) => <li key={l.id as number}><span>{ACTION_LABEL[l.action as string] ?? (l.action as string)} <span className="org-muted">· {l.entity as string}</span></span><span className="org-muted">{names.get(l.actor_id as string) ?? 'Système'} · {when(l.created_at as string)}</span></li>)}</ul>)}
-          <p className="org-muted"><a href="/admin/gestion/audit">Ouvrir le journal d’audit</a></p>
+          <p className="org-muted"><Link href="/admin/gestion/audit">Ouvrir le journal d’audit</Link></p>
         </section>
       </div>
     </main>

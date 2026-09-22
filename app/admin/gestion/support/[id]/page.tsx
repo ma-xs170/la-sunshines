@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import SupportChat from '@/components/support/SupportChat';
 import { requireAdminPage } from '@/lib/adminSpace';
 import { supportRpc } from '@/lib/supportServer';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Ticket · Gestion', robots: { index: false, follow: false } };
@@ -14,5 +15,5 @@ export default async function AdminSupportThreadPage({ params }: { params: Promi
     supportRpc<{ user_id: string; first_name: string; last_name: string; active: boolean }[]>('admin_accounts_list', { p_actor: s.userId })]);
   if (!r.ok) notFound();
   const admins = adm.ok ? adm.data.filter((a) => a.active && a.user_id !== s.userId).map((a) => ({ id: a.user_id, name: `${a.first_name} ${a.last_name}`.trim() })) : [];
-  return (<><p className="org__back"><a href="/admin/gestion/support">← Tous les tickets</a></p><SupportChat initial={r.data} admins={admins} quick={quick.ok ? quick.data : []} /></>);
+  return (<><p className="org__back"><Link href="/admin/gestion/support">← Tous les tickets</Link></p><SupportChat initial={r.data} admins={admins} quick={quick.ok ? quick.data : []} /></>);
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import Icon from '../Icon';
 import BackFooter from '../BackFooter';
@@ -35,10 +36,10 @@ function CopyRef({ value }: { value: string }) {
 function Leaf({ leaf, active, unread }: { leaf: MenuGroup['items'][number]; active: boolean; unread: number }) {
   return (
     <li>
-      <a href={leaf.href} className={'oside__leaf' + (active ? ' is-active' : '')} aria-current={active ? 'page' : undefined}>
+      <Link href={leaf.href} className={'oside__leaf' + (active ? ' is-active' : '')} aria-current={active ? 'page' : undefined}>
         {leaf.label}
         {leaf.badge === 'news' && unread > 0 && <b className="oside__badge" aria-label={`${unread} non lue${unread > 1 ? 's' : ''}`}>{unread > 9 ? '9+' : unread}</b>}
-      </a>
+      </Link>
     </li>
   );
 }
@@ -77,12 +78,12 @@ export default function OrgShell({ orgs, currentId, unread, firstName, children 
       {drawer && <button type="button" className="oshell__scrim" aria-label="Fermer le menu" onClick={() => setDrawer(false)} />}
 
       <aside className={'oside' + (drawer ? ' is-open' : '')} id="oside" aria-label="Menu de l’espace organisateur">
-        <a className="oside__brand" href="/organisateur" aria-label="LA SUNSHINES, espace organisateur">
+        <Link className="oside__brand" href="/organisateur" aria-label="LA SUNSHINES, espace organisateur">
           <Image className="oside__logo" src="/images/logo-dark.png" alt="LA SUNSHINES" width={848} height={168} priority />
           <span className="oside__tag script" aria-hidden="true">organisateur</span>
-        </a>
+        </Link>
 
-        {slug && <a className="oside__back" href="/organisateur/evenements"><Icon name="chevron-left" />Retour à la liste des évènements</a>}
+        {slug && <Link className="oside__back" href="/organisateur/evenements"><Icon name="chevron-left" />Retour à la liste des évènements</Link>}
 
         <nav className="oside__nav" aria-label={slug ? 'Menu de l’évènement' : 'Menu du compte'}>
           <ul>
@@ -94,10 +95,10 @@ export default function OrgShell({ orgs, currentId, unread, firstName, children 
                 const active = isActiveHref(leaf.href, pathname, onglet);
                 return (
                   <li key={g.id} className="oside__group">
-                    <a href={leaf.href} className={'oside__head oside__head--link' + (active ? ' is-active' : '')} aria-current={active ? 'page' : undefined}>
+                    <Link href={leaf.href} className={'oside__head oside__head--link' + (active ? ' is-active' : '')} aria-current={active ? 'page' : undefined}>
                       <Icon name={g.icon} className="icon oside__ico" /><span>{g.label}</span>
                       {leaf.badge === 'news' && unread > 0 && <b className="oside__badge" aria-label={`${unread} non lue${unread > 1 ? 's' : ''}`}>{unread > 9 ? '9+' : unread}</b>}
-                    </a>
+                    </Link>
                   </li>
                 );
               }
@@ -126,7 +127,7 @@ export default function OrgShell({ orgs, currentId, unread, firstName, children 
             <Icon name="menu" />
           </button>
           <nav className="otop__crumbs" aria-label="Fil d’Ariane">
-            <ol>{trail.map((c, i) => <li key={i}>{c.href ? <a href={c.href}>{c.label}</a> : <span aria-current="page">{c.label}</span>}</li>)}</ol>
+            <ol>{trail.map((c, i) => <li key={i}>{c.href ? <Link href={c.href}>{c.label}</Link> : <span aria-current="page">{c.label}</span>}</li>)}</ol>
           </nav>
           {current.reference && <CopyRef value={current.reference} />}
           <div className="otop__org" ref={menuRef}>
@@ -149,9 +150,9 @@ export default function OrgShell({ orgs, currentId, unread, firstName, children 
                     ))}
                   </div>
                 )}
-                {can(current.role, 'owner') && <a role="menuitem" href="/organisateur/parametres">Informations légales</a>}
-                <a role="menuitem" href="/compte">Mon compte</a>
-                <a role="menuitem" href="/">Retour au site</a>
+                {can(current.role, 'owner') && <Link role="menuitem" href="/organisateur/parametres">Informations légales</Link>}
+                <Link role="menuitem" href="/compte">Mon compte</Link>
+                <Link role="menuitem" href="/">Retour au site</Link>
                 <LogoutButton className="otop__out" />
               </div>
             )}
@@ -162,7 +163,7 @@ export default function OrgShell({ orgs, currentId, unread, firstName, children 
         <div className="oshell__main" id="org-main" tabIndex={-1}>{children}</div>
 
         {can(current.role, 'manage') && !pathname.startsWith('/organisateur/support') && (
-          <a className="sup-help" href={`/organisateur/support/nouveau?page=${encodeURIComponent(pathname)}`}><Icon name="help" />Aide</a>
+          <Link className="sup-help" href={`/organisateur/support/nouveau?page=${encodeURIComponent(pathname)}`}><Icon name="help" />Aide</Link>
         )}
         <BackFooter />
       </div>

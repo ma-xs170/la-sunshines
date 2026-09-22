@@ -6,6 +6,7 @@ import { orgRpc, type OrgEventRow } from '@/lib/organizer/data';
 import { can } from '@/lib/organizer/roles';
 import type { OrgCard } from '@/lib/organizer/create-event';
 import { mistralConfigured } from '@/lib/flyerAI';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Créer un évènement · Espace organisateur', robots: { index: false, follow: false } };
@@ -22,7 +23,7 @@ export default async function NewEvent() {
   const cards: OrgCard[] = orgs.filter((o) => can(o.my_role, 'manage')).map((o) => ({ id: o.id, name: o.name, reference: o.reference, siret: o.siret || null, status: o.account_status, events: counts.get(o.id) ?? 0 }));
   return (
     <main className="org org-page">
-      <p className="org__back"><a href="/organisateur/evenements">← Mes évènements</a></p>
+      <p className="org__back"><Link href="/organisateur/evenements">← Mes évènements</Link></p>
       <h1 className="org-head__title">Créer un évènement</h1>
       <p className="script">On monte la prochaine soirée ensemble.</p>
       <EventWizard orgs={s.isAdmin ? cards.slice(0, 50) : cards} isAdmin={s.isAdmin} aiAvailable={mistralConfigured()} defaultOrg={current?.id ?? null} />
