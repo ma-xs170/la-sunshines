@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import type {
   Store,
   StoredArtist,
@@ -206,16 +207,16 @@ export default function AdminDashboard({
 
           <div className="admin-navgroup">
             <p className="admin-navgroup__title">Compte</p>
-            <a className="admin-navlink admin-navlink--ext" href="/admin/billetterie">
+            <Link className="admin-navlink admin-navlink--ext" href="/admin/billetterie">
               <Icon name="ticket" className="icon" />
               <span>Billetterie</span>
               <Icon name="arrow-up-right" className="admin-navlink__ext" />
-            </a>
-            <a className="admin-navlink admin-navlink--ext" href="/admin/actualites">
+            </Link>
+            <Link className="admin-navlink admin-navlink--ext" href="/admin/actualites">
               <Icon name="bell" className="icon" />
               <span>Actualités organisateurs</span>
               <Icon name="arrow-up-right" className="admin-navlink__ext" />
-            </a>
+            </Link>
             <a
               className="admin-navlink admin-navlink--ext"
               href="/status"

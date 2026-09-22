@@ -7,6 +7,7 @@ import { CATEGORY_LABEL, statusText } from '@/lib/support';
 import { one } from '@/lib/organizer/event-data';
 import { LEGAL_FORM_LABEL, DOC_KINDS } from '@/lib/organizer/signup';
 import { formatEuro, formatGp } from '@/lib/ticketing/time';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Organisateur · Gestion', robots: { index: false, follow: false } };
@@ -31,7 +32,7 @@ export default async function OrganizerDetailPage({ params, searchParams }: { pa
   const revenue = events.reduce((n, e) => n + e.revenue_cents, 0);
   return (
     <>
-      <p className="org__back"><a href="/admin/gestion/organisateurs">← Tous les organisateurs</a></p>
+      <p className="org__back"><Link href="/admin/gestion/organisateurs">← Tous les organisateurs</Link></p>
       <h1 className="org-head__title">{o.name}</h1>
       <p className="script"><code>{o.reference ?? 'Référence créée à l’approbation'}</code> · {STATUS[o.account_status]}</p>
       <div className="org-subnav" role="navigation" aria-label="Sections">{TABS.map(([k, v]) => <a key={k} href={`?onglet=${k}`} className={'org-subnav__link' + (tab === k ? ' is-active' : '')} aria-current={tab === k ? 'page' : undefined}>{v}</a>)}</div>

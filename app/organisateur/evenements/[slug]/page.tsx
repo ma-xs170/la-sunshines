@@ -17,6 +17,7 @@ import { SLUG_RE } from '@/lib/ticketing/schemas';
 import { formatEuro, formatGp } from '@/lib/ticketing/time';
 import { eventLinks } from '@/lib/organizer/event-links';
 import { getAllEditions } from '@/lib/content';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Événement · Espace organisateur', robots: { index: false, follow: false } };
@@ -39,7 +40,7 @@ export default async function OrganizerEventPage({ params, searchParams }: { par
     const b = brief.data;
     return (
       <main className="org org-page">
-        <p className="org__back"><a href="/organisateur">← Tous les événements</a></p>
+        <p className="org__back"><Link href="/organisateur">← Tous les événements</Link></p>
         <PageHero eyebrow={b.organizer_name} title={editorial(slug).title} lead={`${formatGp(b.starts_at)}${b.venue_name ? ' · ' + b.venue_name : ''}`} />
         <section aria-labelledby="org-scan-h" className="org-part">
           <h2 id="org-scan-h">Scan à l’entrée</h2>
@@ -70,7 +71,7 @@ export default async function OrganizerEventPage({ params, searchParams }: { par
   return (
     <>
       <main className="org org-page">
-        <p className="org__back"><a href="/organisateur">← Tous les événements</a></p>
+        <p className="org__back"><Link href="/organisateur">← Tous les événements</Link></p>
         <PageHero eyebrow={stats.organizer.name} title={ed.title} lead={`${formatGp(stats.starts_at)}${stats.venue_name ? ' · ' + stats.venue_name : ''}`} />
         <div className="org__meta">
           <span className={`org-state org-state--${state}`}>{STATE_LABEL[state]}</span>

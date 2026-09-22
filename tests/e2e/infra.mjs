@@ -190,6 +190,8 @@ async function main() {
     // dossier de compilation PROPRE au banc : un `next dev` lancé à côté (port 3000…) partage sinon .next et les deux se corrompent
     NEXT_DIST_DIR: '.next-e2e' };
   delete env.KV_REST_API_URL;
+  // pour lancer aussi l'app en mode production à côté (mesures : tests/e2e/perf.mjs) : mêmes réglages, sans les secrets du shell
+  fs.writeFileSync(HERE + '/env.json', JSON.stringify(Object.fromEntries(Object.entries(env).filter(([k]) => !(k in process.env) || env[k] !== process.env[k]))));
   const next = spawn('npx', ['next', 'dev', '-p', String(PORTS.next)], { cwd: ROOT, env, stdio: ['ignore', 'pipe', 'pipe'] });
   next.stdout.on('data', (d) => process.env.VERBOSE && process.stdout.write('[next] ' + d)); next.stderr.on('data', (d) => process.env.VERBOSE && process.stderr.write('[next!] ' + d));
   fs.writeFileSync(HERE + '/next.log', ''); const lf = fs.createWriteStream(HERE + '/next.log'); next.stdout.pipe(lf); next.stderr.pipe(lf);

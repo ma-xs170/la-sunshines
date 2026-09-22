@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import Icon from '../Icon';
 import BackFooter from '../BackFooter';
@@ -42,10 +43,10 @@ export default function AdminShell({ firstName, reference, isSuper, canClients, 
       {drawer && <button type="button" className="oshell__scrim" aria-label="Fermer le menu" onClick={() => setDrawer(false)} />}
 
       <aside className={'oside' + (drawer ? ' is-open' : '')} id="oside" aria-label="Menu de l’administration">
-        <a className="oside__brand" href="/admin" aria-label="LA SUNSHINES, administration">
+        <Link className="oside__brand" href="/admin" aria-label="LA SUNSHINES, administration">
           <Image className="oside__logo" src="/images/logo-dark.png" alt="LA SUNSHINES" width={848} height={168} priority />
           <span className="oside__tag script" aria-hidden="true">administration</span>
-        </a>
+        </Link>
         <nav className="oside__nav" aria-label="Menu de l’administration">
           <ul>
             {groups.map((g) => {
@@ -55,9 +56,9 @@ export default function AdminShell({ firstName, reference, isSuper, canClients, 
                 const leaf = g.items[0]; const active = isAdminActive(leaf.href, pathname, params);
                 return (
                   <li key={g.id} className="oside__group">
-                    <a href={leaf.href} className={'oside__head oside__head--link' + (active ? ' is-active' : '')} aria-current={active ? 'page' : undefined}>
+                    <Link href={leaf.href} className={'oside__head oside__head--link' + (active ? ' is-active' : '')} aria-current={active ? 'page' : undefined}>
                       <Icon name={g.icon} className="icon oside__ico" /><span>{g.label}</span><Badge b={leaf.badge} />
-                    </a>
+                    </Link>
                   </li>
                 );
               }
@@ -70,7 +71,7 @@ export default function AdminShell({ firstName, reference, isSuper, canClients, 
                     <ul className="oside__sub" id={`sec-${g.id}`}>
                       {g.items.map((leaf) => {
                         const active = isAdminActive(leaf.href, pathname, params);
-                        return <li key={leaf.href}><a href={leaf.href} className={'oside__leaf' + (active ? ' is-active' : '')} aria-current={active ? 'page' : undefined}>{leaf.label}<Badge b={leaf.badge} /></a></li>;
+                        return <li key={leaf.href}><Link href={leaf.href} className={'oside__leaf' + (active ? ' is-active' : '')} aria-current={active ? 'page' : undefined}>{leaf.label}<Badge b={leaf.badge} /></Link></li>;
                       })}
                     </ul>
                   )}
@@ -85,7 +86,7 @@ export default function AdminShell({ firstName, reference, isSuper, canClients, 
         <header className="otop">
           <button type="button" className="otop__burger" aria-expanded={drawer} aria-controls="oside" aria-label={drawer ? 'Fermer le menu' : 'Ouvrir le menu'} onClick={() => setDrawer((v) => !v)}><Icon name="menu" /></button>
           <nav className="otop__crumbs" aria-label="Fil d’Ariane">
-            <ol>{trail.map((c, i) => <li key={i}>{c.href ? <a href={c.href}>{c.label}</a> : <span aria-current="page">{c.label}</span>}</li>)}</ol>
+            <ol>{trail.map((c, i) => <li key={i}>{c.href ? <Link href={c.href}>{c.label}</Link> : <span aria-current="page">{c.label}</span>}</li>)}</ol>
           </nav>
           <GlobalSearch />
           <div className="otop__org" ref={menuRef}>
@@ -97,9 +98,9 @@ export default function AdminShell({ firstName, reference, isSuper, canClients, 
             {menu && (
               <div className="otop__menu" role="menu">
                 <p className="otop__who">{isSuper ? 'Super-administrateur' : 'Administrateur'}{reference ? ` · ${reference}` : ''}</p>
-                <a role="menuitem" href="/compte">Mon compte</a>
-                <a role="menuitem" href="/admin/gestion/reglages">Réglages</a>
-                <a role="menuitem" href="/">Retour au site</a>
+                <Link role="menuitem" href="/compte">Mon compte</Link>
+                <Link role="menuitem" href="/admin/gestion/reglages">Réglages</Link>
+                <Link role="menuitem" href="/">Retour au site</Link>
                 <LogoutButton className="otop__out" />
               </div>
             )}
